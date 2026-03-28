@@ -1,0 +1,31 @@
+# Makefile — insinulint, lintor linguae C
+#
+# Solum instrumenta POSIX et compilator C requiruntur.
+
+CC      ?= cc
+CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
+LDFLAGS ?=
+
+FONTES = principale.c lexator.c inspectio.c json.c
+OBJECTA = $(FONTES:.c=.o)
+NOMEN   = insinulint
+
+PROBA_FONTES = proba.c lexator.c inspectio.c json.c
+PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
+
+.PHONY: omnia purga proba
+
+omnia: $(NOMEN)
+
+$(NOMEN): $(OBJECTA)
+	$(CC) $(LDFLAGS) -o $@ $(OBJECTA)
+
+proba: $(PROBA_OBJECTA)
+	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA)
+	./$@
+
+%.o: %.c insinulint.h json.h
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+purga:
+	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba

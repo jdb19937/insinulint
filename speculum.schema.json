@@ -1,0 +1,37 @@
+{
+    "indentatio": {
+        "properties": {
+            "latitudo":     {"type": "integer"},
+            "modus":        {"type": "string"},
+            "continuatio":  {"type": "string"}
+        },
+        "required": []
+    },
+    "bracchia": {
+        "properties": {
+            "stilus":            {"type": "string"},
+            "else_coniunctum":  {"type": "integer"},
+            "necessaria":       {"type": "integer"}
+        },
+        "required": []
+    },
+    "spatia": {
+        "properties": {
+            "post_verba_clavis":  {"type": "integer"},
+            "circa_operatores":   {"type": "integer"},
+            "post_virgulam":      {"type": "integer"},
+            "ante_semicolon":     {"type": "integer"}
+        },
+        "required": []
+    },
+    "lineae": {
+        "properties": {
+            "longitudo_maxima":   {"type": "integer"},
+            "spatia_terminalia":  {"type": "integer"},
+            "vacuae_max":         {"type": "integer"},
+            "finis_linea_nova":   {"type": "integer"},
+            "tabulae_mixtae":     {"type": "integer"}
+        },
+        "required": []
+    }
+}
