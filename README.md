@@ -108,4 +108,4 @@ Exit 0 if clean. Exit 1 if warnings found.
 
 ## License
 
-Free. Public domain.
+Free. Public domain. Use however you like.
