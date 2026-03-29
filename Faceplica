@@ -8,7 +8,7 @@ CC      = cc
 CFLAGS  = -Wall -Wextra -pedantic -std=c99 -O2
 LDFLAGS =
 
-FONTES  = principale.c lexator.c inspectio.c json.c
+FONTES  = principale.c lexator.c inspectio.c
 OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 
