@@ -1,72 +1,48 @@
 # insinulint
 
-### The Last C Linter You Will Ever Need. Possibly The Last C Linter Anyone Will Ever Need.
+**Thirteen meticulously crafted lint rules for C, implemented in approximately 1,700 lines of zero-dependency C99. Compiles in under a second. Runs faster than your previous linter installs.**
 
-**insinulint** isn't just a linter. It's a *movement*. A *philosophy*. A quiet revolution in how humanity relates to the C programming language.
+## Why insinulint Exists
 
-We didn't build insinulint because the world needed another linter. We built it because the world needed a *better* one. And then we built that one, too. And then we kept going.
+Most C linters are either absurdly heavyweight — pulling in Clang's AST machinery for what amounts to whitespace checking — or absurdly crude, matching patterns with no understanding of the language's structure. insinulint occupies the space between these two failures: a purpose-built lexer that understands enough C to enforce style rules correctly, and nothing more.
 
-## The Problem
-
-You've used other linters. We both know this. And we both know how that went.
-
-They were slow. They had dependencies. They wanted you to install Node.js to lint *C code*. They couldn't tell a function definition from a control structure. They choked on continuation lines. They gave up on braceless `if` bodies. They made you feel nothing.
-
-**That era is over.**
-
-## The Solution
-
-**insinulint** is approximately 1700 lines of hand-written, zero-dependency, pure C99 that compiles in under a second and lints your code with the kind of precision and moral clarity that the industry has been crying out for.
-
-No plugins. No extensions. No ecosystem. No community Discord. No GitHub Sponsors tier. Just a C compiler, `make`, and the truth.
-
-### Feature Highlights
-
-- **13 comprehensive lint rules** — not 12, not 14. Thirteen. The exact right number. We ran the analysis.
-- **Two continuation alignment modes** (aligned and block) — because we solved the parenthesized argument indentation problem while the rest of the industry was still publishing Medium articles about it
-- **K&R vs Allman brace detection** that *actually distinguishes function definitions from control structures* — a problem most tools pretend doesn't exist, because they couldn't solve it
-- **Cuddled else enforcement** — your team's `} else {` debate ends here. You're welcome.
-- **Virtual indentation for braceless bodies** — `if (x)\n    return;` is handled correctly. Yes, really. No, the other tools can't do this. We checked.
-- **Zero dependencies** — no npm. No pip. No cargo. No vcpkg. No conan. No brew formula. No Docker image. A C compiler and make. Like the founders intended.
-- **Hand-rolled JSON parser** — we didn't even depend on a JSON library. We wrote our own. With a recursive descent navigator that resolves dotted paths. Because we could.
-- **Sub-second compilation** — by the time your previous linter finished installing its dependencies, insinulint has already compiled, linted your entire project, found seventeen style violations, and is quietly judging you
-
-## Quick Start
-
-```bash
-make omnia
-./insinulint source.c
-```
-
-That's it. That's the quick start. Other tools need a page and a half. We need two lines. Draw your own conclusions.
-
-With a configuration file:
-
-```bash
-./insinulint -s speculum.ison source.c [source2.c ...]
-```
+It distinguishes function definitions from control structures for brace style enforcement. It tracks parenthesization depth for continuation alignment. It handles `case`, `default`, labels, single-statement bodies, `do`/`while`, and every other indentation edge case that naive linters get wrong. And it does all of this in a single, self-contained binary with no runtime dependencies whatsoever.
 
 ## Rules
 
-| Rule | What It Catches | Could Other Tools Do This? |
-|---|---|---|
-| `indentatio` | Brace-depth indentation, parenthesis continuation (aligned/block), case/default, labels, braceless bodies | Not all of it, no |
-| `spatium_verbum` | Missing space after `if`, `for`, `while`, `switch`, `return`, `case` | Probably |
-| `spatium_operator` | Missing spaces around `=` `==` `!=` `<=` `>=` `+=` `-=` `*=` `/=` `%=` `&&` `\|\|` etc. | In theory |
-| `spatium_virgula` | Missing space after `,` or unwanted space before `,` | One would hope |
-| `spatium_semicolon` | Unwanted space before `;` (with `for ( ; ; )` exception) | The exception is the hard part |
-| `bracchia_stilus` | K&R vs Allman brace placement — distinguishes functions from control structures | They can't, actually |
-| `bracchia_necessaria` | Missing braces on `if`/`for`/`while`/`else`/`do` bodies | Theoretically |
-| `cubitus` | Cuddled or uncuddled `else` | Debatable |
-| `longitudo_lineae` | Maximum line length | Fine, yes |
-| `spatia_terminalia` | Trailing whitespace | Okay this one is easy |
-| `lineae_vacuae` | Excessive consecutive blank lines | Sure |
-| `finis_lineae` | File must end with newline | Admittedly straightforward |
-| `tabulae_mixtae` | Mixed tabs and spaces in indentation | Alright |
+| Rule | What It Enforces |
+|---|---|
+| `indentatio` | Brace depth, continuation inside `()`, case/default, labels, braceless bodies |
+| `spatium_verbum` | Space after `if`, `for`, `while`, `switch`, `return`, `case` |
+| `spatium_operator` | Spaces around `=` `==` `!=` `<=` `>=` `+=` `-=` `*=` `/=` `%=` `&&` `\|\|` |
+| `spatium_virgula` | Space after `,` required, before `,` forbidden |
+| `spatium_semicolon` | Space before `;` forbidden (except `for ( ; ; )`) |
+| `bracchia_stilus` | K&R or Allman — with correct function-vs-control distinction |
+| `bracchia_necessaria` | Braces required after `if`/`for`/`while`/`else`/`do` |
+| `cubitus` | `} else {` joined or separated |
+| `longitudo_lineae` | Maximum line length |
+| `spatia_terminalia` | Trailing whitespace |
+| `lineae_vacuae` | Consecutive blank lines |
+| `finis_lineae` | File ends with `\n` |
+| `tabulae_mixtae` | Mixed tabs and spaces in indentation |
+
+## Building
+
+```bash
+make omnia
+```
+
+## Usage
+
+```bash
+./insinulint [-s speculum.json] file.c [file2.c ...]
+```
+
+Without a configuration file, sensible defaults apply: 4 spaces, K&R braces, 80 columns.
 
 ## Configuration
 
-Create a `speculum.ison`:
+Fully configurable via a JSON specification file. Every field is optional — defaults are supplied for anything you don't specify:
 
 ```json
 {
@@ -96,80 +72,40 @@ Create a `speculum.ison`:
 }
 ```
 
-All fields are optional. Sensible defaults are provided, because we spent considerable time thinking about what those defaults should be so that you — and we mean this with the utmost respect — don't have to.
+## Continuation Alignment
 
-| Field | Values | Default |
-|---|---|---|
-| `indentatio.latitudo` | 1–16 | 4 |
-| `indentatio.modus` | `"spatia"` / `"tabulae"` | `"spatia"` |
-| `indentatio.continuatio` | `"congruens"` (aligned) / `"massa"` (block) | `"congruens"` |
-| `bracchia.stilus` | `"kr"` / `"allman"` | `"kr"` |
-| `bracchia.else_coniunctum` | 0 / 1 | 1 |
-| `bracchia.necessaria` | 0 / 1 | 1 |
-| `spatia.post_verba_clavis` | 0 / 1 | 1 |
-| `spatia.circa_operatores` | 0 / 1 | 1 |
-| `spatia.post_virgulam` | 0 / 1 | 1 |
-| `spatia.ante_semicolon` | 0 / 1 | 1 |
-| `lineae.longitudo_maxima` | 0 = unlimited | 80 |
-| `lineae.spatia_terminalia` | 0 / 1 | 1 |
-| `lineae.vacuae_max` | 0 = unlimited | 2 |
-| `lineae.finis_linea_nova` | 0 / 1 | 1 |
-| `lineae.tabulae_mixtae` | 0 / 1 | 1 |
+Two modes, selectable via `indentatio.continuatio`:
+
+```c
+/* "congruens" (aligned) — default */
+function(first_argument,
+         second_argument,
+         third_argument);
+
+/* "massa" (block) */
+function(
+    first_argument,
+    second_argument,
+    third_argument
+);
+```
 
 ## Example Output
 
 ```text
-$ ./insinulint -s speculum.ison main.c
-main.c:10:0: monitum [indentatio] 6 spatia inventa, 4 expectata (prof. 1, par. 0)
-main.c:26:4: monitum [spatium_verbum] spatium requiritur post 'if'
-main.c:43:9: monitum [spatium_operator] spatium requiritur ante '='
-main.c:72:4: monitum [bracchia_necessaria] bracchia necessaria post 'if'
-main.c:93:4: monitum [cubitus] 'else' debet esse in eadem linea ac '}'
+file.c:10:0: warning [indentatio] 6 spaces found, 4 expected (depth 1, paren 0)
+file.c:26:4: warning [spatium_verbum] space required after 'if'
+file.c:43:9: warning [spatium_operator] space required before '='
+file.c:56:25: warning [spatium_virgula] space required after comma
+file.c:72:4: warning [bracchia_necessaria] braces required after 'if'
+file.c:93:4: warning [cubitus] 'else' must be on same line as '}'
+file.c:102:4: warning [bracchia_stilus] '{' must be on same line (K&R style)
 
-insinulint: 5 monita inventa.
+insinulint: 7 warnings found.
 ```
 
-Exit code 0 means your code is worthy. Exit code 1 means it isn't. There is no exit code 2. You either pass or you don't. Life is binary. So is insinulint.
-
-## Architecture
-
-```text
-insinulint.h    header — types, lexer, inspector, config
-lexator.c       C source tokenizer (recursive descent)
-inspectio.c     13 inspection rules + config reader
-principale.c    main() and orchestration
-speculum.ison   example configuration
-Makefile        make omnia / make purga
-```
-
-Six source files. One header. One config. One Makefile. This is what software looks like when you refuse to compromise. Take notes.
-
-## FAQ
-
-**Q: Can it lint C++?**
-A: No. If you're writing C++, you've already made choices that insinulint cannot help you with.
-
-**Q: Can it lint C11/C17/C23?**
-A: It lints C. The C that built Unix, that built the internet, that put men on the moon. If your code compiles with `cc -std=c99`, insinulint will judge it. The newer standards are welcome to earn our support in due time.
-
-**Q: What about auto-fix?**
-A: The purpose of a linter is to make you a better programmer. Auto-fix makes you a more complacent one. We will not be party to your moral decline.
-
-**Q: It flagged my code but my code is correct.**
-A: Your code compiles. That is not the same as being correct. Sit with that for a moment.
-
-**Q: Why doesn't it have a VS Code extension?**
-A: Because it has *self-respect*.
-
-**Q: I want to contribute.**
-A: We'll consider it.
-
-**Q: How does this compare to clang-tidy?**
-A: clang-tidy is a fine tool for people who enjoy waiting. insinulint is for people who enjoy results. Also, our binary is smaller than clang-tidy's *help text*.
-
-**Q: Is this production-ready?**
-A: insinulint was born production-ready. The question is whether your codebase is ready for insinulint.
+Exit 0 if clean. Exit 1 if warnings found.
 
 ## License
 
-Free. Use however you like.
+Free. Public domain.

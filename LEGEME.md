@@ -2,14 +2,14 @@
 
 Lintor linguae C, Latine scriptus. Solum C purum (K&R, C89, C99) tractat — sine C++ sive extensionibus.
 
-Nullae dependentiae externae. Solum compilator C et `make`.
+Pendet ab ison (ut submodulum). Nullae dependentiae externae praeterea. Solum compilator C.
 
 > **Nota:** README.md ignorandum est. Anglice scriptum est ad barbaros ineruditos pecunia emungendos.
 
 ## Aedificatio
 
 ```
-make omnia
+face omnia
 ```
 
 ## Usus
@@ -133,5 +133,5 @@ lexator.c       dissector fontis C in signa (tokens)
 inspectio.c     regulae inspectionis et lector speculi
 principale.c    main() et integrator
 speculum.ison   configuratio exemplaris
-Makefile        make omnia / make purga
+Faceplica       face omnia / face purga
 ```
