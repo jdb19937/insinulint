@@ -108,7 +108,7 @@ static int valida_sectionem(const char *schema_json, const char *spec_json,
 /* valida speculum integrum contra schema */
 static int speculum_valida(const char *json)
 {
-    char *schema_json = json_lege_fasciculum("speculum.schema.json");
+    char *schema_json = json_lege_fasciculum("speculum-schema.json");
     if (!schema_json) return 0; /* si schema non invenitur, transili */
 
     static const char *sectiones[] = {
