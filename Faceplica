@@ -18,8 +18,6 @@ LIBISON = $(APOTHECA)/ison/libison.a
 PROBA_FONTES = proba.c lexator.c inspectio.c
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
-.PHONY: omnia purga proba
-
 omnia: $(NOMEN)
 
 para:
@@ -47,3 +45,5 @@ proba: $(PROBA_OBJECTA)
 
 purga:
 	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba
+
+.PHONY: omnia purga proba para expara
