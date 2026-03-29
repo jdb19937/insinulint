@@ -33,7 +33,7 @@ No plugins. No extensions. No ecosystem. No community Discord. No GitHub Sponsor
 
 ## Quick Start
 
-```
+```bash
 make omnia
 ./insinulint source.c
 ```
@@ -42,7 +42,7 @@ That's it. That's the quick start. Other tools need a page and a half. We need t
 
 With a configuration file:
 
-```
+```bash
 ./insinulint -s speculum.ison source.c [source2.c ...]
 ```
 
@@ -118,7 +118,7 @@ All fields are optional. Sensible defaults are provided, because we spent consid
 
 ## Example Output
 
-```
+```text
 $ ./insinulint -s speculum.ison main.c
 main.c:10:0: monitum [indentatio] 6 spatia inventa, 4 expectata (prof. 1, par. 0)
 main.c:26:4: monitum [spatium_verbum] spatium requiritur post 'if'
@@ -133,7 +133,7 @@ Exit code 0 means your code is worthy. Exit code 1 means it isn't. There is no e
 
 ## Architecture
 
-```
+```text
 insinulint.h    header — types, lexer, inspector, config
 lexator.c       C source tokenizer (recursive descent)
 inspectio.c     13 inspection rules + config reader
@@ -169,3 +169,7 @@ A: clang-tidy is a fine tool for people who enjoy waiting. insinulint is for peo
 
 **Q: Is this production-ready?**
 A: insinulint was born production-ready. The question is whether your codebase is ready for insinulint.
+
+## License
+
+Free. Use however you like.

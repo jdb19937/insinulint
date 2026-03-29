@@ -42,7 +42,7 @@ Sine speculo, defalta applicantur (4 spatia, K&R, 80 columnae).
 
 Duo modi sustentantur per `indentatio.continuatio`:
 
-```c
+```
 /* "congruens" (aligned) — defaltum */
 functio(primus_argumentum,
         secundum_argumentum,
@@ -60,7 +60,7 @@ functio(
 
 Configuratio per plicam ISON. Omnes campi optionales sunt — defalta supplentur.
 
-```json
+```
 {
     "indentatio": {
         "latitudo": 4,
@@ -125,7 +125,7 @@ insinulint: 7 monita inventa.
 
 Exitus 0 si nulla monita, 1 si monita inventa.
 
-## Fasciculi
+## Plicae
 
 ```
 insinulint.h    caput principale — typi, lexator, inspector, speculum
