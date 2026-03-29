@@ -4,8 +4,9 @@
 
 APOTHECA ?= .
 
-CC      = cc
-CFLAGS  = -Wall -Wextra -pedantic -std=c99 -O2 -I$(APOTHECA)/ison
+CC      ?= cc
+CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
+CFLAGS  += -I$(APOTHECA)/ison
 LDFLAGS =
 
 FONTES  = principale.c lexator.c inspectio.c
