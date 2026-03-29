@@ -1,10 +1,6 @@
 /*
  * proba.c — probationes automataticae lintoris insinulint
  *
- * Compilatur et curritur separatim:
- *   cc -std=c99 -o proba proba.c lexator.c inspectio.c json.c
- *   ./proba
- *
  * Unusquisque casus scribit fontem C temporarium, lint eum,
  * et verificat numerum monitorum et regulas inventas.
  */

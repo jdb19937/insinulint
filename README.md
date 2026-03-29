@@ -43,7 +43,7 @@ That's it. That's the quick start. Other tools need a page and a half. We need t
 With a configuration file:
 
 ```
-./insinulint -s speculum.json source.c [source2.c ...]
+./insinulint -s speculum.ison source.c [source2.c ...]
 ```
 
 ## Rules
@@ -66,7 +66,7 @@ With a configuration file:
 
 ## Configuration
 
-Create a `speculum.json`:
+Create a `speculum.ison`:
 
 ```json
 {
@@ -119,7 +119,7 @@ All fields are optional. Sensible defaults are provided, because we spent consid
 ## Example Output
 
 ```
-$ ./insinulint -s speculum.json main.c
+$ ./insinulint -s speculum.ison main.c
 main.c:10:0: monitum [indentatio] 6 spatia inventa, 4 expectata (prof. 1, par. 0)
 main.c:26:4: monitum [spatium_verbum] spatium requiritur post 'if'
 main.c:43:9: monitum [spatium_operator] spatium requiritur ante '='
@@ -138,9 +138,7 @@ insinulint.h    header — types, lexer, inspector, config
 lexator.c       C source tokenizer (recursive descent)
 inspectio.c     13 inspection rules + config reader
 principale.c    main() and orchestration
-json.c          JSON parser (hand-written, dotted path navigator)
-json.h          JSON header
-speculum.json   example configuration
+speculum.ison   example configuration
 Makefile        make omnia / make purga
 ```
 

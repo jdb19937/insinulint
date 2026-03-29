@@ -15,7 +15,7 @@ make omnia
 ## Usus
 
 ```
-./insinulint [-s speculum.json] fasciculus.c [fasciculus2.c ...]
+./insinulint [-s speculum.ison] fasciculus.c [fasciculus2.c ...]
 ```
 
 Sine speculo, defalta applicantur (4 spatia, K&R, 80 columnae).
@@ -58,7 +58,7 @@ functio(
 
 ## Speculum
 
-Configuratio per fasciculum JSON. Omnes campi optionales sunt — defalta supplentur.
+Configuratio per plicam ISON. Omnes campi optionales sunt — defalta supplentur.
 
 ```json
 {
@@ -111,7 +111,7 @@ Configuratio per fasciculum JSON. Omnes campi optionales sunt — defalta supple
 ## Exemplum
 
 ```
-$ ./insinulint -s speculum.json malus.c
+$ ./insinulint -s speculum.ison malus.c
 malus.c:10:0: monitum [indentatio] 6 spatia inventa, 4 expectata (prof. 1, par. 0)
 malus.c:26:4: monitum [spatium_verbum] spatium requiritur post 'if'
 malus.c:43:9: monitum [spatium_operator] spatium requiritur ante '='
@@ -132,8 +132,6 @@ insinulint.h    caput principale — typi, lexator, inspector, speculum
 lexator.c       dissector fontis C in signa (tokens)
 inspectio.c     regulae inspectionis et lector speculi
 principale.c    main() et integrator
-json.c          parser JSON (navigator per viam punctatam)
-json.h          caput JSON
-speculum.json   configuratio exemplaris
+speculum.ison   configuratio exemplaris
 Makefile        make omnia / make purga
 ```
