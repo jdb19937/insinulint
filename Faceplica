@@ -2,29 +2,47 @@
 #
 # Solum instrumenta POSIX et compilator C requiruntur.
 
-CC      ?= cc
-CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
-LDFLAGS ?=
+APOTHECA ?= .
 
-FONTES = principale.c lexator.c inspectio.c json.c
+CC      = cc
+CFLAGS  = -Wall -Wextra -pedantic -std=c99 -O2
+LDFLAGS =
+
+FONTES  = principale.c lexator.c inspectio.c json.c
 OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 
-PROBA_FONTES = proba.c lexator.c inspectio.c json.c
+# bibliothecae externae
+LIBISON = $(APOTHECA)/ison/libison.a
+
+PROBA_FONTES = proba.c lexator.c inspectio.c
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
 .PHONY: omnia purga proba
 
 omnia: $(NOMEN)
 
-$(NOMEN): $(OBJECTA)
-	$(CC) $(LDFLAGS) -o $@ $(OBJECTA)
+para:
+	git submodule update --init ison
+	$(FACE) -C ison
+
+expara:
+	git submodule deinit -f ison
+
+$(LIBISON):
+	$(FACE) -C $(APOTHECA)/ison
+
+$(LIBCRISPUS):
+	$(FACE) -C $(APOTHECA)/crispus
+
+$(NOMEN): $(OBJECTA) $(LIBISON)
+	$(CC) $(LDFLAGS) -o $@ $^
 
 proba: $(PROBA_OBJECTA)
 	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA)
 	./$@
 
-%.o: %.c insinulint.h json.h
+%.o: %.c insinulint.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 purga:
