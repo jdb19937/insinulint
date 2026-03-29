@@ -179,8 +179,12 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     p += 2;
                     columna += 2;
                 } else {
-                    if (*p == '\n') { linea++; columna = 0; }
-                    else columna++;
+                    if (*p == '\n') {
+                        linea++;
+                        columna = 0;
+                    } else {
+                        columna++;
+                    }
                     p++;
                 }
             }

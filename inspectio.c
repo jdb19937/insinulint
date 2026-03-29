@@ -6,7 +6,7 @@
  *   - stilus bracchiorum (K&R vel Allman)
  *   - cubitus coniunctus (cuddled else)
  *   - bracchia necessaria (post if/for/while)
- *   - spatia post verba clavis (if, for, while, switch, return)
+ *   - spatia post verba clavis
  *   - spatia circa operatores binarios
  *   - spatia post virgulam, ante semicolon
  *   - spatia terminalia
@@ -188,19 +188,19 @@ int speculum_lege(speculum_t *spec, const char *via)
     }
 
     spec->bra_else_coniunctum = lege_verum(ison, "bracchia.else_coniunctum",
-                                            spec->bra_else_coniunctum);
+                                           spec->bra_else_coniunctum);
     spec->bra_necessaria = lege_verum(ison, "bracchia.necessaria",
-                                       spec->bra_necessaria);
+                                      spec->bra_necessaria);
 
     /* spatia */
     spec->spa_post_verba = lege_verum(ison, "spatia.post_verba_clavis",
-                                       spec->spa_post_verba);
+                                      spec->spa_post_verba);
     spec->spa_circa_operatores = lege_verum(ison, "spatia.circa_operatores",
-                                             spec->spa_circa_operatores);
+                                            spec->spa_circa_operatores);
     spec->spa_post_virgulam = lege_verum(ison, "spatia.post_virgulam",
-                                          spec->spa_post_virgulam);
+                                         spec->spa_post_virgulam);
     spec->spa_ante_semicolon = lege_verum(ison, "spatia.ante_semicolon",
-                                           spec->spa_ante_semicolon);
+                                          spec->spa_ante_semicolon);
 
     /* lineae */
     long lmax = ison_da_numerum(ison, "lineae.longitudo_maxima");
@@ -208,16 +208,16 @@ int speculum_lege(speculum_t *spec, const char *via)
         spec->lin_longitudo_max = (int)lmax;
 
     spec->lin_spatia_terminalia = lege_verum(ison, "lineae.spatia_terminalia",
-                                              spec->lin_spatia_terminalia);
+                                             spec->lin_spatia_terminalia);
 
     long vmax = ison_da_numerum(ison, "lineae.vacuae_max");
     if (vmax > 0)
         spec->lin_vacuae_max = (int)vmax;
 
     spec->lin_finis_nova = lege_verum(ison, "lineae.finis_linea_nova",
-                                       spec->lin_finis_nova);
+                                      spec->lin_finis_nova);
     spec->lin_tabulae_mixtae = lege_verum(ison, "lineae.tabulae_mixtae",
-                                           spec->lin_tabulae_mixtae);
+                                          spec->lin_tabulae_mixtae);
 
     free(ison);
     return 0;
@@ -274,7 +274,8 @@ static int est_operator_binarius(const signum_t *s)
     return 0;
 }
 
-/* quaere parenthesim congruam retro: dato indice ad ')', reddit indicem ad '(' */
+/* quaere parenthesim congruam retro:
+ * dato indice ad ')', reddit indicem ad '(' */
 static int quaere_par_apertam(const signum_t *signa, int idx)
 {
     int prof = 0;
@@ -496,6 +497,11 @@ static void inspice_indentationem(inspector_t *ins, const lexator_t *lex,
                 expectata = ctx->basis_spatia;
             } else if (spec->ind_continuatio == 0 && !ctx->modus_massa) {
                 expectata = ctx->columna_post;
+                /* etiam accepta block indentatio inter basis+lat et
+                 * columna_post — multi stili validi intra parentheses */
+                if (v->spatia >= ctx->basis_spatia + lat &&
+                    v->spatia <= ctx->columna_post)
+                    expectata = v->spatia;
             } else {
                 expectata = ctx->basis_spatia + lat;
             }
@@ -540,6 +546,26 @@ static void inspice_indentationem(inspector_t *ins, const lexator_t *lex,
                     break;
                 }
             }
+        }
+
+        /* transili continuationem expressionis sine parenthesibus:
+         * linea praecedens finit cum operatore binario vel '?' */
+        if (prof_par == 0 && v->spatia > expectata) {
+            int vp = vi - 1;
+            while (vp >= 0 && versus_vacuus(&versus[vp]))
+                vp--;
+            if (vp >= 0) {
+                int ult = ultimus_significans(signa,
+                                             versus[vp].tok_initium,
+                                             versus[vp].tok_finis);
+                if (ult >= 0 &&
+                    (est_operator_binarius(&signa[ult]) ||
+                     est_operator(&signa[ult], "?")))
+                    goto adiusta_statum;
+            }
+            /* ternarium: linea incipit cum ':' */
+            if (est_operator(&signa[primus], ":"))
+                goto adiusta_statum;
         }
 
         /* verifica */
@@ -591,8 +617,8 @@ adiusta_statum:
         if (prof_par == 0 && !versus_vacuus(v)) {
             int ult = ultimus_significans(signa, v->tok_initium, v->tok_finis);
             int habet_apertionem = linea_habet_bracchium(signa,
-                                                          v->tok_initium,
-                                                          v->tok_finis);
+                                                         v->tok_initium,
+                                                         v->tok_finis);
 
             /* resette gradum virtualem si linea consumpsit eum */
             if (gradus_virtualis > 0 &&
@@ -681,7 +707,17 @@ static void inspice_longitudinem(inspector_t *ins, const lexator_t *lex,
             continue;
         /* columna ultimi characteris */
         int ultimus = v->tok_finis - 1;
-        int lon = signa[ultimus].columna + signa[ultimus].longitudo;
+        int eff_lon = signa[ultimus].longitudo;
+        /* commentaria multiliniaria: solum primam lineam metiamur */
+        if (signa[ultimus].genus == SIGNUM_COMMENTARIUM) {
+            for (int k = 0; k < signa[ultimus].longitudo; k++) {
+                if (signa[ultimus].initium[k] == '\n') {
+                    eff_lon = k;
+                    break;
+                }
+            }
+        }
+        int lon = signa[ultimus].columna + eff_lon;
         if (lon > maxima) {
             char nuntius[NUNTIUS_MAX];
             snprintf(nuntius, sizeof(nuntius),
@@ -1068,8 +1104,7 @@ static void inspice_bracchia_stilum(inspector_t *ins, const lexator_t *lex,
                                    "(stilus Allman)");
                 }
             }
-            /* K&R: functiones in nova linea — ergo non monemus si in nova linea */
-            /* sed si functio habet '{' in eadem linea cum K&R, permittimus etiam */
+            /* K&R: functiones in nova linea — permittimus */
         }
     }
 }

@@ -7,7 +7,7 @@
     "bracchia": {
         "stilus": "kr",
         "else_coniunctum": 1,
-        "necessaria": 1
+        "necessaria": 0
     },
     "spatia": {
         "post_verba_clavis": 1,
