@@ -17,7 +17,7 @@
  */
 
 #include "insinulint.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,9 +65,9 @@ int inspector_scribe(const inspector_t *ins)
  * ================================================================ */
 
 /* auxiliarium: lege valorem veritatis ex JSON */
-static int lege_verum(const char *json, const char *via, int defaltum)
+static int lege_verum(const char *ison, const char *via, int defaltum)
 {
-    char *crudum = json_da_crudum(json, via);
+    char *crudum = ison_da_crudum(ison, via);
     if (!crudum)
         return defaltum;
     int res = (crudum[0] == 't' || crudum[0] == '1');
@@ -76,10 +76,10 @@ static int lege_verum(const char *json, const char *via, int defaltum)
 }
 
 /* valida sectionem speculi contra schema */
-static int valida_sectionem(const char *schema_json, const char *spec_json,
+static int valida_sectionem(const char *schema_ison, const char *spec_ison,
                             const char *nomen)
 {
-    char *sec_schema = json_da_crudum(schema_json, nomen);
+    char *sec_schema = ison_da_crudum(schema_ison, nomen);
     if (!sec_schema) return 0; /* sectio in schemate non est */
 
     schema_t s;
@@ -89,11 +89,11 @@ static int valida_sectionem(const char *schema_json, const char *spec_json,
     }
     free(sec_schema);
 
-    char *sec_data = json_da_crudum(spec_json, nomen);
+    char *sec_data = ison_da_crudum(spec_ison, nomen);
     if (!sec_data) return 0; /* sectio in speculo non est */
 
-    json_par_t pares[32];
-    int np = json_lege(sec_data, pares, 32);
+    ison_par_t pares[32];
+    int np = ison_lege(sec_data, pares, 32);
     free(sec_data);
     if (np <= 0) return 0;
 
@@ -106,20 +106,20 @@ static int valida_sectionem(const char *schema_json, const char *spec_json,
 }
 
 /* valida speculum integrum contra schema */
-static int speculum_valida(const char *json)
+static int speculum_valida(const char *ison)
 {
-    char *schema_json = json_lege_fasciculum("speculum-schema.json");
-    if (!schema_json) return 0; /* si schema non invenitur, transili */
+    char *schema_ison = ison_lege_plicam("speculum-schema.ison");
+    if (!schema_ison) return 0; /* si schema non invenitur, transili */
 
     static const char *sectiones[] = {
         "indentatio", "bracchia", "spatia", "lineae"
     };
     int errores = 0;
     for (int i = 0; i < 4; i++) {
-        if (valida_sectionem(schema_json, json, sectiones[i]) < 0)
+        if (valida_sectionem(schema_ison, ison, sectiones[i]) < 0)
             errores++;
     }
-    free(schema_json);
+    free(schema_ison);
     return errores > 0 ? -1 : 0;
 }
 
@@ -148,31 +148,31 @@ int speculum_lege(speculum_t *spec, const char *via)
     if (!via)
         return 0;
 
-    char *json = json_lege_fasciculum(via);
-    if (!json) {
+    char *ison = ison_lege_plicam(via);
+    if (!ison) {
         fprintf(stderr, "insinulint: non possum legere speculum '%s'\n", via);
         return -1;
     }
 
     /* valida contra schema */
-    if (speculum_valida(json) < 0) {
-        free(json);
+    if (speculum_valida(ison) < 0) {
+        free(ison);
         return -1;
     }
 
     /* indentatio */
-    long lat = json_da_numerum(json, "indentatio.latitudo");
+    long lat = ison_da_numerum(ison, "indentatio.latitudo");
     if (lat > 0 && lat <= 16)
         spec->ind_latitudo = (int)lat;
 
-    char *modus = json_da_chordam(json, "indentatio.modus");
+    char *modus = ison_da_chordam(ison, "indentatio.modus");
     if (modus) {
         if (strcmp(modus, "tabulae") == 0)
             spec->ind_tabulis = 1;
         free(modus);
     }
 
-    char *cont = json_da_chordam(json, "indentatio.continuatio");
+    char *cont = ison_da_chordam(ison, "indentatio.continuatio");
     if (cont) {
         if (strcmp(cont, "massa") == 0)
             spec->ind_continuatio = 1;
@@ -180,46 +180,46 @@ int speculum_lege(speculum_t *spec, const char *via)
     }
 
     /* bracchia */
-    char *stilus = json_da_chordam(json, "bracchia.stilus");
+    char *stilus = ison_da_chordam(ison, "bracchia.stilus");
     if (stilus) {
         if (strcmp(stilus, "allman") == 0)
             spec->bra_stilus = 1;
         free(stilus);
     }
 
-    spec->bra_else_coniunctum = lege_verum(json, "bracchia.else_coniunctum",
+    spec->bra_else_coniunctum = lege_verum(ison, "bracchia.else_coniunctum",
                                             spec->bra_else_coniunctum);
-    spec->bra_necessaria = lege_verum(json, "bracchia.necessaria",
+    spec->bra_necessaria = lege_verum(ison, "bracchia.necessaria",
                                        spec->bra_necessaria);
 
     /* spatia */
-    spec->spa_post_verba = lege_verum(json, "spatia.post_verba_clavis",
+    spec->spa_post_verba = lege_verum(ison, "spatia.post_verba_clavis",
                                        spec->spa_post_verba);
-    spec->spa_circa_operatores = lege_verum(json, "spatia.circa_operatores",
+    spec->spa_circa_operatores = lege_verum(ison, "spatia.circa_operatores",
                                              spec->spa_circa_operatores);
-    spec->spa_post_virgulam = lege_verum(json, "spatia.post_virgulam",
+    spec->spa_post_virgulam = lege_verum(ison, "spatia.post_virgulam",
                                           spec->spa_post_virgulam);
-    spec->spa_ante_semicolon = lege_verum(json, "spatia.ante_semicolon",
+    spec->spa_ante_semicolon = lege_verum(ison, "spatia.ante_semicolon",
                                            spec->spa_ante_semicolon);
 
     /* lineae */
-    long lmax = json_da_numerum(json, "lineae.longitudo_maxima");
+    long lmax = ison_da_numerum(ison, "lineae.longitudo_maxima");
     if (lmax > 0)
         spec->lin_longitudo_max = (int)lmax;
 
-    spec->lin_spatia_terminalia = lege_verum(json, "lineae.spatia_terminalia",
+    spec->lin_spatia_terminalia = lege_verum(ison, "lineae.spatia_terminalia",
                                               spec->lin_spatia_terminalia);
 
-    long vmax = json_da_numerum(json, "lineae.vacuae_max");
+    long vmax = ison_da_numerum(ison, "lineae.vacuae_max");
     if (vmax > 0)
         spec->lin_vacuae_max = (int)vmax;
 
-    spec->lin_finis_nova = lege_verum(json, "lineae.finis_linea_nova",
+    spec->lin_finis_nova = lege_verum(ison, "lineae.finis_linea_nova",
                                        spec->lin_finis_nova);
-    spec->lin_tabulae_mixtae = lege_verum(json, "lineae.tabulae_mixtae",
+    spec->lin_tabulae_mixtae = lege_verum(ison, "lineae.tabulae_mixtae",
                                            spec->lin_tabulae_mixtae);
 
-    free(json);
+    free(ison);
     return 0;
 }
 

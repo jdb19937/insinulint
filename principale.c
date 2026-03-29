@@ -1,11 +1,11 @@
 /*
  * principale.c — punctum ingressus lintoris insinulint
  *
- * Usus: insinulint [-s speculum.json] fasciculus.c [fasciculus2.c ...]
+ * Usus: insinulint [-s speculum.ison] plica.c [plicaque.c ...]
  */
 
 #include "insinulint.h"
-#include "json.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,8 +17,8 @@
 
 int insinulint_inspice(const char *via_fontis, const speculum_t *spec)
 {
-    /* lege fasciculum */
-    char *fons = json_lege_fasciculum(via_fontis);
+    /* lege plicam */
+    char *fons = ison_lege_plicam(via_fontis);
     if (!fons) {
         fprintf(stderr, "insinulint: non possum legere '%s'\n", via_fontis);
         return -1;
@@ -57,7 +57,7 @@ int insinulint_inspice(const char *via_fontis, const speculum_t *spec)
 static void auxilium(void)
 {
     fprintf(stderr,
-        "Usus: insinulint [-s speculum.json] fasciculus.c [...]\n"
+        "Usus: insinulint [-s speculum.ison] fasciculus.c [...]\n"
         "\n"
         "Optiones:\n"
         "  -s VIA    speculum configurationis (JSON)\n"
