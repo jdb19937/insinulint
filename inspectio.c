@@ -61,10 +61,10 @@ int inspector_scribe(const inspector_t *ins)
 }
 
 /* ================================================================
- * speculum — configuratio ex JSON
+ * speculum — configuratio ex ISON
  * ================================================================ */
 
-/* auxiliarium: lege valorem veritatis ex JSON */
+/* auxiliarium: lege valorem veritatis ex ISON */
 static int lege_verum(const char *ison, const char *via, int defaltum)
 {
     char *crudum = ison_da_crudum(ison, via);

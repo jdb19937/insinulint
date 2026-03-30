@@ -60,7 +60,7 @@ static void auxilium(void)
         "Usus: insinulint [-s speculum.ison] fasciculus.c [...]\n"
         "\n"
         "Optiones:\n"
-        "  -s VIA    speculum configurationis (JSON)\n"
+        "  -s VIA    speculum configurationis (ISON)\n"
         "  -h        hoc auxilium monstra\n"
         "\n"
         "Regulae:\n"

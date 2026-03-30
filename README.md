@@ -35,14 +35,14 @@ make omnia
 ## Usage
 
 ```bash
-./insinulint [-s speculum.json] file.c [file2.c ...]
+./insinulint [-s speculum.ison] file.c [file2.c ...]
 ```
 
 Without a configuration file, sensible defaults apply: 4 spaces, K&R braces, 80 columns.
 
 ## Configuration
 
-Fully configurable via a JSON specification file. Every field is optional — defaults are supplied for anything you don't specify:
+Fully configurable via a ISON specification file. Every field is optional — defaults are supplied for anything you don't specify:
 
 ```json
 {
