@@ -39,11 +39,24 @@ void inspector_adde(inspector_t *ins, gravitas_t g, int linea, int columna,
     if (ins->num_monita >= MONITA_MAX)
         return;
     monitum_t *m = &ins->monita[ins->num_monita++];
-    m->gravitas = g;
-    m->linea    = linea;
-    m->columna  = columna;
-    snprintf(m->regula, sizeof(m->regula), "%s", regula);
+    m->gravitas  = g;
+    m->linea     = linea;
+    m->columna   = columna;
+    m->fix_valor = -1;  /* -1 = non fixabile; >= 0 = expectata spatia */
+    snprintf(m->regula,  sizeof(m->regula),  "%s", regula);
     snprintf(m->nuntius, sizeof(m->nuntius), "%s", nuntius);
+}
+
+/*
+ * adde_fix — adde monitum cum valore correctionis.
+ */
+static void adde_fix(inspector_t *ins, gravitas_t g, int linea, int columna,
+                     const char *regula, const char *nuntius, int fix_valor)
+{
+    int pre = ins->num_monita;
+    inspector_adde(ins, g, linea, columna, regula, nuntius);
+    if (ins->num_monita > pre)
+        ins->monita[pre].fix_valor = fix_valor;
 }
 
 int inspector_scribe(const inspector_t *ins)
@@ -176,6 +189,10 @@ int speculum_lege(speculum_t *spec, const char *via)
     if (cont) {
         if (strcmp(cont, "massa") == 0)
             spec->ind_continuatio = 1;
+        else if (strcmp(cont, "pendens") == 0)
+            spec->ind_continuatio = 2;
+        else if (strcmp(cont, "patens") == 0)
+            spec->ind_continuatio = 3;
         free(cont);
     }
 
@@ -461,7 +478,7 @@ static void inspice_indentationem(inspector_t *ins, const lexator_t *lex,
 {
     int lat = spec->ind_latitudo;
     const signum_t *signa = lex->signa;
-    (void)lex;
+    int n = lex->num_signa;
 
     int profunditas = 0;    /* profunditas bracchiorum { } */
     continuatio_gradus_t acervus[CONTINUATIO_MAX];
@@ -574,8 +591,8 @@ static void inspice_indentationem(inspector_t *ins, const lexator_t *lex,
             snprintf(nuntius, sizeof(nuntius),
                      "%d spatia inventa, %d expectata (prof. %d, par. %d)",
                      v->spatia, expectata, profunditas, prof_par);
-            inspector_adde(ins, GRAVITAS_MONITUM,
-                           v->numero, 0, "indentatio", nuntius);
+            adde_fix(ins, GRAVITAS_MONITUM,
+                     v->numero, 0, "indentatio", nuntius, expectata);
         }
 
 adiusta_statum:
@@ -604,12 +621,44 @@ adiusta_statum:
                         ctx->modus_massa = 0;
                         break;
                     }
+                    /* stilus pendens/patens: '(' debet esse ultimum signum in
+                     * linea. solum parentheses '()' multilineares flagella —
+                     * '[' non tractatur (subscripti fere semper unilineares). */
+                    if ((spec->ind_continuatio == 2 ||
+                         spec->ind_continuatio == 3) &&
+                        signa[j].genus == SIGNUM_APERTIO_PAR &&
+                        !ctx->modus_massa) {
+                        int par_cl = quaere_par_clausam(signa, n, j);
+                        if (par_cl >= 0 &&
+                            signa[par_cl].linea != signa[j].linea) {
+                            inspector_adde(ins, GRAVITAS_MONITUM,
+                                           v->numero, signa[j].columna,
+                                           "indentatio",
+                                           "'(' debet esse ultimum signum"
+                                           " in linea (stilus pendens/patens)");
+                        }
+                    }
                 }
                 prof_par++;
             } else if (signa[j].genus == SIGNUM_CLAUSIO_PAR ||
                        signa[j].genus == SIGNUM_CLAUSIO_QUAD) {
-                if (prof_par > 0)
+                if (prof_par > 0) {
+                    /* stilus patens: ')' debet esse primum signum in linea */
+                    if (spec->ind_continuatio == 3 &&
+                        signa[j].genus == SIGNUM_CLAUSIO_PAR &&
+                        j != v->tok_primus) {
+                        int par_ap = quaere_par_apertam(signa, j);
+                        if (par_ap >= 0 &&
+                            signa[par_ap].linea != signa[j].linea) {
+                            inspector_adde(ins, GRAVITAS_MONITUM,
+                                           v->numero, signa[j].columna,
+                                           "indentatio",
+                                           "')' debet esse primum signum"
+                                           " in linea (stilus patens)");
+                        }
+                    }
                     prof_par--;
+                }
             }
         }
 
@@ -681,10 +730,10 @@ static void inspice_spatia_terminalia(inspector_t *ins,
             continue;
         int ultimus = v->tok_finis - 1;
         if (signa[ultimus].genus == SIGNUM_SPATIUM) {
-            inspector_adde(ins, GRAVITAS_MONITUM,
-                           v->numero, signa[ultimus].columna,
-                           "spatia_terminalia",
-                           "spatia terminalia inventa");
+            adde_fix(ins, GRAVITAS_MONITUM,
+                     v->numero, signa[ultimus].columna,
+                     "spatia_terminalia",
+                     "spatia terminalia inventa", 1);
         }
     }
 }
@@ -1179,6 +1228,35 @@ static void inspice_bracchia_necessaria(inspector_t *ins,
                            "bracchia_necessaria", nuntius);
         }
     }
+}
+
+/* ================================================================
+ * insinulint_lege_inspice — pipeline communis: lege, lexa, inspice
+ * ================================================================ */
+
+int insinulint_lege_inspice(const char *via, const speculum_t *spec,
+                            inspector_t *ins, char **fons_out)
+{
+    char *fons = ison_lege_plicam(via);
+    if (!fons) {
+        fprintf(stderr, "insinulint: non possum legere '%s'\n", via);
+        return -1;
+    }
+    size_t lon = strlen(fons);
+
+    lexator_t lex;
+    if (lexator_disseca(&lex, fons, lon) < 0) {
+        fprintf(stderr, "insinulint: erratum dissecandi '%s'\n", via);
+        free(fons);
+        return -1;
+    }
+
+    inspector_initia(ins, via);
+    inspice_omnia(ins, &lex, spec);
+    lexator_purgare(&lex);
+
+    *fons_out = fons;
+    return 0;
 }
 
 /* ================================================================

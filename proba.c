@@ -236,6 +236,79 @@ static void proba_continuatio_massa(void)
     expecta_mundum("massa", &ins);
 }
 
+static void proba_continuatio_pendens(void)
+{
+    fprintf(stderr, "proba: continuatio pendens\n");
+    speculum_t spec = spec_solum();
+    spec.ind_continuatio = 2;  /* pendens */
+    inspector_t ins;
+
+    /* mundus: '(' in fine lineae */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    functio(\n"
+        "        a,\n"
+        "        b\n"
+        "    );\n"
+        "}\n",
+        &spec, &ins);
+    expecta_mundum("pendens mundus", &ins);
+
+    /* malum: contentum sequitur '(' in eadem linea */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    functio(a,\n"
+        "        b\n"
+        "    );\n"
+        "}\n",
+        &spec, &ins);
+    expecta("pendens: '(' non ultimum", &ins, "indentatio", 1);
+}
+
+static void proba_continuatio_patens(void)
+{
+    fprintf(stderr, "proba: continuatio patens\n");
+    speculum_t spec = spec_solum();
+    spec.ind_continuatio = 3;  /* patens */
+    inspector_t ins;
+
+    /* mundus: '(' in fine, ')' primum in linea propria */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    functio(\n"
+        "        a,\n"
+        "        b\n"
+        "    );\n"
+        "}\n",
+        &spec, &ins);
+    expecta_mundum("patens mundus", &ins);
+
+    /* malum: ')' non primum in linea */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    functio(\n"
+        "        a,\n"
+        "        b);\n"
+        "}\n",
+        &spec, &ins);
+    expecta("patens: ')' non primum", &ins, "indentatio", 1);
+
+    /* malum: '(' non ultimum in linea */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    functio(a,\n"
+        "        b\n"
+        "    );\n"
+        "}\n",
+        &spec, &ins);
+    expecta("patens: '(' non ultimum", &ins, "indentatio", 1);
+}
+
 /* ================================================================
  * probationes: spatia
  * ================================================================ */
@@ -846,6 +919,8 @@ int main(void)
     proba_indentatio_virtualis();
     proba_continuatio_congruens();
     proba_continuatio_massa();
+    proba_continuatio_pendens();
+    proba_continuatio_patens();
 
     /* spatia */
     proba_spatia_verba();

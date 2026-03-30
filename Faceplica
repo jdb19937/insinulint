@@ -9,7 +9,7 @@ CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
 CFLAGS  += -I$(APOTHECA)/ison
 LDFLAGS =
 
-FONTES  = principale.c lexator.c inspectio.c
+FONTES  = principale.c lexator.c inspectio.c correctio.c
 OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 
@@ -37,8 +37,8 @@ $(LIBCRISPUS):
 $(NOMEN): $(OBJECTA) $(LIBISON)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-proba: $(PROBA_OBJECTA)
-	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA)
+proba: $(PROBA_OBJECTA) $(LIBISON)
+	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA) $(LIBISON)
 	./$@
 
 %.o: %.c insinulint.h

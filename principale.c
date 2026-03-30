@@ -1,10 +1,11 @@
 /*
  * principale.c — punctum ingressus lintoris insinulint
  *
- * Usus: insinulint [-s speculum.ison] plica.c [plicaque.c ...]
+ * Usus: insinulint [-s speculum.ison] [-c] plica.c [plicaque.c ...]
  */
 
 #include "insinulint.h"
+#include "correctio.h"
 #include "ison.h"
 
 #include <stdio.h>
@@ -17,36 +18,12 @@
 
 int insinulint_inspice(const char *via_fontis, const speculum_t *spec)
 {
-    /* lege plicam */
-    char *fons = ison_lege_plicam(via_fontis);
-    if (!fons) {
-        fprintf(stderr, "insinulint: non possum legere '%s'\n", via_fontis);
-        return -1;
-    }
-    size_t lon = strlen(fons);
-
-    /* disseca in signa */
-    lexator_t lex;
-    if (lexator_disseca(&lex, fons, lon) < 0) {
-        fprintf(stderr, "insinulint: erratum dissecandi '%s'\n", via_fontis);
-        free(fons);
-        return -1;
-    }
-
-    /* praepara inspectorem */
     inspector_t ins;
-    inspector_initia(&ins, via_fontis);
-
-    /* applica regulas */
-    inspice_omnia(&ins, &lex, spec);
-
-    /* scribe monita */
+    char *fons;
+    if (insinulint_lege_inspice(via_fontis, spec, &ins, &fons) < 0)
+        return -1;
     int num = inspector_scribe(&ins);
-
-    /* purga */
-    lexator_purgare(&lex);
     free(fons);
-
     return num;
 }
 
@@ -57,11 +34,18 @@ int insinulint_inspice(const char *via_fontis, const speculum_t *spec)
 static void auxilium(void)
 {
     fprintf(stderr,
-        "Usus: insinulint [-s speculum.ison] fasciculus.c [...]\n"
+        "Usus: insinulint [-s speculum.ison] [-c] fasciculus.c [...]\n"
         "\n"
         "Optiones:\n"
         "  -s VIA    speculum configurationis (ISON)\n"
+        "  -c        corriges fasciculos in loco (non solum inspice)\n"
         "  -h        hoc auxilium monstra\n"
+        "\n"
+        "Stili continuationis (indentatio.continuatio in speculo):\n"
+        "  congruens  continuatio ad columnam post '(' alignata (defaltum)\n"
+        "  massa      continuatio indentata per unum gradum\n"
+        "  pendens    '(' in fine lineae, contentum +1 gradus, ')' ad basin\n"
+        "  patens     ut pendens, et ')' debet esse primum signum in linea\n"
         "\n"
         "Regulae:\n"
         "  indentatio          gradus per bracchia et continuationem\n"
@@ -84,6 +68,7 @@ int main(int argc, char **argv)
 {
     const char *via_speculi = NULL;
     int primus_fasciculus = 1;
+    int corrige = 0;
 
     /* argumenta */
     for (int i = 1; i < argc; i++) {
@@ -97,6 +82,11 @@ int main(int argc, char **argv)
                 return 1;
             }
             via_speculi = argv[++i];
+            primus_fasciculus = i + 1;
+            continue;
+        }
+        if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--corrige") == 0) {
+            corrige = 1;
             primus_fasciculus = i + 1;
             continue;
         }
@@ -118,9 +108,11 @@ int main(int argc, char **argv)
     if (speculum_lege(&spec, via_speculi) < 0)
         return 1;
 
-    /* inspice fasciculos */
+    /* inspice (et corriges si -c) fasciculos */
     int summa_monitorum = 0;
     for (int i = primus_fasciculus; i < argc; i++) {
+        if (corrige)
+            correctio_age(argv[i], &spec);
         int res = insinulint_inspice(argv[i], &spec);
         if (res < 0) {
             summa_monitorum++;

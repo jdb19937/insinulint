@@ -78,6 +78,7 @@ typedef struct {
     int         columna;
     char        nuntius[NUNTIUS_MAX];
     char        regula[64];
+    int         fix_valor;    /* valor pro correctione (0 = non fixabile) */
 } monitum_t;
 
 /* ================================================================
@@ -135,6 +136,24 @@ int speculum_lege(speculum_t *spec, const char *via);
 void inspice_omnia(inspector_t *ins, const lexator_t *lex,
                    const speculum_t *spec);
 
+/*
+ * insinulint_lege_inspice — lege plicam, lexa, inspice.
+ * ins popula; *fons_out adtribuitur (vocans per free() liberat).
+ * reddit 0 si bene, -1 si error.
+ */
+int insinulint_lege_inspice(const char *via, const speculum_t *spec,
+                            inspector_t *ins, char **fons_out);
+
 int insinulint_inspice(const char *via_fontis, const speculum_t *spec);
+
+/* ================================================================
+ * correctio — correctio plicarum in loco
+ * ================================================================ */
+
+/*
+ * correctio_age — corriges plicam in loco ex speculo.
+ * reddit 0 si bene, -1 si error.
+ */
+int correctio_age(const char *via, const speculum_t *spec);
 
 #endif /* INSINULINT_H */
