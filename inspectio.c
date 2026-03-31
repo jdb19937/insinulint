@@ -14,7 +14,7 @@
  *   - lineae vacuae consecutivae
  *   - linea nova ad finem fasciculi
  *   - tabulae et spatia mixtae
- *   - adtributiones colineatae ('=' in gregibus adtributionum)
+ *   - colineatio ('=' in adtributionibus; extensibile ad alia signa)
  */
 
 #include "insinulint.h"
@@ -1496,11 +1496,20 @@ int insinulint_lege_inspice(
 }
 
 /* ================================================================
- * 14. ADTRIBUTIONES COLINEATAE
+ * 14. COLINEATIO
  * ================================================================ */
 
-/* turba maxima permissa inter columnas '=' in grege */
+/* turba maxima permissa inter columnas signi colineabilis in grege */
 #define COLINEATIO_TURBA_MAX 8
+
+typedef struct {
+    signum_genus_t genus;       /* genus signi allineandi */
+    char           valor[8];    /* valor signi (e.g. "=", "//") */
+    int            spatium_min; /* spatia minima ante signum */
+    const char    *regula;
+} colineatio_t;
+
+typedef int (*colineatio_praedicatum_t)(const signum_t *, const versus_t *);
 
 /*
  * est_adtributio — 1 si linea est adtributio simplex cum '=' et ';'.
@@ -1546,66 +1555,73 @@ static int est_adtributio(const signum_t *signa, const versus_t *v)
     return aequale && semicolon;
 }
 
-/* inveni indicem signi '=' simplicis in linea */
-static int inveni_aequale(const signum_t *signa, const versus_t *v)
-{
+/* inveni indicem signi colineabilis in linea; reddit -1 si non invenitur */
+static int inveni_signum_col(
+    const signum_t *signa, const versus_t *v, const colineatio_t *col
+) {
+    int lon = (int)strlen(col->valor);
     for (int j = v->tok_initium; j < v->tok_finis; j++) {
+        if (signa[j].genus != col->genus)
+            continue;
         if (
-            signa[j].genus == SIGNUM_OPERATOR &&
-            signa[j].longitudo == 1 &&
-            signa[j].initium[0] == '='
+            lon > 0 && (
+                signa[j].longitudo != lon ||
+                strncmp(signa[j].initium, col->valor, (size_t)lon) != 0
+            )
         )
-            return j;
+            continue;
+        return j;
     }
     return -1;
 }
 
 /*
- * columna_naturalis — columna ubi '=' esse debet cum uno spatio post LHS.
+ * columna_naturalis — columna ubi signum esse debet cum spatium_min post LHS.
  * reddit -1 si non determinari potest.
  */
 static int columna_naturalis(
-    const signum_t *signa, const versus_t *v, int idx_aeq
+    const signum_t *signa, const versus_t *v, int idx, int spatium_min
 ) {
-    int prev = idx_aeq - 1;
+    int prev = idx - 1;
     while (prev >= v->tok_initium && signa[prev].genus == SIGNUM_SPATIUM)
         prev--;
     if (prev < v->tok_initium)
         return -1;
-    return signa[prev].columna + signa[prev].longitudo + 1;
+    return signa[prev].columna + signa[prev].longitudo + spatium_min;
 }
 
-static void inspice_adtributiones_colineatas(
+static void inspice_colineationes(
     inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
+    const versus_t *versus, int num_versus,
+    colineatio_praedicatum_t praedicatum,
+    const colineatio_t *col
 ) {
     const signum_t *signa = lex->signa;
 
     int vi = 0;
     while (vi < num_versus) {
-        /* salta lineas non-adtributiones */
-        while (vi < num_versus && !est_adtributio(signa, &versus[vi]))
+        while (vi < num_versus && !praedicatum(signa, &versus[vi]))
             vi++;
         if (vi >= num_versus)
             break;
 
-        /* aedifica gregem linearum adtributionis consecutivarum */
         int gi = vi;
-        while (vi < num_versus && est_adtributio(signa, &versus[vi]))
+        while (vi < num_versus && praedicatum(signa, &versus[vi]))
             vi++;
         int gf = vi;  /* exclusive */
 
         if (gf - gi < 2)
             continue;
 
-        /* inveni columnas naturales (LHS finis + 1 spatium) */
         int nat_max = 0;
         int nat_min = -1;
         for (int k = gi; k < gf; k++) {
-            int idx = inveni_aequale(signa, &versus[k]);
+            int idx = inveni_signum_col(signa, &versus[k], col);
             if (idx < 0)
                 continue;
-            int nc = columna_naturalis(signa, &versus[k], idx);
+            int nc = columna_naturalis(
+                signa, &versus[k], idx, col->spatium_min
+            );
             if (nc < 0)
                 continue;
             if (nat_min < 0 || nc < nat_min) nat_min = nc;
@@ -1615,34 +1631,41 @@ static void inspice_adtributiones_colineatas(
         if (nat_min < 0)
             continue;
 
-        /* turba nimia inter LHS: transili gregem */
         if (nat_max - nat_min > COLINEATIO_TURBA_MAX)
             continue;
 
-        /* emitte monita pro lineis non in columna petita */
         for (int k = gi; k < gf; k++) {
             const versus_t *v = &versus[k];
-            int idx = inveni_aequale(signa, v);
+            int idx = inveni_signum_col(signa, v, col);
             if (idx < 0)
                 continue;
-            int col = signa[idx].columna;
-            if (col == nat_max)
+            int c = signa[idx].columna;
+            if (c == nat_max)
                 continue;
             char nuntius[NUNTIUS_MAX];
             snprintf(
                 nuntius, sizeof(nuntius),
-                "'=' in columna %d, expectatur %d",
-                col, nat_max
+                "'%s' in columna %d, expectatur %d",
+                col->valor, c, nat_max
             );
-            /* fix_valor = columna petita (non delta) */
             adde_fix(
                 ins, GRAVITAS_MONITUM,
-                v->numero, col,
-                "adtributio_colineata", nuntius,
+                v->numero, c,
+                col->regula, nuntius,
                 nat_max
             );
         }
     }
+}
+
+static void inspice_adtributiones_colineatas(
+    inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus
+) {
+    static const colineatio_t col = {
+        SIGNUM_OPERATOR, "=", 1, "adtributio_colineata"
+    };
+    inspice_colineationes(ins, lex, versus, num_versus, est_adtributio, &col);
 }
 
 /* ================================================================

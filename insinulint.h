@@ -110,7 +110,7 @@ typedef struct {
     /* indentatio */
     int ind_latitudo;           /* spatia per gradum (defaltum: 4) */
     int ind_tabulis;            /* 1 = tabulae, 0 = spatia */
-    int ind_continuatio;        /* 0 = congruens (aligned), 1 = massa (block) */
+    int ind_continuatio;        /* 0=congruens, 1=massa, 2=pendens, 3=patens */
 
     /* bracchia */
     int bra_stilus;             /* 0 = kr (1TBS), 1 = allman */
