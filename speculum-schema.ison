@@ -40,6 +40,9 @@
       },
       "ante_semicolon": {
         "type": "integer"
+      },
+      "adtributio_colineata": {
+        "type": "integer"
       }
     },
     "required": []

@@ -15,9 +15,9 @@
  * apparatus probationis
  * ================================================================ */
 
-static int probationes_totae   = 0;
-static int probationes_bonae   = 0;
-static int probationes_malae   = 0;
+static int probationes_totae = 0;
+static int probationes_bonae = 0;
+static int probationes_malae = 0;
 
 /* curre lintorem in chorda fontis et reddit inspectorem */
 static int curre_lintorem(
@@ -217,7 +217,7 @@ static void proba_indentatio_virtualis(void)
 static void proba_continuatio_congruens(void)
 {
     fprintf(stderr, "proba: continuatio congruens (aligned)\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec      = spec_solum();
     spec.ind_continuatio = 0;  /* congruens */
     inspector_t ins;
 
@@ -236,7 +236,7 @@ static void proba_continuatio_congruens(void)
 static void proba_continuatio_massa(void)
 {
     fprintf(stderr, "proba: continuatio massa (block)\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec      = spec_solum();
     spec.ind_continuatio = 1;  /* massa */
     inspector_t ins;
 
@@ -257,7 +257,7 @@ static void proba_continuatio_massa(void)
 static void proba_continuatio_pendens(void)
 {
     fprintf(stderr, "proba: continuatio pendens\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec      = spec_solum();
     spec.ind_continuatio = 2;  /* pendens */
     inspector_t ins;
 
@@ -290,7 +290,7 @@ static void proba_continuatio_pendens(void)
 static void proba_continuatio_patens(void)
 {
     fprintf(stderr, "proba: continuatio patens\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec      = spec_solum();
     spec.ind_continuatio = 3;  /* patens */
     inspector_t ins;
 
@@ -339,7 +339,7 @@ static void proba_continuatio_patens(void)
 static void proba_spatia_verba(void)
 {
     fprintf(stderr, "proba: spatia post verba clavis\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec     = spec_solum();
     spec.spa_post_verba = 1;
     inspector_t ins;
 
@@ -404,7 +404,7 @@ static void proba_spatia_operatores(void)
 static void proba_spatia_virgulae(void)
 {
     fprintf(stderr, "proba: spatia virgularum\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec        = spec_solum();
     spec.spa_post_virgulam = 1;
     inspector_t ins;
 
@@ -433,7 +433,7 @@ static void proba_spatia_virgulae(void)
 static void proba_spatia_semicolona(void)
 {
     fprintf(stderr, "proba: spatia semicolonorum\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec         = spec_solum();
     spec.spa_ante_semicolon = 1;
     inspector_t ins;
 
@@ -476,7 +476,7 @@ static void proba_spatia_semicolona(void)
 static void proba_bracchia_necessaria(void)
 {
     fprintf(stderr, "proba: bracchia necessaria\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec     = spec_solum();
     spec.bra_necessaria = 1;
     inspector_t ins;
 
@@ -650,7 +650,7 @@ static void proba_spatia_terminalia(void)
 static void proba_longitudo_lineae(void)
 {
     fprintf(stderr, "proba: longitudo lineae\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec        = spec_solum();
     spec.lin_longitudo_max = 40;
     inspector_t ins;
 
@@ -672,7 +672,7 @@ static void proba_longitudo_lineae(void)
 static void proba_lineae_vacuae(void)
 {
     fprintf(stderr, "proba: lineae vacuae consecutivae\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec     = spec_solum();
     spec.lin_vacuae_max = 1;
     inspector_t ins;
 
@@ -699,7 +699,7 @@ static void proba_lineae_vacuae(void)
 static void proba_finis_lineae(void)
 {
     fprintf(stderr, "proba: finis lineae novae\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec     = spec_solum();
     spec.lin_finis_nova = 1;
     inspector_t ins;
 
@@ -721,7 +721,7 @@ static void proba_finis_lineae(void)
 static void proba_tabulae_mixtae(void)
 {
     fprintf(stderr, "proba: tabulae mixtae\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec         = spec_solum();
     spec.lin_tabulae_mixtae = 1;
     inspector_t ins;
 
@@ -916,7 +916,7 @@ static void proba_lexator(void)
 static void proba_codex_mundus(void)
 {
     fprintf(stderr, "proba: codex mundus (omnes regulae activae)\n");
-    speculum_t spec = spec_defaltum();
+    speculum_t spec        = spec_defaltum();
     spec.lin_longitudo_max = 120;  /* permitte lineas longiores */
     inspector_t ins;
 

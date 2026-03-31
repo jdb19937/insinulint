@@ -14,7 +14,6 @@
  *   - lineae vacuae consecutivae
  *   - linea nova ad finem fasciculi
  *   - tabulae et spatia mixtae
- *   - adtributiones colineatae ('=' in gregibus adtributionum)
  */
 
 #include "insinulint.h"
@@ -34,19 +33,16 @@ void inspector_initia(inspector_t *ins, const char *via)
     ins->via_fasciculi = via;
 }
 
-void inspector_adde(
-    inspector_t *ins, gravitas_t g, int linea, int columna,
-    const char *regula, const char *nuntius
-) {
+void inspector_adde(inspector_t *ins, gravitas_t g, int linea, int columna,
+    const char *regula, const char *nuntius)
+{
     if (ins->num_monita >= MONITA_MAX)
         return;
-    monitum_t *m     = &ins->monita[ins->num_monita++];
-    m->gravitas      = g;
-    m->linea         = linea;
-    m->columna       = columna;
-    m->fix_valor     = -1;
-    m->split_columna = -1;
-    m->apert_columna = -1;
+    monitum_t *m = &ins->monita[ins->num_monita++];
+    m->gravitas  = g;
+    m->linea     = linea;
+    m->columna   = columna;
+    m->fix_valor = -1;  /* -1 = non fixabile; >= 0 = expectata spatia */
     snprintf(m->regula,  sizeof(m->regula),  "%s", regula);
     snprintf(m->nuntius, sizeof(m->nuntius), "%s", nuntius);
 }
@@ -54,64 +50,25 @@ void inspector_adde(
 /*
  * adde_fix — adde monitum cum valore correctionis.
  */
-static void adde_fix(
-    inspector_t *ins, gravitas_t g, int linea, int columna,
-    const char *regula, const char *nuntius, int fix_valor
-) {
+static void adde_fix(inspector_t *ins, gravitas_t g, int linea, int columna,
+    const char *regula, const char *nuntius, int fix_valor)
+{
     int pre = ins->num_monita;
     inspector_adde(ins, g, linea, columna, regula, nuntius);
     if (ins->num_monita > pre)
         ins->monita[pre].fix_valor = fix_valor;
 }
 
-/*
- * adde_scissio — adde monitum cum scissionem lineae ad ')'.
- * ind_novi: indentatio lineae novae post scissionem (basis_spatia).
- * split_col: columna ')' in linea originali.
- */
-static void adde_scissio(
-    inspector_t *ins, gravitas_t g, int linea,
-    int columna, const char *regula, const char *nuntius,
-    int ind_novi, int split_col
-) {
-    int pre = ins->num_monita;
-    inspector_adde(ins, g, linea, columna, regula, nuntius);
-    if (ins->num_monita > pre) {
-        ins->monita[pre].fix_valor     = ind_novi;
-        ins->monita[pre].split_columna = split_col;
-    }
-}
-
-/*
- * adde_apert — adde monitum cum scissionem lineae post '('.
- * ind_cont: indentatio linearum continuationis post scissionem.
- * apert_col: columna '(' in linea originali.
- */
-static void adde_apert(
-    inspector_t *ins, gravitas_t g, int linea,
-    int columna, const char *regula, const char *nuntius,
-    int ind_cont, int apert_col
-) {
-    int pre = ins->num_monita;
-    inspector_adde(ins, g, linea, columna, regula, nuntius);
-    if (ins->num_monita > pre) {
-        ins->monita[pre].fix_valor     = ind_cont;
-        ins->monita[pre].apert_columna = apert_col;
-    }
-}
-
 int inspector_scribe(const inspector_t *ins)
 {
     for (int i = 0; i < ins->num_monita; i++) {
         const monitum_t *m = &ins->monita[i];
-        fprintf(
-            stderr, "%s:%d:%d: %s [%s] %s\n",
+        fprintf(stderr, "%s:%d:%d: %s [%s] %s\n",
             ins->via_fasciculi ? ins->via_fasciculi : "<fons>",
             m->linea, m->columna,
             m->gravitas == GRAVITAS_ERRATUM ? "erratum" : "monitum",
             m->regula,
-            m->nuntius
-        );
+            m->nuntius);
     }
     return ins->num_monita;
 }
@@ -132,10 +89,9 @@ static int lege_verum(const char *ison, const char *via, int defaltum)
 }
 
 /* valida sectionem speculi contra schema */
-static int valida_sectionem(
-    const char *schema_ison, const char *spec_ison,
-    const char *nomen
-) {
+static int valida_sectionem(const char *schema_ison, const char *spec_ison,
+    const char *nomen)
+{
     char *sec_schema = ison_da_crudum(schema_ison, nomen);
     if (!sec_schema) return 0; /* sectio in schemate non est */
 
@@ -183,25 +139,24 @@ static int speculum_valida(const char *ison)
 int speculum_lege(speculum_t *spec, const char *via)
 {
     /* defalta */
-    spec->ind_latitudo    = 4;
-    spec->ind_tabulis     = 0;
-    spec->ind_continuatio = 0;  /* congruens (aligned) */
+    spec->ind_latitudo        = 4;
+    spec->ind_tabulis         = 0;
+    spec->ind_continuatio     = 0;  /* congruens (aligned) */
 
     spec->bra_stilus           = 0;  /* kr */
-    spec->bra_else_coniunctum  = 1;
-    spec->bra_necessaria       = 1;
+    spec->bra_else_coniunctum = 1;
+    spec->bra_necessaria      = 1;
 
     spec->spa_post_verba       = 1;
     spec->spa_circa_operatores = 1;
     spec->spa_post_virgulam    = 1;
     spec->spa_ante_semicolon   = 1;
-    spec->spa_adtributio_colineata = 1;
 
-    spec->lin_longitudo_max     = 80;
+    spec->lin_longitudo_max    = 80;
     spec->lin_spatia_terminalia = 1;
-    spec->lin_vacuae_max        = 2;
-    spec->lin_finis_nova        = 1;
-    spec->lin_tabulae_mixtae    = 1;
+    spec->lin_vacuae_max       = 2;
+    spec->lin_finis_nova       = 1;
+    spec->lin_tabulae_mixtae   = 1;
 
     if (!via)
         return 0;
@@ -249,59 +204,37 @@ int speculum_lege(speculum_t *spec, const char *via)
         free(stilus);
     }
 
-    spec->bra_else_coniunctum = lege_verum(
-        ison, "bracchia.else_coniunctum",
-        spec->bra_else_coniunctum
-    );
-    spec->bra_necessaria = lege_verum(
-        ison, "bracchia.necessaria",
-        spec->bra_necessaria
-    );
+    spec->bra_else_coniunctum = lege_verum(ison, "bracchia.else_coniunctum",
+        spec->bra_else_coniunctum);
+    spec->bra_necessaria = lege_verum(ison, "bracchia.necessaria",
+        spec->bra_necessaria);
 
     /* spatia */
-    spec->spa_post_verba = lege_verum(
-        ison, "spatia.post_verba_clavis",
-        spec->spa_post_verba
-    );
-    spec->spa_circa_operatores = lege_verum(
-        ison, "spatia.circa_operatores",
-        spec->spa_circa_operatores
-    );
-    spec->spa_post_virgulam = lege_verum(
-        ison, "spatia.post_virgulam",
-        spec->spa_post_virgulam
-    );
-    spec->spa_ante_semicolon = lege_verum(
-        ison, "spatia.ante_semicolon",
-        spec->spa_ante_semicolon
-    );
-    spec->spa_adtributio_colineata = lege_verum(
-        ison, "spatia.adtributio_colineata",
-        spec->spa_adtributio_colineata
-    );
+    spec->spa_post_verba = lege_verum(ison, "spatia.post_verba_clavis",
+        spec->spa_post_verba);
+    spec->spa_circa_operatores = lege_verum(ison, "spatia.circa_operatores",
+        spec->spa_circa_operatores);
+    spec->spa_post_virgulam = lege_verum(ison, "spatia.post_virgulam",
+        spec->spa_post_virgulam);
+    spec->spa_ante_semicolon = lege_verum(ison, "spatia.ante_semicolon",
+        spec->spa_ante_semicolon);
 
     /* lineae */
     long lmax = ison_da_numerum(ison, "lineae.longitudo_maxima");
     if (lmax > 0)
         spec->lin_longitudo_max = (int)lmax;
 
-    spec->lin_spatia_terminalia = lege_verum(
-        ison, "lineae.spatia_terminalia",
-        spec->lin_spatia_terminalia
-    );
+    spec->lin_spatia_terminalia = lege_verum(ison, "lineae.spatia_terminalia",
+        spec->lin_spatia_terminalia);
 
     long vmax = ison_da_numerum(ison, "lineae.vacuae_max");
     if (vmax > 0)
         spec->lin_vacuae_max = (int)vmax;
 
-    spec->lin_finis_nova = lege_verum(
-        ison, "lineae.finis_linea_nova",
-        spec->lin_finis_nova
-    );
-    spec->lin_tabulae_mixtae = lege_verum(
-        ison, "lineae.tabulae_mixtae",
-        spec->lin_tabulae_mixtae
-    );
+    spec->lin_finis_nova = lege_verum(ison, "lineae.finis_linea_nova",
+        spec->lin_finis_nova);
+    spec->lin_tabulae_mixtae = lege_verum(ison, "lineae.tabulae_mixtae",
+        spec->lin_tabulae_mixtae);
 
     free(ison);
     return 0;
@@ -343,16 +276,14 @@ static int est_operator_binarius(const signum_t *s)
     if (s->genus != SIGNUM_OPERATOR)
         return 0;
     /* compositi — semper binarii */
-    if (
-        est_operator(s, "==") || est_operator(s, "!=") ||
+    if (est_operator(s, "==") || est_operator(s, "!=") ||
         est_operator(s, "<=") || est_operator(s, ">=") ||
         est_operator(s, "&&") || est_operator(s, "||") ||
         est_operator(s, "+=") || est_operator(s, "-=") ||
         est_operator(s, "*=") || est_operator(s, "/=") ||
         est_operator(s, "%=") || est_operator(s, "&=") ||
         est_operator(s, "|=") || est_operator(s, "^=") ||
-        est_operator(s, "<<=") || est_operator(s, ">>=")
-    )
+        est_operator(s, "<<=") || est_operator(s, ">>="))
         return 1;
     /* assignatio simplex (longitudo 1, '=') */
     if (s->longitudo == 1 && s->initium[0] == '=')
@@ -397,11 +328,9 @@ static int quaere_par_clausam(const signum_t *signa, int n, int idx)
 static int prox_significans(const signum_t *signa, int n, int idx)
 {
     for (int i = idx; i < n; i++) {
-        if (
-            signa[i].genus != SIGNUM_SPATIUM &&
+        if (signa[i].genus != SIGNUM_SPATIUM &&
             signa[i].genus != SIGNUM_LINEA_NOVA &&
-            signa[i].genus != SIGNUM_COMMENTARIUM
-        )
+            signa[i].genus != SIGNUM_COMMENTARIUM)
             return i;
     }
     return n;
@@ -411,11 +340,9 @@ static int prox_significans(const signum_t *signa, int n, int idx)
 static int prox_significans_retro(const signum_t *signa, int idx)
 {
     for (int i = idx; i >= 0; i--) {
-        if (
-            signa[i].genus != SIGNUM_SPATIUM &&
+        if (signa[i].genus != SIGNUM_SPATIUM &&
             signa[i].genus != SIGNUM_LINEA_NOVA &&
-            signa[i].genus != SIGNUM_COMMENTARIUM
-        )
+            signa[i].genus != SIGNUM_COMMENTARIUM)
             return i;
     }
     return -1;
@@ -453,15 +380,13 @@ static int aedifica_versus(const lexator_t *lex, versus_t *vv, int max)
     const signum_t *s = lex->signa;
 
     while (i < n && nv < max) {
-        versus_t *v    = &vv[nv];
+        versus_t *v = &vv[nv];
         v->tok_initium = i;
 
         /* inveni finem lineae */
         int j = i;
-        while (
-            j < n && s[j].genus != SIGNUM_LINEA_NOVA &&
-            s[j].genus != SIGNUM_FINIS
-        )
+        while (j < n && s[j].genus != SIGNUM_LINEA_NOVA &&
+            s[j].genus != SIGNUM_FINIS)
             j++;
         v->tok_finis = j;
 
@@ -528,10 +453,8 @@ typedef struct {
 static int ultimus_significans(const signum_t *signa, int initium, int finis)
 {
     for (int j = finis - 1; j >= initium; j--) {
-        if (
-            signa[j].genus != SIGNUM_SPATIUM &&
-            signa[j].genus != SIGNUM_COMMENTARIUM
-        )
+        if (signa[j].genus != SIGNUM_SPATIUM &&
+            signa[j].genus != SIGNUM_COMMENTARIUM)
             return j;
     }
     return -1;
@@ -549,18 +472,17 @@ static int linea_habet_bracchium(const signum_t *signa, int initium, int finis)
     return 0;
 }
 
-static void inspice_indentationem(
-    inspector_t *ins, const lexator_t *lex,
+static void inspice_indentationem(inspector_t *ins, const lexator_t *lex,
     const versus_t *versus, int num_versus,
-    const speculum_t *spec
-) {
+    const speculum_t *spec)
+{
     int lat = spec->ind_latitudo;
     const signum_t *signa = lex->signa;
     int n = lex->num_signa;
 
     int profunditas = 0;    /* profunditas bracchiorum { } */
     continuatio_gradus_t acervus[CONTINUATIO_MAX];
-    int prof_par         = 0;       /* profunditas parenthesium */
+    int prof_par = 0;       /* profunditas parenthesium */
     int gradus_virtualis = 0;  /* +1 pro corpore sine bracchiis */
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -573,10 +495,8 @@ static void inspice_indentationem(
         int primus = v->tok_primus;
 
         /* transili praeprocessorem et commentaria pura */
-        if (
-            signa[primus].genus == SIGNUM_PRAEPROCESSOR ||
-            signa[primus].genus == SIGNUM_COMMENTARIUM
-        )
+        if (signa[primus].genus == SIGNUM_PRAEPROCESSOR ||
+            signa[primus].genus == SIGNUM_COMMENTARIUM)
             goto adiusta_statum;
 
         /* computa indentationem expectatam */
@@ -587,10 +507,8 @@ static void inspice_indentationem(
             continuatio_gradus_t *ctx = &acervus[prof_par - 1];
 
             int primus_est_clausio =
-                (
-                    signa[primus].genus == SIGNUM_CLAUSIO_PAR ||
-                    signa[primus].genus == SIGNUM_CLAUSIO_QUAD
-                );
+                (signa[primus].genus == SIGNUM_CLAUSIO_PAR ||
+                    signa[primus].genus == SIGNUM_CLAUSIO_QUAD);
 
             if (primus_est_clausio) {
                 expectata = ctx->basis_spatia;
@@ -598,10 +516,8 @@ static void inspice_indentationem(
                 expectata = ctx->columna_post;
                 /* etiam accepta block indentatio inter basis+lat et
                  * columna_post — multi stili validi intra parentheses */
-                if (
-                    v->spatia >= ctx->basis_spatia + lat &&
-                    v->spatia <= ctx->columna_post
-                )
+                if (v->spatia >= ctx->basis_spatia + lat &&
+                    v->spatia <= ctx->columna_post)
                     expectata = v->spatia;
             } else {
                 expectata = ctx->basis_spatia + lat;
@@ -614,15 +530,13 @@ static void inspice_indentationem(
             if (signa[primus].genus == SIGNUM_CLAUSIO) {
                 if (profunditas > 0)
                     profunditas--;
-                expectata        = profunditas * lat;
+                expectata = profunditas * lat;
                 gradus_virtualis = 0;
             }
 
             /* applica gradum virtualem (corpus sine bracchiis) */
-            if (
-                gradus_virtualis > 0 &&
-                signa[primus].genus != SIGNUM_APERTIO
-            ) {
+            if (gradus_virtualis > 0 &&
+                signa[primus].genus != SIGNUM_APERTIO) {
                 expectata += gradus_virtualis * lat;
             }
             /* si '{' post gradum virtualem, cancellandum */
@@ -630,21 +544,17 @@ static void inspice_indentationem(
                 gradus_virtualis = 0;
 
             /* case/default: unus gradus minus */
-            if (
-                est_verbum(&signa[primus], "case") ||
-                est_verbum(&signa[primus], "default")
-            ) {
+            if (est_verbum(&signa[primus], "case") ||
+                est_verbum(&signa[primus], "default")) {
                 expectata = (profunditas > 0) ? (profunditas - 1) * lat
                                               : 0;
                 gradus_virtualis = 0;
             }
 
             /* label (verbum sequitur ':'): unus gradus minus */
-            if (
-                signa[primus].genus == SIGNUM_VERBUM &&
+            if (signa[primus].genus == SIGNUM_VERBUM &&
                 !est_verbum(&signa[primus], "case") &&
-                !est_verbum(&signa[primus], "default")
-            ) {
+                !est_verbum(&signa[primus], "default")) {
                 for (int j = primus + 1; j < v->tok_finis; j++) {
                     if (signa[j].genus == SIGNUM_SPATIUM)
                         continue;
@@ -662,49 +572,27 @@ static void inspice_indentationem(
             while (vp >= 0 && versus_vacuus(&versus[vp]))
                 vp--;
             if (vp >= 0) {
-                int ult = ultimus_significans(
-                    signa,
+                int ult = ultimus_significans(signa,
                     versus[vp].tok_initium,
-                    versus[vp].tok_finis
-                );
-                if (
-                    ult >= 0 &&
-                    (
-                        est_operator_binarius(&signa[ult]) ||
-                        est_operator(&signa[ult], "?")
-                    )
-                )
+                    versus[vp].tok_finis);
+                if (ult >= 0 &&
+                    (est_operator_binarius(&signa[ult]) ||
+                        est_operator(&signa[ult], "?")))
                     goto adiusta_statum;
             }
             /* ternarium: linea incipit cum ':' */
             if (est_operator(&signa[primus], ":"))
                 goto adiusta_statum;
-            /* concatenatio implicita chordarum: "a"\n"b"\n"c" */
-            if (signa[primus].genus == SIGNUM_CHORDA) {
-                int vp = vi - 1;
-                while (vp >= 0 && versus_vacuus(&versus[vp]))
-                    vp--;
-                if (
-                    vp >= 0 &&
-                    signa[versus[vp].tok_primus].genus == SIGNUM_CHORDA &&
-                    versus[vp].spatia == v->spatia
-                )
-                    goto adiusta_statum;
-            }
         }
 
         /* verifica */
         if (v->spatia != expectata) {
             char nuntius[NUNTIUS_MAX];
-            snprintf(
-                nuntius, sizeof(nuntius),
+            snprintf(nuntius, sizeof(nuntius),
                 "%d spatia inventa, %d expectata (prof. %d, par. %d)",
-                v->spatia, expectata, profunditas, prof_par
-            );
-            adde_fix(
-                ins, GRAVITAS_MONITUM,
-                v->numero, 0, "indentatio", nuntius, expectata
-            );
+                v->spatia, expectata, profunditas, prof_par);
+            adde_fix(ins, GRAVITAS_MONITUM,
+                v->numero, 0, "indentatio", nuntius, expectata);
         }
 
 adiusta_statum:
@@ -718,79 +606,55 @@ adiusta_statum:
                     if (profunditas > 0)
                         profunditas--;
                 }
-            } else if (
-                signa[j].genus == SIGNUM_APERTIO_PAR ||
-                signa[j].genus == SIGNUM_APERTIO_QUAD
-            ) {
+            } else if (signa[j].genus == SIGNUM_APERTIO_PAR ||
+                signa[j].genus == SIGNUM_APERTIO_QUAD) {
                 if (prof_par < CONTINUATIO_MAX) {
                     continuatio_gradus_t *ctx = &acervus[prof_par];
                     ctx->basis_spatia = v->spatia;
                     ctx->columna_post = signa[j].columna + 1;
                     ctx->modus_massa = 1;
                     for (int k = j + 1; k < v->tok_finis; k++) {
-                        if (
-                            signa[k].genus == SIGNUM_SPATIUM ||
-                            signa[k].genus == SIGNUM_COMMENTARIUM
-                        )
+                        if (signa[k].genus == SIGNUM_SPATIUM ||
+                            signa[k].genus == SIGNUM_COMMENTARIUM)
                             continue;
                         ctx->columna_post = signa[k].columna;
-                        ctx->modus_massa  = 0;
+                        ctx->modus_massa = 0;
                         break;
                     }
                     /* stilus pendens/patens: '(' debet esse ultimum signum in
                      * linea. solum parentheses '()' multilineares flagella —
                      * '[' non tractatur (subscripti fere semper unilineares). */
-                    if (
-                        (
-                            spec->ind_continuatio == 2 ||
-                            spec->ind_continuatio == 3
-                        ) &&
+                    if ((spec->ind_continuatio == 2 ||
+                        spec->ind_continuatio == 3) &&
                         signa[j].genus == SIGNUM_APERTIO_PAR &&
-                        !ctx->modus_massa
-                    ) {
+                        !ctx->modus_massa) {
                         int par_cl = quaere_par_clausam(signa, n, j);
-                        if (
-                            par_cl >= 0 &&
-                            signa[par_cl].linea != signa[j].linea
-                        ) {
-                            adde_apert(
-                                ins, GRAVITAS_MONITUM,
+                        if (par_cl >= 0 &&
+                            signa[par_cl].linea != signa[j].linea) {
+                            inspector_adde(ins, GRAVITAS_MONITUM,
                                 v->numero, signa[j].columna,
                                 "indentatio",
                                 "'(' debet esse ultimum signum"
-                                " in linea (stilus pendens/patens)",
-                                v->spatia + spec->ind_latitudo,
-                                signa[j].columna
-                            );
+                                " in linea (stilus pendens/patens)");
                         }
                     }
                 }
                 prof_par++;
-            } else if (
-                signa[j].genus == SIGNUM_CLAUSIO_PAR ||
-                signa[j].genus == SIGNUM_CLAUSIO_QUAD
-            ) {
+            } else if (signa[j].genus == SIGNUM_CLAUSIO_PAR ||
+                signa[j].genus == SIGNUM_CLAUSIO_QUAD) {
                 if (prof_par > 0) {
                     /* stilus patens: ')' debet esse primum signum in linea */
-                    if (
-                        spec->ind_continuatio == 3 &&
+                    if (spec->ind_continuatio == 3 &&
                         signa[j].genus == SIGNUM_CLAUSIO_PAR &&
-                        j != v->tok_primus
-                    ) {
+                        j != v->tok_primus) {
                         int par_ap = quaere_par_apertam(signa, j);
-                        if (
-                            par_ap >= 0 &&
-                            signa[par_ap].linea != signa[j].linea
-                        ) {
-                            int bas = acervus[prof_par - 1].basis_spatia;
-                            adde_scissio(
-                                ins, GRAVITAS_MONITUM,
+                        if (par_ap >= 0 &&
+                            signa[par_ap].linea != signa[j].linea) {
+                            inspector_adde(ins, GRAVITAS_MONITUM,
                                 v->numero, signa[j].columna,
                                 "indentatio",
                                 "')' debet esse primum signum"
-                                " in linea (stilus patens)",
-                                bas, signa[j].columna
-                            );
+                                " in linea (stilus patens)");
                         }
                     }
                     prof_par--;
@@ -801,34 +665,24 @@ adiusta_statum:
         /* determina an linea sequens debeat habere gradum virtualem */
         if (prof_par == 0 && !versus_vacuus(v)) {
             int ult = ultimus_significans(signa, v->tok_initium, v->tok_finis);
-            int habet_apertionem = linea_habet_bracchium(
-                signa,
+            int habet_apertionem = linea_habet_bracchium(signa,
                 v->tok_initium,
-                v->tok_finis
-            );
+                v->tok_finis);
 
             /* resette gradum virtualem si linea consumpsit eum */
-            if (
-                gradus_virtualis > 0 &&
+            if (gradus_virtualis > 0 &&
                 signa[primus].genus != SIGNUM_APERTIO &&
                 signa[primus].genus != SIGNUM_PRAEPROCESSOR &&
-                signa[primus].genus != SIGNUM_COMMENTARIUM
-            ) {
+                signa[primus].genus != SIGNUM_COMMENTARIUM) {
                 /* haec linea erat corpus — si non est ipsa controlum,
                  * resette; si est controlum sine bracchiis, catena */
-                int est_cont = (
-                    ult >= 0 &&
+                int est_cont = (ult >= 0 &&
                     signa[ult].genus == SIGNUM_CLAUSIO_PAR &&
-                    !habet_apertionem
-                );
-                int est_else_do = (
-                    ult >= 0 &&
-                    (
-                        est_verbum(&signa[ult], "else") ||
-                        est_verbum(&signa[ult], "do")
-                    ) &&
-                    !habet_apertionem
-                );
+                    !habet_apertionem);
+                int est_else_do = (ult >= 0 &&
+                    (est_verbum(&signa[ult], "else") ||
+                        est_verbum(&signa[ult], "do")) &&
+                    !habet_apertionem);
                 if (!est_cont && !est_else_do)
                     gradus_virtualis = 0;
             }
@@ -840,24 +694,18 @@ adiusta_statum:
                     int apertio = quaere_par_apertam(signa, ult);
                     if (apertio >= 0) {
                         int ante = prox_significans_retro(signa, apertio - 1);
-                        if (
-                            ante >= 0 &&
-                            (
-                                est_verbum(&signa[ante], "if") ||
+                        if (ante >= 0 &&
+                            (est_verbum(&signa[ante], "if") ||
                                 est_verbum(&signa[ante], "for") ||
                                 est_verbum(&signa[ante], "while") ||
-                                est_verbum(&signa[ante], "switch")
-                            )
-                        ) {
+                                est_verbum(&signa[ante], "switch"))) {
                             gradus_virtualis++;
                         }
                     }
                 }
                 /* post 'else' vel 'do' sine '{' */
-                if (
-                    est_verbum(&signa[ult], "else") ||
-                    est_verbum(&signa[ult], "do")
-                ) {
+                if (est_verbum(&signa[ult], "else") ||
+                    est_verbum(&signa[ult], "do")) {
                     gradus_virtualis++;
                 }
             }
@@ -869,12 +717,11 @@ adiusta_statum:
  * 2. SPATIA TERMINALIA — veta spatia ad finem lineae
  * ================================================================ */
 
-static void inspice_spatia_terminalia(
-    inspector_t *ins,
+static void inspice_spatia_terminalia(inspector_t *ins,
     const lexator_t *lex,
     const versus_t *versus,
-    int num_versus
-) {
+    int num_versus)
+{
     const signum_t *signa = lex->signa;
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -883,12 +730,10 @@ static void inspice_spatia_terminalia(
             continue;
         int ultimus = v->tok_finis - 1;
         if (signa[ultimus].genus == SIGNUM_SPATIUM) {
-            adde_fix(
-                ins, GRAVITAS_MONITUM,
+            adde_fix(ins, GRAVITAS_MONITUM,
                 v->numero, signa[ultimus].columna,
                 "spatia_terminalia",
-                "spatia terminalia inventa", 1
-            );
+                "spatia terminalia inventa", 1);
         }
     }
 }
@@ -897,11 +742,10 @@ static void inspice_spatia_terminalia(
  * 3. LONGITUDO LINEAE
  * ================================================================ */
 
-static void inspice_longitudinem(
-    inspector_t *ins, const lexator_t *lex,
+static void inspice_longitudinem(inspector_t *ins, const lexator_t *lex,
     const versus_t *versus, int num_versus,
-    int maxima
-) {
+    int maxima)
+{
     if (maxima <= 0)
         return;
     const signum_t *signa = lex->signa;
@@ -925,15 +769,11 @@ static void inspice_longitudinem(
         int lon = signa[ultimus].columna + eff_lon;
         if (lon > maxima) {
             char nuntius[NUNTIUS_MAX];
-            snprintf(
-                nuntius, sizeof(nuntius),
-                "linea %d columnarum (max %d)", lon, maxima
-            );
-            inspector_adde(
-                ins, GRAVITAS_MONITUM,
+            snprintf(nuntius, sizeof(nuntius),
+                "linea %d columnarum (max %d)", lon, maxima);
+            inspector_adde(ins, GRAVITAS_MONITUM,
                 v->numero, maxima,
-                "longitudo_lineae", nuntius
-            );
+                "longitudo_lineae", nuntius);
         }
     }
 }
@@ -942,11 +782,10 @@ static void inspice_longitudinem(
  * 4. LINEAE VACUAE CONSECUTIVAE
  * ================================================================ */
 
-static void inspice_lineas_vacuas(
-    inspector_t *ins,
+static void inspice_lineas_vacuas(inspector_t *ins,
     const versus_t *versus, int num_versus,
-    int maxima
-) {
+    int maxima)
+{
     if (maxima <= 0)
         return;
     int vacuae = 0;
@@ -956,16 +795,12 @@ static void inspice_lineas_vacuas(
         } else {
             if (vacuae > maxima) {
                 char nuntius[NUNTIUS_MAX];
-                snprintf(
-                    nuntius, sizeof(nuntius),
+                snprintf(nuntius, sizeof(nuntius),
                     "%d lineae vacuae consecutivae (max %d)",
-                    vacuae, maxima
-                );
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                    vacuae, maxima);
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     versus[vi].numero, 0,
-                    "lineae_vacuae", nuntius
-                );
+                    "lineae_vacuae", nuntius);
             }
             vacuae = 0;
         }
@@ -983,12 +818,10 @@ static void inspice_finem(inspector_t *ins, const lexator_t *lex)
         return;
     /* ultimum signum est FINIS; inspice penultimum */
     if (lex->signa[n - 2].genus != SIGNUM_LINEA_NOVA) {
-        inspector_adde(
-            ins, GRAVITAS_MONITUM,
+        inspector_adde(ins, GRAVITAS_MONITUM,
             lex->signa[n - 1].linea, 0,
             "finis_lineae",
-            "fasciculus non finit cum linea nova"
-        );
+            "fasciculus non finit cum linea nova");
     }
 }
 
@@ -996,10 +829,9 @@ static void inspice_finem(inspector_t *ins, const lexator_t *lex)
  * 6. TABULAE ET SPATIA MIXTAE
  * ================================================================ */
 
-static void inspice_tabulas_mixtas(
-    inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
-) {
+static void inspice_tabulas_mixtas(inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus)
+{
     const signum_t *signa = lex->signa;
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -1009,18 +841,16 @@ static void inspice_tabulas_mixtas(
         if (signa[v->tok_initium].genus != SIGNUM_SPATIUM)
             continue;
         const signum_t *sp = &signa[v->tok_initium];
-        int habet_tab      = 0, habet_sp = 0;
+        int habet_tab = 0, habet_sp = 0;
         for (int k = 0; k < sp->longitudo; k++) {
             if (sp->initium[k] == '\t') habet_tab = 1;
             if (sp->initium[k] == ' ')  habet_sp = 1;
         }
         if (habet_tab && habet_sp) {
-            inspector_adde(
-                ins, GRAVITAS_MONITUM,
+            inspector_adde(ins, GRAVITAS_MONITUM,
                 v->numero, 0,
                 "tabulae_mixtae",
-                "tabulae et spatia mixta in indentatione"
-            );
+                "tabulae et spatia mixta in indentatione");
         }
     }
 }
@@ -1029,10 +859,9 @@ static void inspice_tabulas_mixtas(
  * 7. SPATIA POST VERBA CLAVIS
  * ================================================================ */
 
-static void inspice_spatia_verborum(
-    inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
-) {
+static void inspice_spatia_verborum(inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus)
+{
     const signum_t *signa = lex->signa;
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -1047,30 +876,22 @@ static void inspice_spatia_verborum(
             /* si sequens est '(' directe sine spatio */
             if (signa[seq].genus == SIGNUM_APERTIO_PAR) {
                 char nuntius[NUNTIUS_MAX];
-                snprintf(
-                    nuntius, sizeof(nuntius),
+                snprintf(nuntius, sizeof(nuntius),
                     "spatium requiritur post '%.*s'",
-                    signa[j].longitudo, signa[j].initium
-                );
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                    signa[j].longitudo, signa[j].initium);
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[j].linea, signa[j].columna,
-                    "spatium_verbum", nuntius
-                );
+                    "spatium_verbum", nuntius);
             }
             /* si 'return' sequitur expressio sine spatio (non '(') */
-            else if (
-                est_verbum(&signa[j], "return") &&
+            else if (est_verbum(&signa[j], "return") &&
                 signa[seq].genus != SIGNUM_SPATIUM &&
                 signa[seq].genus != SIGNUM_SEMICOLON &&
-                signa[seq].genus != SIGNUM_LINEA_NOVA
-            ) {
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                signa[seq].genus != SIGNUM_LINEA_NOVA) {
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[j].linea, signa[j].columna,
                     "spatium_verbum",
-                    "spatium requiritur post 'return'"
-                );
+                    "spatium requiritur post 'return'");
             }
         }
     }
@@ -1080,10 +901,9 @@ static void inspice_spatia_verborum(
  * 8. SPATIA CIRCA OPERATORES BINARIOS
  * ================================================================ */
 
-static void inspice_spatia_operatorum(
-    inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
-) {
+static void inspice_spatia_operatorum(inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus)
+{
     const signum_t *signa = lex->signa;
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -1093,41 +913,29 @@ static void inspice_spatia_operatorum(
                 continue;
 
             /* inspice spatium ante operatorem */
-            if (
-                j > v->tok_initium &&
-                signa[j - 1].genus != SIGNUM_SPATIUM
-            ) {
+            if (j > v->tok_initium &&
+                signa[j - 1].genus != SIGNUM_SPATIUM) {
                 char nuntius[NUNTIUS_MAX];
-                snprintf(
-                    nuntius, sizeof(nuntius),
+                snprintf(nuntius, sizeof(nuntius),
                     "spatium requiritur ante '%.*s'",
-                    signa[j].longitudo, signa[j].initium
-                );
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                    signa[j].longitudo, signa[j].initium);
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[j].linea, signa[j].columna,
-                    "spatium_operator", nuntius
-                );
+                    "spatium_operator", nuntius);
             }
 
             /* inspice spatium post operatorem */
             int seq = j + 1;
-            if (
-                seq < v->tok_finis &&
+            if (seq < v->tok_finis &&
                 signa[seq].genus != SIGNUM_SPATIUM &&
-                signa[seq].genus != SIGNUM_LINEA_NOVA
-            ) {
+                signa[seq].genus != SIGNUM_LINEA_NOVA) {
                 char nuntius[NUNTIUS_MAX];
-                snprintf(
-                    nuntius, sizeof(nuntius),
+                snprintf(nuntius, sizeof(nuntius),
                     "spatium requiritur post '%.*s'",
-                    signa[j].longitudo, signa[j].initium
-                );
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                    signa[j].longitudo, signa[j].initium);
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[j].linea, signa[j].columna,
-                    "spatium_operator", nuntius
-                );
+                    "spatium_operator", nuntius);
             }
         }
     }
@@ -1137,10 +945,9 @@ static void inspice_spatia_operatorum(
  * 9. SPATIA POST VIRGULAM
  * ================================================================ */
 
-static void inspice_virgulas(
-    inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
-) {
+static void inspice_virgulas(inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus)
+{
     const signum_t *signa = lex->signa;
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -1150,31 +957,23 @@ static void inspice_virgulas(
                 continue;
 
             /* spatium ante virgulam non debet esse */
-            if (
-                j > v->tok_initium &&
-                signa[j - 1].genus == SIGNUM_SPATIUM
-            ) {
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+            if (j > v->tok_initium &&
+                signa[j - 1].genus == SIGNUM_SPATIUM) {
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[j].linea, signa[j].columna,
                     "spatium_virgula",
-                    "spatium non debet esse ante virgulam"
-                );
+                    "spatium non debet esse ante virgulam");
             }
 
             /* spatium post virgulam debet esse */
             int seq = j + 1;
-            if (
-                seq < v->tok_finis &&
+            if (seq < v->tok_finis &&
                 signa[seq].genus != SIGNUM_SPATIUM &&
-                signa[seq].genus != SIGNUM_LINEA_NOVA
-            ) {
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                signa[seq].genus != SIGNUM_LINEA_NOVA) {
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[j].linea, signa[j].columna,
                     "spatium_virgula",
-                    "spatium requiritur post virgulam"
-                );
+                    "spatium requiritur post virgulam");
             }
         }
     }
@@ -1184,10 +983,9 @@ static void inspice_virgulas(
  * 10. SPATIA ANTE SEMICOLON
  * ================================================================ */
 
-static void inspice_semicolona(
-    inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
-) {
+static void inspice_semicolona(inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus)
+{
     const signum_t *signa = lex->signa;
 
     for (int vi = 0; vi < num_versus; vi++) {
@@ -1202,26 +1000,18 @@ static void inspice_semicolona(
 
             /* exceptio: for ( ; ; ) — praecedentia '(' vel ';' */
             int ante = j - 2;
-            while (
-                ante >= v->tok_initium &&
-                signa[ante].genus == SIGNUM_SPATIUM
-            )
+            while (ante >= v->tok_initium &&
+                signa[ante].genus == SIGNUM_SPATIUM)
                 ante--;
-            if (
-                ante >= v->tok_initium &&
-                (
-                    signa[ante].genus == SIGNUM_APERTIO_PAR ||
-                    signa[ante].genus == SIGNUM_SEMICOLON
-                )
-            )
+            if (ante >= v->tok_initium &&
+                (signa[ante].genus == SIGNUM_APERTIO_PAR ||
+                    signa[ante].genus == SIGNUM_SEMICOLON))
                 continue;
 
-            inspector_adde(
-                ins, GRAVITAS_MONITUM,
+            inspector_adde(ins, GRAVITAS_MONITUM,
                 signa[j].linea, signa[j].columna,
                 "spatium_semicolon",
-                "spatium non debet esse ante semicolon"
-            );
+                "spatium non debet esse ante semicolon");
         }
     }
 }
@@ -1230,10 +1020,9 @@ static void inspice_semicolona(
  * 11. CUBITUS CONIUNCTUS (cuddled else)
  * ================================================================ */
 
-static void inspice_cubitum(
-    inspector_t *ins, const lexator_t *lex,
-    const speculum_t *spec
-) {
+static void inspice_cubitum(inspector_t *ins, const lexator_t *lex,
+    const speculum_t *spec)
+{
     int n = lex->num_signa;
     const signum_t *signa = lex->signa;
 
@@ -1261,20 +1050,16 @@ static void inspice_cubitum(
             continue;
 
         if (spec->bra_else_coniunctum && linea_nova_inter) {
-            inspector_adde(
-                ins, GRAVITAS_MONITUM,
+            inspector_adde(ins, GRAVITAS_MONITUM,
                 signa[i].linea, signa[i].columna,
                 "cubitus",
-                "'else' debet esse in eadem linea ac '}'"
-            );
+                "'else' debet esse in eadem linea ac '}'");
         }
         if (!spec->bra_else_coniunctum && !linea_nova_inter) {
-            inspector_adde(
-                ins, GRAVITAS_MONITUM,
+            inspector_adde(ins, GRAVITAS_MONITUM,
                 signa[i].linea, signa[i].columna,
                 "cubitus",
-                "'else' debet esse in nova linea post '}'"
-            );
+                "'else' debet esse in nova linea post '}'");
         }
     }
 }
@@ -1296,10 +1081,8 @@ static int est_bracchium_controli(const signum_t *signa, int idx_apertio)
         return 0;
 
     /* directe post else vel do */
-    if (
-        est_verbum(&signa[ante], "else") ||
-        est_verbum(&signa[ante], "do")
-    )
+    if (est_verbum(&signa[ante], "else") ||
+        est_verbum(&signa[ante], "do"))
         return 1;
 
     /* post ')' — debemus inspicere an parenthesis pertineat ad controlum */
@@ -1311,12 +1094,10 @@ static int est_bracchium_controli(const signum_t *signa, int idx_apertio)
         if (ante_par < 0)
             return 0;
         /* si verbum clavis controli praecedit '(' */
-        if (
-            est_verbum(&signa[ante_par], "if") ||
+        if (est_verbum(&signa[ante_par], "if") ||
             est_verbum(&signa[ante_par], "for") ||
             est_verbum(&signa[ante_par], "while") ||
-            est_verbum(&signa[ante_par], "switch")
-        )
+            est_verbum(&signa[ante_par], "switch"))
             return 1;
         /* aliter est functio */
         return 0;
@@ -1324,10 +1105,9 @@ static int est_bracchium_controli(const signum_t *signa, int idx_apertio)
     return 0;
 }
 
-static void inspice_bracchia_stilum(
-    inspector_t *ins, const lexator_t *lex,
-    const speculum_t *spec
-) {
+static void inspice_bracchia_stilum(inspector_t *ins, const lexator_t *lex,
+    const speculum_t *spec)
+{
     int n = lex->num_signa;
     const signum_t *signa = lex->signa;
 
@@ -1347,38 +1127,30 @@ static void inspice_bracchia_stilum(
 
         if (controlum) {
             if (spec->bra_stilus == 0 && linea_nova) {
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[i].linea, signa[i].columna,
                     "bracchia_stilus",
-                    "'{' debet esse in eadem linea (stilus K&R)"
-                );
+                    "'{' debet esse in eadem linea (stilus K&R)");
             }
             if (spec->bra_stilus == 1 && !linea_nova) {
-                inspector_adde(
-                    ins, GRAVITAS_MONITUM,
+                inspector_adde(ins, GRAVITAS_MONITUM,
                     signa[i].linea, signa[i].columna,
                     "bracchia_stilus",
-                    "'{' debet esse in nova linea (stilus Allman)"
-                );
+                    "'{' debet esse in nova linea (stilus Allman)");
             }
         } else {
             /* functiones et struct/enum: in Allman, in nova linea */
             if (spec->bra_stilus == 1 && !linea_nova) {
                 /* si praecedentia est ')' vel verbum declarativum */
-                if (
-                    signa[ante].genus == SIGNUM_CLAUSIO_PAR ||
+                if (signa[ante].genus == SIGNUM_CLAUSIO_PAR ||
                     est_verbum(&signa[ante], "struct") ||
                     est_verbum(&signa[ante], "union") ||
-                    est_verbum(&signa[ante], "enum")
-                ) {
-                    inspector_adde(
-                        ins, GRAVITAS_MONITUM,
+                    est_verbum(&signa[ante], "enum")) {
+                    inspector_adde(ins, GRAVITAS_MONITUM,
                         signa[i].linea, signa[i].columna,
                         "bracchia_stilus",
                         "'{' debet esse in nova linea "
-                        "(stilus Allman)"
-                    );
+                        "(stilus Allman)");
                 }
             }
             /* K&R: functiones in nova linea — permittimus */
@@ -1390,10 +1162,9 @@ static void inspice_bracchia_stilum(
  * 13. BRACCHIA NECESSARIA (post if/for/while/else)
  * ================================================================ */
 
-static void inspice_bracchia_necessaria(
-    inspector_t *ins,
-    const lexator_t *lex
-) {
+static void inspice_bracchia_necessaria(inspector_t *ins,
+    const lexator_t *lex)
+{
     int n = lex->num_signa;
     const signum_t *signa = lex->signa;
 
@@ -1402,12 +1173,10 @@ static void inspice_bracchia_necessaria(
         int post_idx = -1;
 
         /* if (...), for (...), while (...), switch (...) */
-        if (
-            est_verbum(&signa[i], "if") ||
+        if (est_verbum(&signa[i], "if") ||
             est_verbum(&signa[i], "for") ||
             est_verbum(&signa[i], "while") ||
-            est_verbum(&signa[i], "switch")
-        ) {
+            est_verbum(&signa[i], "switch")) {
 
             /* quaere '(' */
             int par_ap = prox_significans(signa, n, i + 1);
@@ -1451,16 +1220,12 @@ static void inspice_bracchia_necessaria(
 
         if (signa[post_idx].genus != SIGNUM_APERTIO) {
             char nuntius[NUNTIUS_MAX];
-            snprintf(
-                nuntius, sizeof(nuntius),
+            snprintf(nuntius, sizeof(nuntius),
                 "bracchia necessaria post '%.*s'",
-                signa[i].longitudo, signa[i].initium
-            );
-            inspector_adde(
-                ins, GRAVITAS_MONITUM,
+                signa[i].longitudo, signa[i].initium);
+            inspector_adde(ins, GRAVITAS_MONITUM,
                 signa[i].linea, signa[i].columna,
-                "bracchia_necessaria", nuntius
-            );
+                "bracchia_necessaria", nuntius);
         }
     }
 }
@@ -1469,10 +1234,9 @@ static void inspice_bracchia_necessaria(
  * insinulint_lege_inspice — pipeline communis: lege, lexa, inspice
  * ================================================================ */
 
-int insinulint_lege_inspice(
-    const char *via, const speculum_t *spec,
-    inspector_t *ins, char **fons_out
-) {
+int insinulint_lege_inspice(const char *via, const speculum_t *spec,
+    inspector_t *ins, char **fons_out)
+{
     char *fons = ison_lege_plicam(via);
     if (!fons) {
         fprintf(stderr, "insinulint: non possum legere '%s'\n", via);
@@ -1496,163 +1260,12 @@ int insinulint_lege_inspice(
 }
 
 /* ================================================================
- * 14. ADTRIBUTIONES COLINEATAE
- * ================================================================ */
-
-/* turba maxima permissa inter columnas '=' in grege */
-#define COLINEATIO_TURBA_MAX 8
-
-/*
- * est_adtributio — 1 si linea est adtributio simplex cum '=' et ';'.
- * excludit lineas vacuas, praeprocessorem, commentaria,
- * verba clavis structuralia, et lineas cum '{' vel '}'.
- */
-static int est_adtributio(const signum_t *signa, const versus_t *v)
-{
-    if (versus_vacuus(v))
-        return 0;
-    int primus = v->tok_primus;
-    if (
-        signa[primus].genus == SIGNUM_PRAEPROCESSOR ||
-        signa[primus].genus == SIGNUM_COMMENTARIUM
-    )
-        return 0;
-    static const char *prohibita[] = {
-        "if", "else", "for", "while", "switch", "do",
-        "return", "break", "continue", "goto", "case", "default",
-        "struct", "union", "enum", "typedef", NULL
-    };
-    for (int k = 0; prohibita[k]; k++)
-        if (est_verbum(&signa[primus], prohibita[k]))
-            return 0;
-    int aequale   = 0;
-    int semicolon = 0;
-    for (int j = v->tok_initium; j < v->tok_finis; j++) {
-        if (
-            signa[j].genus == SIGNUM_APERTIO ||
-            signa[j].genus == SIGNUM_CLAUSIO
-        )
-            return 0;
-        if (signa[j].genus == SIGNUM_SEMICOLON)
-            semicolon = 1;
-        if (
-            !aequale &&
-            signa[j].genus == SIGNUM_OPERATOR &&
-            signa[j].longitudo == 1 &&
-            signa[j].initium[0] == '='
-        )
-            aequale = 1;
-    }
-    return aequale && semicolon;
-}
-
-/* inveni indicem signi '=' simplicis in linea */
-static int inveni_aequale(const signum_t *signa, const versus_t *v)
-{
-    for (int j = v->tok_initium; j < v->tok_finis; j++) {
-        if (
-            signa[j].genus == SIGNUM_OPERATOR &&
-            signa[j].longitudo == 1 &&
-            signa[j].initium[0] == '='
-        )
-            return j;
-    }
-    return -1;
-}
-
-/*
- * columna_naturalis — columna ubi '=' esse debet cum uno spatio post LHS.
- * reddit -1 si non determinari potest.
- */
-static int columna_naturalis(
-    const signum_t *signa, const versus_t *v, int idx_aeq
-) {
-    int prev = idx_aeq - 1;
-    while (prev >= v->tok_initium && signa[prev].genus == SIGNUM_SPATIUM)
-        prev--;
-    if (prev < v->tok_initium)
-        return -1;
-    return signa[prev].columna + signa[prev].longitudo + 1;
-}
-
-static void inspice_adtributiones_colineatas(
-    inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
-) {
-    const signum_t *signa = lex->signa;
-
-    int vi = 0;
-    while (vi < num_versus) {
-        /* salta lineas non-adtributiones */
-        while (vi < num_versus && !est_adtributio(signa, &versus[vi]))
-            vi++;
-        if (vi >= num_versus)
-            break;
-
-        /* aedifica gregem linearum adtributionis consecutivarum */
-        int gi = vi;
-        while (vi < num_versus && est_adtributio(signa, &versus[vi]))
-            vi++;
-        int gf = vi;  /* exclusive */
-
-        if (gf - gi < 2)
-            continue;
-
-        /* inveni columnas naturales (LHS finis + 1 spatium) */
-        int nat_max = 0;
-        int nat_min = -1;
-        for (int k = gi; k < gf; k++) {
-            int idx = inveni_aequale(signa, &versus[k]);
-            if (idx < 0)
-                continue;
-            int nc = columna_naturalis(signa, &versus[k], idx);
-            if (nc < 0)
-                continue;
-            if (nat_min < 0 || nc < nat_min) nat_min = nc;
-            if (nc > nat_max)                nat_max = nc;
-        }
-
-        if (nat_min < 0)
-            continue;
-
-        /* turba nimia inter LHS: transili gregem */
-        if (nat_max - nat_min > COLINEATIO_TURBA_MAX)
-            continue;
-
-        /* emitte monita pro lineis non in columna petita */
-        for (int k = gi; k < gf; k++) {
-            const versus_t *v = &versus[k];
-            int idx = inveni_aequale(signa, v);
-            if (idx < 0)
-                continue;
-            int col = signa[idx].columna;
-            if (col == nat_max)
-                continue;
-            char nuntius[NUNTIUS_MAX];
-            snprintf(
-                nuntius, sizeof(nuntius),
-                "'=' in columna %d, expectatur %d",
-                col, nat_max
-            );
-            /* fix_valor = columna petita (non delta) */
-            adde_fix(
-                ins, GRAVITAS_MONITUM,
-                v->numero, col,
-                "adtributio_colineata", nuntius,
-                nat_max
-            );
-        }
-    }
-}
-
-/* ================================================================
  * inspice_omnia — orchestrator inspectionum
  * ================================================================ */
 
-void inspice_omnia(
-    inspector_t *ins, const lexator_t *lex,
-    const speculum_t *spec
-) {
+void inspice_omnia(inspector_t *ins, const lexator_t *lex,
+    const speculum_t *spec)
+{
     /* aedifica tabulam versuum */
     versus_t *versus = malloc((size_t)VERSUS_MAX * sizeof(versus_t));
     if (!versus)
@@ -1707,10 +1320,6 @@ void inspice_omnia(
     /* 13. bracchia necessaria */
     if (spec->bra_necessaria)
         inspice_bracchia_necessaria(ins, lex);
-
-    /* 14. adtributiones colineatae */
-    if (spec->spa_adtributio_colineata)
-        inspice_adtributiones_colineatas(ins, lex, versus, nv);
 
     free(versus);
 }

@@ -85,12 +85,15 @@ int correctio_age(const char *via, const speculum_t *spec)
     int *split_ind = malloc((size_t)(nlin + 1) * sizeof(int));
     int *apert_col = malloc((size_t)(nlin + 1) * sizeof(int));
     int *apert_ind = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *equ_col   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *equ_spa   = malloc((size_t)(nlin + 1) * sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
-        !apert_col || !apert_ind
+        !apert_col || !apert_ind || !equ_col || !equ_spa
     ) {
         free(fons); free(lineae); free(ind_exp); free(trim_fin);
         free(split_col); free(split_ind); free(apert_col); free(apert_ind);
+        free(equ_col); free(equ_spa);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -99,6 +102,8 @@ int correctio_age(const char *via, const speculum_t *spec)
         split_ind[i] = 0;
         apert_col[i] = -1;
         apert_ind[i] = 0;
+        equ_col[i]   = -1;
+        equ_spa[i]   = 0;
     }
 
     /* popula tabulam ex monitis */
@@ -126,12 +131,17 @@ int correctio_age(const char *via, const speculum_t *spec)
             }
         } else if (strcmp(m->regula, "spatia_terminalia") == 0) {
             trim_fin[li] = 1;
+        } else if (strcmp(m->regula, "adtributio_colineata") == 0) {
+            if (m->fix_valor >= 0 && equ_col[li] < 0) {
+                equ_col[li] = m->columna;
+                equ_spa[li] = m->fix_valor - m->columna; /* delta */
+            }
         }
     }
 
     /* alloca buffer exitus (extra spatium pro scissionibus) */
     size_t outsz = fons_lon * 2 + (size_t)nlin * 64 + 4;
-    char *out = malloc(outsz);
+    char *out    = malloc(outsz);
     if (!out) {
         free(fons); free(lineae); free(ind_exp); free(trim_fin);
         return -1;
@@ -309,6 +319,30 @@ int correctio_age(const char *via, const speculum_t *spec)
                 corp_lon--;
         }
 
+        /* adtributio colineata: adiusta spatia ante '=' */
+        if (equ_col[i] >= 0) {
+            int eq_off = equ_col[i] - sp_init;
+            int delta  = equ_spa[i];
+            if (eq_off < 0)        eq_off = 0;
+            if (eq_off > corp_lon) eq_off = corp_lon;
+            if (delta >= 0) {
+                /* insere delta spatia ante '=' */
+                memcpy(wp, corpus, eq_off);
+                wp += eq_off;
+                for (int j = 0; j < delta; j++) *wp++ = ' ';
+            } else {
+                /* remove -delta spatia ante '=' */
+                int new_off = eq_off + delta;
+                if (new_off < 0) new_off = 0;
+                memcpy(wp, corpus, new_off);
+                wp += new_off;
+            }
+            memcpy(wp, corpus + eq_off, corp_lon - eq_off);
+            wp += corp_lon - eq_off;
+            *wp++ = '\n';
+            continue;
+        }
+
         memcpy(wp, corpus, corp_lon);
         wp += corp_lon;
         *wp++ = '\n';
@@ -342,6 +376,8 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(split_ind);
     free(apert_col);
     free(apert_ind);
+    free(equ_col);
+    free(equ_spa);
     free(out);
     return res;
 }
