@@ -78,7 +78,9 @@ typedef struct {
     int         columna;
     char        nuntius[NUNTIUS_MAX];
     char        regula[64];
-    int         fix_valor;    /* valor pro correctione (0 = non fixabile) */
+    int         fix_valor;      /* -1 = non fixabile; >= 0 = spatia */
+    int         split_columna;  /* -1 = non; >= 0 = columna ')' */
+    int         apert_columna;  /* -1 = non; >= 0 = columna '(' */
 } monitum_t;
 
 /* ================================================================
@@ -94,8 +96,10 @@ typedef struct {
 } inspector_t;
 
 void inspector_initia(inspector_t *ins, const char *via);
-void inspector_adde(inspector_t *ins, gravitas_t g, int linea, int columna,
-                    const char *regula, const char *nuntius);
+void inspector_adde(
+    inspector_t *ins, gravitas_t g, int linea, int columna,
+    const char *regula, const char *nuntius
+);
 int  inspector_scribe(const inspector_t *ins);
 
 /* ================================================================
@@ -133,16 +137,20 @@ int speculum_lege(speculum_t *spec, const char *via);
  * inspectio integra
  * ================================================================ */
 
-void inspice_omnia(inspector_t *ins, const lexator_t *lex,
-                   const speculum_t *spec);
+void inspice_omnia(
+    inspector_t *ins, const lexator_t *lex,
+    const speculum_t *spec
+);
 
 /*
  * insinulint_lege_inspice — lege plicam, lexa, inspice.
  * ins popula; *fons_out adtribuitur (vocans per free() liberat).
  * reddit 0 si bene, -1 si error.
  */
-int insinulint_lege_inspice(const char *via, const speculum_t *spec,
-                            inspector_t *ins, char **fons_out);
+int insinulint_lege_inspice(
+    const char *via, const speculum_t *spec,
+    inspector_t *ins, char **fons_out
+);
 
 int insinulint_inspice(const char *via_fontis, const speculum_t *spec);
 

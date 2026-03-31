@@ -24,9 +24,10 @@ typedef struct {
     int         lon;
 } linea_t;
 
-static int scinde_in_lineas(const char *fons, size_t fons_lon,
-                             linea_t *lineae, int max_lineae)
-{
+static int scinde_in_lineas(
+    const char *fons, size_t fons_lon,
+    linea_t *lineae, int max_lineae
+) {
     int n = 0;
     const char *p   = fons;
     const char *fin = fons + fons_lon;
@@ -78,13 +79,27 @@ int correctio_age(const char *via, const speculum_t *spec)
     int nlin = scinde_in_lineas(fons, fons_lon, lineae, nlin_max);
 
     /* construi tabulam correctionum (per lineam, 0-basis) */
-    int *ind_exp  = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *trim_fin = calloc((size_t)(nlin + 1), sizeof(int));
-    if (!ind_exp || !trim_fin) {
+    int *ind_exp   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *trim_fin  = calloc((size_t)(nlin + 1), sizeof(int));
+    int *split_col = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *split_ind = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *apert_col = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *apert_ind = malloc((size_t)(nlin + 1) * sizeof(int));
+    if (
+        !ind_exp || !trim_fin || !split_col || !split_ind ||
+        !apert_col || !apert_ind
+    ) {
         free(fons); free(lineae); free(ind_exp); free(trim_fin);
+        free(split_col); free(split_ind); free(apert_col); free(apert_ind);
         return -1;
     }
-    for (int i = 0; i <= nlin; i++) ind_exp[i] = -1;
+    for (int i = 0; i <= nlin; i++) {
+        ind_exp[i]   = -1;
+        split_col[i] = -1;
+        split_ind[i] = 0;
+        apert_col[i] = -1;
+        apert_ind[i] = 0;
+    }
 
     /* popula tabulam ex monitis */
     for (int i = 0; i < ins.num_monita; i++) {
@@ -92,17 +107,30 @@ int correctio_age(const char *via, const speculum_t *spec)
         int li = m->linea - 1;  /* 0-basis */
         if (li < 0 || li >= nlin) continue;
 
-        if (strcmp(m->regula, "indentatio") == 0 && m->fix_valor >= 0) {
-            /* si plura monita in eadem linea, primum vincit */
-            if (ind_exp[li] < 0)
+        if (strcmp(m->regula, "indentatio") == 0) {
+            if (m->apert_columna >= 0) {
+                /* scissio: contentum post '(' ad lineam novam */
+                if (apert_col[li] < 0) {
+                    apert_col[li] = m->apert_columna;
+                    apert_ind[li] = (m->fix_valor >= 0) ? m->fix_valor : 0;
+                }
+            } else if (m->split_columna >= 0) {
+                /* scissio: ')' ad lineam novam */
+                if (split_col[li] < 0) {
+                    split_col[li] = m->split_columna;
+                    split_ind[li] = (m->fix_valor >= 0) ? m->fix_valor : 0;
+                }
+            } else if (m->fix_valor >= 0 && ind_exp[li] < 0) {
+                /* correctio indentationis normalis */
                 ind_exp[li] = m->fix_valor;
+            }
         } else if (strcmp(m->regula, "spatia_terminalia") == 0) {
             trim_fin[li] = 1;
         }
     }
 
-    /* alloca buffer exitus */
-    size_t outsz = fons_lon * 2 + (size_t)nlin * 32 + 4;
+    /* alloca buffer exitus (extra spatium pro scissionibus) */
+    size_t outsz = fons_lon * 2 + (size_t)nlin * 64 + 4;
     char *out = malloc(outsz);
     if (!out) {
         free(fons); free(lineae); free(ind_exp); free(trim_fin);
@@ -127,8 +155,10 @@ int correctio_age(const char *via, const speculum_t *spec)
 
         /* mensura spatia initialia originalia */
         int sp_init = 0;
-        while (sp_init < l->lon &&
-               (l->initium[sp_init] == ' ' || l->initium[sp_init] == '\t'))
+        while (
+            sp_init < l->lon &&
+            (l->initium[sp_init] == ' ' || l->initium[sp_init] == '\t')
+        )
             sp_init++;
 
         /* scribe indentationem (correctionis vel originalem) */
@@ -146,14 +176,136 @@ int correctio_age(const char *via, const speculum_t *spec)
         }
 
         /* contentum post indentationem */
-        const char *corpus  = l->initium + sp_init;
+        const char *corpus   = l->initium + sp_init;
         int         corp_lon = l->lon - sp_init;
+
+        /* scissio: contentum post '(' ad lineam novam (stilus patens) */
+        if (apert_col[i] >= 0) {
+            int par_byte = apert_col[i] - sp_init;  /* offset '(' in corpus */
+            if (par_byte < 0) par_byte = 0;
+            if (par_byte >= corp_lon) par_byte = corp_lon - 1;
+
+            /* pars 1: contentum usque ad '(' inclusive */
+            int ante_lon = par_byte + 1;
+            memcpy(wp, corpus, ante_lon);
+            wp += ante_lon;
+            *wp++ = '\n';
+
+            /* pars 2: contentum post '(' in linea nova cum indentatio nova */
+            int ai = apert_ind[i];
+            for (int j = 0; j < ai; j++) *wp++ = ' ';
+
+            const char *rest     = corpus + ante_lon;
+            int         rest_lon = corp_lon - ante_lon;
+            /* salta spatia initialia post '(' */
+            while (
+                rest_lon > 0 &&
+                (rest[0] == ' ' || rest[0] == '\t')
+            ) {
+                rest++;
+                rest_lon--;
+            }
+            /* remove spatia terminalia */
+            while (
+                rest_lon > 0 &&
+                (
+                    rest[rest_lon - 1] == ' ' ||
+                    rest[rest_lon - 1] == '\t'
+                )
+            )
+                rest_lon--;
+
+            memcpy(wp, rest, rest_lon);
+            wp += rest_lon;
+            *wp++ = '\n';
+            continue;
+        }
+
+        /* scissio: ')' ad lineam novam (stilus patens) */
+        if (split_col[i] >= 0) {
+            /* byte offset ')' in linea (columna == byte pro spatiis) */
+            int par_byte = split_col[i];
+            int ante_lon = par_byte - sp_init;  /* bytes ante ')' */
+            if (ante_lon < 0) ante_lon = 0;
+            if (ante_lon > corp_lon) ante_lon = corp_lon;
+
+            /* pars 1: contentum ante ')' */
+            while (
+                ante_lon > 0 &&
+                (
+                    corpus[ante_lon - 1] == ' ' ||
+                    corpus[ante_lon - 1] == '\t'
+                )
+            )
+                ante_lon--;
+            memcpy(wp, corpus, ante_lon);
+            wp += ante_lon;
+            *wp++ = '\n';
+
+            /* pars 2: ')' et residuum in linea nova */
+            int si = split_ind[i];
+            for (int j = 0; j < si; j++) *wp++ = ' ';
+
+            const char *rest     = l->initium + par_byte;
+            int         rest_lon = l->lon - par_byte;
+            while (
+                rest_lon > 0 &&
+                (
+                    rest[rest_lon - 1] == ' ' ||
+                    rest[rest_lon - 1] == '\t'
+                )
+            )
+                rest_lon--;
+
+            /* si residuum est solum ')' et linea proxima est '{',
+             * iunge in ') {' */
+            int prox_apertio = 0;
+            if (rest_lon == 1 && rest[0] == ')' && i + 1 < nlin) {
+                const linea_t *ln = &lineae[i + 1];
+                int k = 0;
+                while (
+                    k < ln->lon &&
+                    (
+                        ln->initium[k] == ' ' ||
+                        ln->initium[k] == '\t'
+                    )
+                )
+                    k++;
+                if (k < ln->lon && ln->initium[k] == '{') {
+                    int m2 = k + 1;
+                    while (
+                        m2 < ln->lon &&
+                        (
+                            ln->initium[m2] == ' ' ||
+                            ln->initium[m2] == '\t'
+                        )
+                    )
+                        m2++;
+                    if (m2 == ln->lon)
+                        prox_apertio = 1;
+                }
+            }
+
+            memcpy(wp, rest, rest_lon);
+            wp += rest_lon;
+            if (prox_apertio) {
+                *wp++ = ' ';
+                *wp++ = '{';
+                i++;  /* transili lineam '{' */
+            }
+            *wp++ = '\n';
+            continue;
+        }
 
         /* remove spatia terminalia si opus est */
         if (trim_fin[i]) {
-            while (corp_lon > 0 &&
-                   (corpus[corp_lon - 1] == ' ' ||
-                    corpus[corp_lon - 1] == '\t'))
+            while (
+                corp_lon > 0 &&
+                (
+                    corpus[corp_lon - 1] == ' ' ||
+                    corpus[corp_lon - 1] == '\t'
+                )
+            )
                 corp_lon--;
         }
 
@@ -186,6 +338,10 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(lineae);
     free(ind_exp);
     free(trim_fin);
+    free(split_col);
+    free(split_ind);
+    free(apert_col);
+    free(apert_ind);
     free(out);
     return res;
 }

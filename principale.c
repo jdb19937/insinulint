@@ -33,7 +33,8 @@ int insinulint_inspice(const char *via_fontis, const speculum_t *spec)
 
 static void auxilium(void)
 {
-    fprintf(stderr,
+    fprintf(
+        stderr,
         "Usus: insinulint [-s speculum.ison] [-c] fasciculus.c [...]\n"
         "\n"
         "Optiones:\n"
@@ -123,8 +124,10 @@ int main(int argc, char **argv)
 
     /* epilogus */
     if (summa_monitorum > 0) {
-        fprintf(stderr, "\ninsinulint: %d monita inventa.\n",
-                summa_monitorum);
+        fprintf(
+            stderr, "\ninsinulint: %d monita inventa.\n",
+            summa_monitorum
+        );
         return 1;
     }
 

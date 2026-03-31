@@ -15,18 +15,21 @@
  * auxiliaria interna
  * ---------------------------------------------------------------- */
 
-static int lex_adde(lexator_t *lex, signum_genus_t genus,
-                    int linea, int columna,
-                    const char *initium, int longitudo)
-{
+static int lex_adde(
+    lexator_t *lex, signum_genus_t genus,
+    int linea, int columna,
+    const char *initium, int longitudo
+) {
     if (lex->num_signa >= lex->capacitas) {
         int nova_cap = lex->capacitas * 2;
         if (nova_cap > SIGNA_MAX)
             nova_cap = SIGNA_MAX;
         if (lex->num_signa >= nova_cap)
             return -1;
-        signum_t *nova = realloc(lex->signa,
-                                 (size_t)nova_cap * sizeof(signum_t));
+        signum_t *nova = realloc(
+            lex->signa,
+            (size_t)nova_cap * sizeof(signum_t)
+        );
         if (!nova) return -1;
         lex->signa = nova;
         lex->capacitas = nova_cap;
@@ -97,8 +100,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 columna += (*p == '\t') ? 8 : 1;
                 p++;
             }
-            lex_adde(lex, SIGNUM_SPATIUM, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_SPATIUM, lin0, col0, initium,
+                (int)(p - initium)
+            );
             continue;
         }
 
@@ -106,8 +111,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
         if (p + 1 < fin && p[0] == '/' && p[1] == '/') {
             while (p < fin && *p != '\n')
                 p++;
-            lex_adde(lex, SIGNUM_COMMENTARIUM, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_COMMENTARIUM, lin0, col0, initium,
+                (int)(p - initium)
+            );
             columna += (int)(p - initium);
             continue;
         }
@@ -125,8 +132,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 p++;
             }
             if (p + 1 < fin) p += 2; /* transili */
-            lex_adde(lex, SIGNUM_COMMENTARIUM, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_COMMENTARIUM, lin0, col0, initium,
+                (int)(p - initium)
+            );
             columna += 2;
             continue;
         }
@@ -147,8 +156,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 }
                 p++;
             }
-            lex_adde(lex, SIGNUM_PRAEPROCESSOR, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_PRAEPROCESSOR, lin0, col0, initium,
+                (int)(p - initium)
+            );
             columna = 0;
             continue;
         }
@@ -164,8 +175,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 }
                 p++;
             }
-            lex_adde(lex, SIGNUM_PRAEPROCESSOR, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_PRAEPROCESSOR, lin0, col0, initium,
+                (int)(p - initium)
+            );
             columna = 0;
             continue;
         }
@@ -189,8 +202,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 }
             }
             if (p < fin) { p++; columna++; } /* transili '"' */
-            lex_adde(lex, SIGNUM_CHORDA, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_CHORDA, lin0, col0, initium,
+                (int)(p - initium)
+            );
             continue;
         }
 
@@ -208,8 +223,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 }
             }
             if (p < fin) { p++; columna++; }
-            lex_adde(lex, SIGNUM_LITTERA, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_LITTERA, lin0, col0, initium,
+                (int)(p - initium)
+            );
             continue;
         }
 
@@ -256,39 +273,53 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 p++;
                 columna++;
             }
-            lex_adde(lex, SIGNUM_VERBUM, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_VERBUM, lin0, col0, initium,
+                (int)(p - initium)
+            );
             continue;
         }
 
         /* --- numerus --- */
         if (isdigit((unsigned char)*p)) {
             /* hexadecimalis */
-            if (*p == '0' && p + 1 < fin &&
-                (p[1] == 'x' || p[1] == 'X')) {
+            if (
+                *p == '0' && p + 1 < fin &&
+                (p[1] == 'x' || p[1] == 'X')
+            ) {
                 p += 2; columna += 2;
                 while (p < fin && isxdigit((unsigned char)*p)) {
                     p++; columna++;
                 }
             } else {
-                while (p < fin && (isdigit((unsigned char)*p) ||
-                       *p == '.' || *p == 'e' || *p == 'E' ||
-                       *p == 'x' || *p == 'X' ||
-                       *p == 'a' || *p == 'b' || *p == 'c' ||
-                       *p == 'd' || *p == 'f' || *p == 'A' ||
-                       *p == 'B' || *p == 'C' || *p == 'D' ||
-                       *p == 'F')) {
+                while (
+                    p < fin && (
+                        isdigit((unsigned char)*p) ||
+                        *p == '.' || *p == 'e' || *p == 'E' ||
+                        *p == 'x' || *p == 'X' ||
+                        *p == 'a' || *p == 'b' || *p == 'c' ||
+                        *p == 'd' || *p == 'f' || *p == 'A' ||
+                        *p == 'B' || *p == 'C' || *p == 'D' ||
+                        *p == 'F'
+                    )
+                ) {
                     p++; columna++;
                 }
             }
             /* suffixum: u, l, ul, ll, ull, f */
-            while (p < fin && (*p == 'u' || *p == 'U' ||
-                               *p == 'l' || *p == 'L' ||
-                               *p == 'f' || *p == 'F')) {
+            while (
+                p < fin && (
+                    *p == 'u' || *p == 'U' ||
+                    *p == 'l' || *p == 'L' ||
+                    *p == 'f' || *p == 'F'
+                )
+            ) {
                 p++; columna++;
             }
-            lex_adde(lex, SIGNUM_NUMERUS, lin0, col0, initium,
-                     (int)(p - initium));
+            lex_adde(
+                lex, SIGNUM_NUMERUS, lin0, col0, initium,
+                (int)(p - initium)
+            );
             continue;
         }
 
@@ -297,7 +328,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
             int op_lon = 1;
             if (p + 1 < fin) {
                 char duo[3] = { p[0], p[1], '\0' };
-                if (strcmp(duo, "==") == 0 || strcmp(duo, "!=") == 0 ||
+                if (
+                    strcmp(duo, "==") == 0 || strcmp(duo, "!=") == 0 ||
                     strcmp(duo, "<=") == 0 || strcmp(duo, ">=") == 0 ||
                     strcmp(duo, "&&") == 0 || strcmp(duo, "||") == 0 ||
                     strcmp(duo, "<<") == 0 || strcmp(duo, ">>") == 0 ||
@@ -306,7 +338,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     strcmp(duo, "%=") == 0 || strcmp(duo, "&=") == 0 ||
                     strcmp(duo, "|=") == 0 || strcmp(duo, "^=") == 0 ||
                     strcmp(duo, "++") == 0 || strcmp(duo, "--") == 0 ||
-                    strcmp(duo, "->") == 0)
+                    strcmp(duo, "->") == 0
+                )
                     op_lon = 2;
                 if (p + 2 < fin) {
                     if (p[0] == '<' && p[1] == '<' && p[2] == '=')

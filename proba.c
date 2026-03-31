@@ -20,9 +20,10 @@ static int probationes_bonae   = 0;
 static int probationes_malae   = 0;
 
 /* curre lintorem in chorda fontis et reddit inspectorem */
-static int curre_lintorem(const char *fons, const speculum_t *spec,
-                          inspector_t *ins)
-{
+static int curre_lintorem(
+    const char *fons, const speculum_t *spec,
+    inspector_t *ins
+) {
     lexator_t lex;
     size_t lon = strlen(fons);
     if (lexator_disseca(&lex, fons, lon) < 0)
@@ -46,24 +47,29 @@ static int numera_regulam(const inspector_t *ins, const char *regula)
 }
 
 /* verificatio: expecta exacte tot monita regulae */
-static void expecta(const char *nomen, const inspector_t *ins,
-                    const char *regula, int expectata)
-{
+static void expecta(
+    const char *nomen, const inspector_t *ins,
+    const char *regula, int expectata
+) {
     probationes_totae++;
     int inventa = numera_regulam(ins, regula);
     if (inventa == expectata) {
         probationes_bonae++;
     } else {
         probationes_malae++;
-        fprintf(stderr, "  MALUM: %s — regula '%s': "
-                        "%d inventa, %d expectata\n",
-                nomen, regula, inventa, expectata);
+        fprintf(
+            stderr, "  MALUM: %s — regula '%s': "
+            "%d inventa, %d expectata\n",
+            nomen, regula, inventa, expectata
+        );
         /* monstra monita ad auxilium debugandi */
         for (int i = 0; i < ins->num_monita; i++) {
             if (strcmp(ins->monita[i].regula, regula) == 0) {
-                fprintf(stderr, "    linea %d: %s\n",
-                        ins->monita[i].linea,
-                        ins->monita[i].nuntius);
+                fprintf(
+                    stderr, "    linea %d: %s\n",
+                    ins->monita[i].linea,
+                    ins->monita[i].nuntius
+                );
             }
         }
     }
@@ -77,13 +83,17 @@ static void expecta_mundum(const char *nomen, const inspector_t *ins)
         probationes_bonae++;
     } else {
         probationes_malae++;
-        fprintf(stderr, "  MALUM: %s — %d monita inventa, 0 expectata\n",
-                nomen, ins->num_monita);
+        fprintf(
+            stderr, "  MALUM: %s — %d monita inventa, 0 expectata\n",
+            nomen, ins->num_monita
+        );
         for (int i = 0; i < ins->num_monita; i++) {
-            fprintf(stderr, "    linea %d [%s]: %s\n",
-                    ins->monita[i].linea,
-                    ins->monita[i].regula,
-                    ins->monita[i].nuntius);
+            fprintf(
+                stderr, "    linea %d [%s]: %s\n",
+                ins->monita[i].linea,
+                ins->monita[i].regula,
+                ins->monita[i].nuntius
+            );
         }
     }
 }
@@ -125,7 +135,8 @@ static void proba_indentatio_simplex(void)
         "    }\n"
         "    return 0;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("mundus", &ins);
 
     /* indentatio mala */
@@ -134,7 +145,8 @@ static void proba_indentatio_simplex(void)
         "{\n"
         "      int a = 1;\n"  /* 6 spatia, 4 expectata */
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("nimis indentatum", &ins, "indentatio", 1);
 
     /* parum indentatum */
@@ -145,7 +157,8 @@ static void proba_indentatio_simplex(void)
         "    int x;\n"       /* 4 spatia, 8 expectata */
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("parum indentatum", &ins, "indentatio", 1);
 }
 
@@ -165,7 +178,8 @@ static void proba_indentatio_case(void)
         "        break;\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("case mundus", &ins);
 }
 
@@ -182,7 +196,8 @@ static void proba_indentatio_virtualis(void)
         "        return;\n"    /* 8 spatia — gradus virtualis */
         "    x = 1;\n"        /* 4 spatia — revertit */
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("virtualis simplex", &ins);
 
     /* catenatio: if-else sine bracchiis */
@@ -194,7 +209,8 @@ static void proba_indentatio_virtualis(void)
         "    else\n"
         "        b();\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("virtualis if-else", &ins);
 }
 
@@ -212,7 +228,8 @@ static void proba_continuatio_congruens(void)
         "            b,\n"       /* aliniatum cum 'a' */
         "            c);\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("congruens", &ins);
 }
 
@@ -232,7 +249,8 @@ static void proba_continuatio_massa(void)
         "        c\n"
         "    );\n"               /* basis */
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("massa", &ins);
 }
 
@@ -252,7 +270,8 @@ static void proba_continuatio_pendens(void)
         "        b\n"
         "    );\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("pendens mundus", &ins);
 
     /* malum: contentum sequitur '(' in eadem linea */
@@ -263,7 +282,8 @@ static void proba_continuatio_pendens(void)
         "        b\n"
         "    );\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("pendens: '(' non ultimum", &ins, "indentatio", 1);
 }
 
@@ -283,7 +303,8 @@ static void proba_continuatio_patens(void)
         "        b\n"
         "    );\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("patens mundus", &ins);
 
     /* malum: ')' non primum in linea */
@@ -294,7 +315,8 @@ static void proba_continuatio_patens(void)
         "        a,\n"
         "        b);\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("patens: ')' non primum", &ins, "indentatio", 1);
 
     /* malum: '(' non ultimum in linea */
@@ -305,7 +327,8 @@ static void proba_continuatio_patens(void)
         "        b\n"
         "    );\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("patens: '(' non ultimum", &ins, "indentatio", 1);
 }
 
@@ -330,7 +353,8 @@ static void proba_spatia_verba(void)
         "    switch (x) { }\n"
         "    return 0;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("verba munda", &ins);
 
     /* mala */
@@ -341,7 +365,8 @@ static void proba_spatia_verba(void)
         "    for(;;) { }\n"
         "    while(1) { }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("verba sine spatio", &ins, "spatium_verbum", 3);
 }
 
@@ -360,7 +385,8 @@ static void proba_spatia_operatores(void)
         "    a += 2;\n"
         "    if (a == 3 && a != 4) { }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("operatores mundi", &ins);
 
     /* mala */
@@ -370,7 +396,8 @@ static void proba_spatia_operatores(void)
         "    int a=1;\n"       /* ante et post = */
         "    a +=2;\n"         /* post += */
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("operatores mali", &ins, "spatium_operator", 3);
 }
 
@@ -384,19 +411,22 @@ static void proba_spatia_virgulae(void)
     /* mundus */
     curre_lintorem(
         "void f(int a, int b, int c) { }\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("virgulae mundae", &ins);
 
     /* malum: sine spatio post */
     curre_lintorem(
         "void f(int a,int b) { }\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("sine spatio post virgulam", &ins, "spatium_virgula", 1);
 
     /* malum: spatium ante */
     curre_lintorem(
         "void f(int a , int b) { }\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("spatium ante virgulam", &ins, "spatium_virgula", 1);
 }
 
@@ -414,7 +444,8 @@ static void proba_spatia_semicolona(void)
         "    int a = 1;\n"
         "    return;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("semicolona munda", &ins);
 
     /* malum */
@@ -423,7 +454,8 @@ static void proba_spatia_semicolona(void)
         "{\n"
         "    int a = 1 ;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("spatium ante semicolon", &ins, "spatium_semicolon", 1);
 
     /* exceptio: for ( ; ; ) */
@@ -432,7 +464,8 @@ static void proba_spatia_semicolona(void)
         "{\n"
         "    for ( ; ; ) { }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("for vacula", &ins);
 }
 
@@ -458,7 +491,8 @@ static void proba_bracchia_necessaria(void)
         "        b();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("bracchia praesentia", &ins);
 
     /* mala */
@@ -472,7 +506,8 @@ static void proba_bracchia_necessaria(void)
         "    while (1)\n"
         "        c();\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("bracchia absentia", &ins, "bracchia_necessaria", 3);
 }
 
@@ -493,7 +528,8 @@ static void proba_cubitus(void)
         "        b();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("cubitus coniunctus", &ins);
 
     /* malum: else in nova linea */
@@ -507,7 +543,8 @@ static void proba_cubitus(void)
         "        b();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("else separatum", &ins, "cubitus", 1);
 
     /* contrarium: cubitus non coniunctus */
@@ -522,7 +559,8 @@ static void proba_cubitus(void)
         "        b();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("cubitus non desideratus", &ins, "cubitus", 1);
 }
 
@@ -541,7 +579,8 @@ static void proba_bracchia_stilus(void)
         "        a();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("kr mundus", &ins);
 
     /* K&R malum: '{' in nova linea post controlum */
@@ -553,7 +592,8 @@ static void proba_bracchia_stilus(void)
         "        a();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("kr malum", &ins, "bracchia_stilus", 1);
 
     /* K&R: functio cum '{' in nova linea — permissum */
@@ -561,7 +601,8 @@ static void proba_bracchia_stilus(void)
         "void f(void)\n"
         "{\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("kr functio", &ins);
 
     /* Allman */
@@ -573,7 +614,8 @@ static void proba_bracchia_stilus(void)
         "        a();\n"
         "    }\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("allman malum", &ins, "bracchia_stilus", 1);
 }
 
@@ -592,14 +634,16 @@ static void proba_spatia_terminalia(void)
     curre_lintorem(
         "int a;\n"
         "int b;\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("sine spatiis terminalibus", &ins);
 
     /* malum */
     curre_lintorem(
         "int a;  \n"        /* spatia terminalia */
         "int b;\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("spatia terminalia", &ins, "spatia_terminalia", 1);
 }
 
@@ -613,13 +657,15 @@ static void proba_longitudo_lineae(void)
     /* mundus */
     curre_lintorem(
         "int a = 1;\n",    /* brevis */
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("linea brevis", &ins);
 
     /* malum */
     curre_lintorem(
         "int a_very_long_variable_name_that_exceeds = 1;\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("linea longa", &ins, "longitudo_lineae", 1);
 }
 
@@ -635,7 +681,8 @@ static void proba_lineae_vacuae(void)
         "int a;\n"
         "\n"
         "int b;\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("una vacua", &ins);
 
     /* malum: duae vacuae */
@@ -644,7 +691,8 @@ static void proba_lineae_vacuae(void)
         "\n"
         "\n"
         "int b;\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("duae vacuae", &ins, "lineae_vacuae", 1);
 }
 
@@ -658,13 +706,15 @@ static void proba_finis_lineae(void)
     /* mundus */
     curre_lintorem(
         "int a;\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("finis cum \\n", &ins);
 
     /* malum */
     curre_lintorem(
         "int a;",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("finis sine \\n", &ins, "finis_lineae", 1);
 }
 
@@ -681,7 +731,8 @@ static void proba_tabulae_mixtae(void)
         "{\n"
         "    int a;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("solum spatia", &ins);
 
     /* malum: mixta */
@@ -690,7 +741,8 @@ static void proba_tabulae_mixtae(void)
         "{\n"
         "\t int a;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta("mixta", &ins, "tabulae_mixtae", 1);
 }
 
@@ -703,7 +755,8 @@ static void proba_speculum_defaltum(void)
     fprintf(stderr, "proba: speculum defaltum\n");
     probationes_totae++;
     speculum_t spec = spec_defaltum();
-    if (spec.ind_latitudo == 4 &&
+    if (
+        spec.ind_latitudo == 4 &&
         spec.ind_tabulis == 0 &&
         spec.bra_stilus == 0 &&
         spec.bra_else_coniunctum == 1 &&
@@ -711,7 +764,8 @@ static void proba_speculum_defaltum(void)
         spec.spa_post_verba == 1 &&
         spec.spa_circa_operatores == 1 &&
         spec.lin_longitudo_max == 80 &&
-        spec.lin_vacuae_max == 2) {
+        spec.lin_vacuae_max == 2
+    ) {
         probationes_bonae++;
     } else {
         probationes_malae++;
@@ -734,14 +788,18 @@ static void proba_lexator(void)
         "}\n";
 
     probationes_totae++;
-    if (lexator_disseca(&lex, fons, strlen(fons)) == 0 &&
-        lex.num_signa > 0) {
+    if (
+        lexator_disseca(&lex, fons, strlen(fons)) == 0 &&
+        lex.num_signa > 0
+    ) {
 
         /* primum signum debet esse VERBUM "int" */
         int bonum = 1;
-        if (lex.signa[0].genus != SIGNUM_VERBUM ||
+        if (
+            lex.signa[0].genus != SIGNUM_VERBUM ||
             lex.signa[0].longitudo != 3 ||
-            memcmp(lex.signa[0].initium, "int", 3) != 0) {
+            memcmp(lex.signa[0].initium, "int", 3) != 0
+        ) {
             bonum = 0;
             fprintf(stderr, "  MALUM: primum signum non est 'int'\n");
         }
@@ -895,7 +953,8 @@ static void proba_codex_mundus(void)
         "\n"
         "    return 0;\n"
         "}\n",
-        &spec, &ins);
+        &spec, &ins
+    );
     expecta_mundum("codex mundus integer", &ins);
 }
 
@@ -945,8 +1004,10 @@ int main(void)
 
     /* summa */
     fprintf(stderr, "\n=== summa ===\n");
-    fprintf(stderr, "probationes: %d totae, %d bonae, %d malae\n\n",
-            probationes_totae, probationes_bonae, probationes_malae);
+    fprintf(
+        stderr, "probationes: %d totae, %d bonae, %d malae\n\n",
+        probationes_totae, probationes_bonae, probationes_malae
+    );
 
     return probationes_malae > 0 ? 1 : 0;
 }
