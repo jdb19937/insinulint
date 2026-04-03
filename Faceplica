@@ -16,7 +16,7 @@ NOMEN   = insinulint
 # bibliothecae externae
 LIBISON = $(APOTHECA)/ison/libison.a
 
-PROBA_FONTES = proba.c lexator.c inspectio.c
+PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
 omnia: $(NOMEN)

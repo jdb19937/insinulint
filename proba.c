@@ -6,6 +6,7 @@
  */
 
 #include "insinulint.h"
+#include "correctio.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -959,6 +960,170 @@ static void proba_codex_mundus(void)
 }
 
 /* ================================================================
+ * probationes: commentaria vetita
+ * ================================================================ */
+
+static void proba_commentaria_vetita(void)
+{
+    fprintf(stderr, "proba: commentaria vetita\n");
+    speculum_t spec = spec_solum();
+    spec.com_veta   = 1;
+    inspector_t ins;
+
+    /* mundus: nullum commentarium */
+    curre_lintorem(
+        "int main(void)\n"
+        "{\n"
+        "    return 0;\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta_mundum("sine commentariis", &ins);
+
+    /* commentarium lineare */
+    curre_lintorem(
+        "int x = 5; // numerus\n",
+        &spec, &ins
+    );
+    expecta("// lineare", &ins, "commentaria_vetita", 1);
+
+    /* commentarium clausum */
+    curre_lintorem(
+        "int x = 5; /* numerus */\n",
+        &spec, &ins
+    );
+    expecta("/* clausum */", &ins, "commentaria_vetita", 1);
+
+    /* commentarium multi-lineare — unum signum */
+    curre_lintorem(
+        "/*\n"
+        " * multi\n"
+        " */\n"
+        "int x;\n",
+        &spec, &ins
+    );
+    expecta("multi-lineare", &ins, "commentaria_vetita", 1);
+
+    /* plura commentaria */
+    curre_lintorem(
+        "/* primum */\n"
+        "int x; // secundum\n"
+        "/* tertium */\n",
+        &spec, &ins
+    );
+    expecta("plura commentaria", &ins, "commentaria_vetita", 3);
+
+    /* inactivum: com_veta = 0 */
+    spec.com_veta = 0;
+    curre_lintorem(
+        "int x; // commentarium\n",
+        &spec, &ins
+    );
+    expecta_mundum("inactivum", &ins);
+}
+
+/* ================================================================
+ * probationes: correctio commentariorum
+ * ================================================================ */
+
+static const char *via_temp = "/tmp/insinulint_proba_com.c";
+
+/* scribe chordam in plicam temporalem */
+static void scribe_temp(const char *fons)
+{
+    FILE *f = fopen(via_temp, "wb");
+    if (!f) return;
+    fwrite(fons, 1, strlen(fons), f);
+    fclose(f);
+}
+
+/* lege plicam temporalem in memoriam (vocans liberet) */
+static char *lege_temp(void)
+{
+    FILE *f = fopen(via_temp, "rb");
+    if (!f) return NULL;
+    fseek(f, 0, SEEK_END);
+    long lon = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *buf = malloc((size_t)lon + 1);
+    if (!buf) { fclose(f); return NULL; }
+    fread(buf, 1, (size_t)lon, f);
+    buf[lon] = '\0';
+    fclose(f);
+    return buf;
+}
+
+/* numera commentaria in fonte per lexatorem */
+static int numera_commentaria(const char *fons)
+{
+    lexator_t lex;
+    if (lexator_disseca(&lex, fons, strlen(fons)) < 0)
+        return -1;
+    int n = 0;
+    for (int i = 0; i < lex.num_signa; i++) {
+        if (lex.signa[i].genus == SIGNUM_COMMENTARIUM)
+            n++;
+    }
+    lexator_purgare(&lex);
+    return n;
+}
+
+static void proba_correctio_excommenta(void)
+{
+    fprintf(stderr, "proba: correctio excommenta\n");
+
+    const char *fons =
+        "/* caput */\n"
+        "#include <stdio.h>\n"
+        "\n"
+        "int main(void)\n"
+        "{\n"
+        "    int x = 5;  // numerus\n"
+        "    /* commentarium internum */\n"
+        "    printf(\"%d\\n\", x);\n"
+        "    return 0;\n"
+        "}\n";
+
+    /* correctio prima */
+    scribe_temp(fons);
+    correctio_excommenta(via_temp);
+    char *post1 = lege_temp();
+
+    /* nulla commentaria remanent */
+    probationes_totae++;
+    int com = numera_commentaria(post1);
+    if (com == 0) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(
+            stderr, "  MALUM: %d commentaria remanent post correctionem\n",
+            com
+        );
+    }
+
+    /* idempotentia: F(F(x)) = F(x) */
+    correctio_excommenta(via_temp);
+    char *post2 = lege_temp();
+
+    probationes_totae++;
+    if (strcmp(post1, post2) == 0) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(
+            stderr, "  MALUM: correctio non idempotens\n"
+            "    post 1: [%s]\n    post 2: [%s]\n",
+            post1, post2
+        );
+    }
+
+    free(post1);
+    free(post2);
+    remove(via_temp);
+}
+
+/* ================================================================
  * principale
  * ================================================================ */
 
@@ -998,6 +1163,10 @@ int main(void)
     proba_lineae_vacuae();
     proba_finis_lineae();
     proba_tabulae_mixtae();
+
+    /* commentaria */
+    proba_commentaria_vetita();
+    proba_correctio_excommenta();
 
     /* codex mundus */
     proba_codex_mundus();

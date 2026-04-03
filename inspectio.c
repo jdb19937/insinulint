@@ -15,6 +15,7 @@
  *   - linea nova ad finem fasciculi
  *   - tabulae et spatia mixtae
  *   - colineatio ('=' in adtributionibus; extensibile ad alia signa)
+ *   - commentaria vetita (nulla commentaria permissa)
  */
 
 #include "insinulint.h"
@@ -203,6 +204,8 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->lin_finis_nova        = 1;
     spec->lin_tabulae_mixtae    = 1;
 
+    spec->com_veta = 0;
+
     if (!via)
         return 0;
 
@@ -301,6 +304,12 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->lin_tabulae_mixtae = lege_verum(
         ison, "lineae.tabulae_mixtae",
         spec->lin_tabulae_mixtae
+    );
+
+    /* commentaria */
+    spec->com_veta = lege_verum(
+        ison, "commentaria.veta",
+        spec->com_veta
     );
 
     free(ison);
@@ -1669,6 +1678,23 @@ static void inspice_adtributiones_colineatas(
 }
 
 /* ================================================================
+ * 15. commentaria vetita
+ * ================================================================ */
+
+static void inspice_commentaria(
+    inspector_t *ins, const lexator_t *lex
+) {
+    for (int i = 0; i < lex->num_signa; i++) {
+        const signum_t *s = &lex->signa[i];
+        if (s->genus == SIGNUM_COMMENTARIUM)
+            inspector_adde(
+                ins, GRAVITAS_MONITUM, s->linea, s->columna,
+                "commentaria_vetita", "commentarium inventum"
+            );
+    }
+}
+
+/* ================================================================
  * inspice_omnia — orchestrator inspectionum
  * ================================================================ */
 
@@ -1734,6 +1760,10 @@ void inspice_omnia(
     /* 14. adtributiones colineatae */
     if (spec->spa_adtributio_colineata)
         inspice_adtributiones_colineatas(ins, lex, versus, nv);
+
+    /* 15. commentaria vetita */
+    if (spec->com_veta)
+        inspice_commentaria(ins, lex);
 
     free(versus);
 }

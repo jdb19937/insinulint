@@ -16,4 +16,10 @@
  */
 int correctio_age(const char *via, const speculum_t *spec);
 
+/*
+ * correctio_excommenta — exstirpat omnia commentaria ex plica.
+ * reddit 0 si bene, -1 si error.
+ */
+int correctio_excommenta(const char *via);
+
 #endif /* CORRECTIO_H */

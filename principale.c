@@ -62,6 +62,7 @@ static void auxilium(void)
         "  lineae_vacuae       lineae vacuae consecutivae maximae\n"
         "  finis_lineae        fasciculus finit cum \\n\n"
         "  tabulae_mixtae      veta tabulas et spatia mixtas\n"
+        "  commentaria_vetita  nulla commentaria permissa\n"
     );
 }
 
@@ -112,6 +113,8 @@ int main(int argc, char **argv)
     /* inspice (et corriges si -c) fasciculos */
     int summa_monitorum = 0;
     for (int i = primus_fasciculus; i < argc; i++) {
+        if (corrige && spec.com_veta)
+            correctio_excommenta(argv[i]);
         if (corrige)
             correctio_age(argv[i], &spec);
         int res = insinulint_inspice(argv[i], &spec);

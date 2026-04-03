@@ -130,6 +130,9 @@ typedef struct {
     int lin_vacuae_max;         /* lineae vacuae consecutivae maximae */
     int lin_finis_nova;         /* 1 = fasciculus debet finire cum \n */
     int lin_tabulae_mixtae;     /* 1 = veta tabulas et spatia mixtas */
+
+    /* commentaria */
+    int com_veta;               /* 1 = veta omnia commentaria */
 } speculum_t;
 
 int speculum_lege(speculum_t *spec, const char *via);
@@ -164,5 +167,11 @@ int insinulint_inspice(const char *via_fontis, const speculum_t *spec);
  * reddit 0 si bene, -1 si error.
  */
 int correctio_age(const char *via, const speculum_t *spec);
+
+/*
+ * correctio_excommenta — exstirpat omnia commentaria ex plica.
+ * reddit 0 si bene, -1 si error.
+ */
+int correctio_excommenta(const char *via);
 
 #endif /* INSINULINT_H */

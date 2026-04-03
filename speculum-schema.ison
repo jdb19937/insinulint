@@ -66,5 +66,13 @@
       }
     },
     "required": []
+  },
+  "commentaria": {
+    "properties": {
+      "veta": {
+        "type": "integer"
+      }
+    },
+    "required": []
   }
 }
