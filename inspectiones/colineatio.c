@@ -124,8 +124,10 @@ static void inspice_colineationes(
             );
             if (nc < 0)
                 continue;
-            if (nat_min < 0 || nc < nat_min) nat_min = nc;
-            if (nc > nat_max)                nat_max = nc;
+            if (nat_min < 0 || nc < nat_min)
+                nat_min = nc;
+            if (nc > nat_max)
+                nat_max = nc;
         }
 
         if (nat_min < 0)

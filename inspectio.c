@@ -76,7 +76,8 @@ static int valida_sectionem(
     const char *nomen
 ) {
     char *sec_schema = ison_da_crudum(schema_ison, nomen);
-    if (!sec_schema) return 0;
+    if (!sec_schema)
+        return 0;
 
     schema_t s;
     if (schema_lege(sec_schema, &s) < 0) {
@@ -86,12 +87,14 @@ static int valida_sectionem(
     free(sec_schema);
 
     char *sec_data = ison_da_crudum(spec_ison, nomen);
-    if (!sec_data) return 0;
+    if (!sec_data)
+        return 0;
 
     ison_par_t pares[32];
     int np = ison_lege(sec_data, pares, 32);
     free(sec_data);
-    if (np <= 0) return 0;
+    if (np <= 0)
+        return 0;
 
     char error[256];
     if (schema_valida(&s, pares, np, error, sizeof(error)) < 0) {
@@ -105,7 +108,8 @@ static int valida_sectionem(
 static int speculum_valida(const char *ison)
 {
     char *schema_ison = ison_lege_plicam("insinulint-schema.ison");
-    if (!schema_ison) return 0;
+    if (!schema_ison)
+        return 0;
 
     static const char *sectiones[] = {
         "indentatio", "bracchia", "spatia", "lineae",

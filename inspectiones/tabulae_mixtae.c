@@ -19,8 +19,10 @@ void inspice_tabulas_mixtas(
         const signum_t *sp = &signa[v->tok_initium];
         int habet_tab      = 0, habet_sp = 0;
         for (int k = 0; k < sp->longitudo; k++) {
-            if (sp->initium[k] == '\t') habet_tab = 1;
-            if (sp->initium[k] == ' ')  habet_sp = 1;
+            if (sp->initium[k] == '\t')
+                habet_tab = 1;
+            if (sp->initium[k] == ' ')
+                habet_sp = 1;
         }
         if (habet_tab && habet_sp) {
             inspector_adde(

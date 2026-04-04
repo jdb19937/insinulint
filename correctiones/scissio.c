@@ -14,8 +14,10 @@ char *corrige_scissionem(
 ) {
     int par_byte = col;
     int ante_lon = par_byte - sp_init;
-    if (ante_lon < 0) ante_lon = 0;
-    if (ante_lon > corp_lon) ante_lon = corp_lon;
+    if (ante_lon < 0)
+        ante_lon = 0;
+    if (ante_lon > corp_lon)
+        ante_lon = corp_lon;
 
     /* pars 1: contentum ante ')' */
     while (
@@ -28,7 +30,8 @@ char *corrige_scissionem(
     *wp++ = '\n';
 
     /* pars 2: ')' et residuum in linea nova */
-    for (int j = 0; j < ind; j++) *wp++ = ' ';
+    for (int j = 0; j < ind; j++)
+        *wp++ = ' ';
 
     const char *rest     = l->initium + par_byte;
     int         rest_lon = l->lon - par_byte;
@@ -64,8 +67,8 @@ char *corrige_scissionem(
     memcpy(wp, rest, rest_lon);
     wp += rest_lon;
     if (prox_apertio) {
-        *wp++ = ' ';
-        *wp++ = '{';
+        *wp++     = ' ';
+        *wp++     = '{';
         *transili = 1;
     }
     *wp++ = '\n';

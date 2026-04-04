@@ -14,7 +14,8 @@ int scinde_in_lineas(
 
     while (p < fin && n < max_lineae) {
         const char *q = p;
-        while (q < fin && *q != '\n') q++;
+        while (q < fin && *q != '\n')
+            q++;
         lineae[n].initium = p;
         lineae[n].lon     = (int)(q - p);
         n++;
@@ -27,7 +28,8 @@ int linea_vacua(const linea_t *l)
 {
     for (int i = 0; i < l->lon; i++) {
         char c = l->initium[i];
-        if (c != ' ' && c != '\t') return 0;
+        if (c != ' ' && c != '\t')
+            return 0;
     }
     return 1;
 }

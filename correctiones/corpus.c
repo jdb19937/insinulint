@@ -13,8 +13,10 @@ char *corrige_corpus(
     int col, int ind
 ) {
     int cc = col;
-    if (cc < 0) cc = 0;
-    if (cc > corp_lon) cc = corp_lon;
+    if (cc < 0)
+        cc = 0;
+    if (cc > corp_lon)
+        cc = corp_lon;
 
     /* pars 1: controlum usque ad corpus */
     int ante_lon = cc;
@@ -28,7 +30,8 @@ char *corrige_corpus(
     *wp++ = '\n';
 
     /* pars 2: corpus in linea nova cum indentatione */
-    for (int j = 0; j < ind; j++) *wp++ = ' ';
+    for (int j = 0; j < ind; j++)
+        *wp++ = ' ';
 
     const char *rest     = corpus + cc;
     int         rest_lon = corp_lon - cc;

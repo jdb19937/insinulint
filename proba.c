@@ -1032,7 +1032,8 @@ static const char *via_temp = "/tmp/insinulint_proba_com.c";
 static void scribe_temp(const char *fons)
 {
     FILE *f = fopen(via_temp, "wb");
-    if (!f) return;
+    if (!f)
+        return;
     fwrite(fons, 1, strlen(fons), f);
     fclose(f);
 }
@@ -1041,7 +1042,8 @@ static void scribe_temp(const char *fons)
 static char *lege_temp(void)
 {
     FILE *f = fopen(via_temp, "rb");
-    if (!f) return NULL;
+    if (!f)
+        return NULL;
     fseek(f, 0, SEEK_END);
     long lon = ftell(f);
     fseek(f, 0, SEEK_SET);
@@ -1132,7 +1134,7 @@ static const char *via_temp_corp = "/tmp/insinulint_proba_corp.c";
 static void proba_corpus_separatum(void)
 {
     fprintf(stderr, "proba: corpus separatum\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec    = spec_solum();
     spec.cor_separatum = 1;
     inspector_t ins;
 
@@ -1226,7 +1228,7 @@ static void proba_corpus_separatum(void)
     expecta("bracchia", &ins, "corpus_separatum", 0);
 
     /* regula inactiva — non flagellandum */
-    speculum_t spec2 = spec_solum();
+    speculum_t spec2    = spec_solum();
     spec2.cor_separatum = 0;
     curre_lintorem(
         "void f(void)\n"
@@ -1262,14 +1264,16 @@ static void proba_correctio_corpus_separatum(void)
         "}\n";
 
     FILE *f = fopen(via_temp_corp, "wb");
-    if (!f) return;
+    if (!f)
+        return;
     fwrite(fons, 1, strlen(fons), f);
     fclose(f);
 
     correctio_age(via_temp_corp, &spec);
 
     f = fopen(via_temp_corp, "rb");
-    if (!f) return;
+    if (!f)
+        return;
     fseek(f, 0, SEEK_END);
     long lon = ftell(f);
     fseek(f, 0, SEEK_SET);

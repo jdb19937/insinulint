@@ -29,7 +29,8 @@ int correctio_age(const char *via, const speculum_t *spec)
     /* scinde in lineas */
     int nlin_max = 2;
     for (size_t i = 0; i < fons_lon; i++)
-        if (fons[i] == '\n') nlin_max++;
+        if (fons[i] == '\n')
+            nlin_max++;
 
     linea_t *lineae = malloc((size_t)nlin_max * sizeof(linea_t));
     if (!lineae) {
@@ -75,7 +76,8 @@ int correctio_age(const char *via, const speculum_t *spec)
     for (int i = 0; i < ins.num_monita; i++) {
         const monitum_t *m = &ins.monita[i];
         int li = m->linea - 1;
-        if (li < 0 || li >= nlin) continue;
+        if (li < 0 || li >= nlin)
+            continue;
 
         if (strcmp(m->regula, "indentatio") == 0) {
             if (m->apert_columna >= 0) {
@@ -143,9 +145,11 @@ int correctio_age(const char *via, const speculum_t *spec)
         if (ind >= 0) {
             if (spec->ind_tabulis) {
                 int tabs = ind / spec->ind_latitudo;
-                for (int j = 0; j < tabs; j++) *wp++ = '\t';
+                for (int j = 0; j < tabs; j++)
+                    *wp++ = '\t';
             } else {
-                for (int j = 0; j < ind; j++) *wp++ = ' ';
+                for (int j = 0; j < ind; j++)
+                    *wp++ = ' ';
             }
         } else {
             memcpy(wp, l->initium, sp_init);
@@ -182,7 +186,8 @@ int correctio_age(const char *via, const speculum_t *spec)
                 split_col[i], split_ind[i], sp_init,
                 l, lineae, i, nlin, &transili
             );
-            if (transili) i++;
+            if (transili)
+                i++;
             continue;
         }
 

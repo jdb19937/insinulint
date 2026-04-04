@@ -85,9 +85,9 @@ int main(int argc, char **argv)
                 fprintf(stderr, "insinulint: -s requirit viam speculi\n");
                 return 1;
             }
-            via_speculi       = argv[++i];
+            via_speculi         = argv[++i];
             speculum_explicatum = 1;
-            primus_fasciculus = i + 1;
+            primus_fasciculus   = i + 1;
             continue;
         }
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--corrige") == 0) {

@@ -11,8 +11,10 @@ char *corrige_apertionem(
     int col, int ind, int sp_init
 ) {
     int par_byte = col - sp_init;
-    if (par_byte < 0) par_byte = 0;
-    if (par_byte >= corp_lon) par_byte = corp_lon - 1;
+    if (par_byte < 0)
+        par_byte = 0;
+    if (par_byte >= corp_lon)
+        par_byte = corp_lon - 1;
 
     /* pars 1: contentum usque ad '(' inclusive */
     int ante_lon = par_byte + 1;
@@ -21,7 +23,8 @@ char *corrige_apertionem(
     *wp++ = '\n';
 
     /* pars 2: contentum post '(' in linea nova */
-    for (int j = 0; j < ind; j++) *wp++ = ' ';
+    for (int j = 0; j < ind; j++)
+        *wp++ = ' ';
 
     const char *rest     = corpus + ante_lon;
     int         rest_lon = corp_lon - ante_lon;

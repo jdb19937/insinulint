@@ -32,7 +32,7 @@ int correctio_excommenta(const char *via)
         return -1;
     }
 
-    char *wp = out;
+    char *wp        = out;
     const char *src = fons;
 
     for (int i = 0; i < lex.num_signa; i++) {

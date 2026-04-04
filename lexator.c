@@ -30,7 +30,8 @@ static int lex_adde(
             lex->signa,
             (size_t)nova_cap * sizeof(signum_t)
         );
-        if (!nova) return -1;
+        if (!nova)
+            return -1;
         lex->signa     = nova;
         lex->capacitas = nova_cap;
     }
@@ -61,7 +62,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
     lex->fons_lon  = lon;
     lex->capacitas = 4096;
     lex->signa     = malloc((size_t)lex->capacitas * sizeof(signum_t));
-    if (!lex->signa) return -1;
+    if (!lex->signa)
+        return -1;
 
     const char *p   = fons;
     const char *fin = fons + lon;
@@ -131,7 +133,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 }
                 p++;
             }
-            if (p + 1 < fin) p += 2; /* transili */
+            if (p + 1 < fin)
+                p += 2; /* transili */
             lex_adde(
                 lex, SIGNUM_COMMENTARIUM, lin0, col0, initium,
                 (int)(p - initium)
