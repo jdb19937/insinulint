@@ -162,28 +162,33 @@ int correctio_age(const char *via, const speculum_t *spec)
 
         /* corpus separatum */
         if (corp_col[i] >= 0) {
-            wp = corrige_corpus(
-                wp, corpus, corp_lon,
-                corp_col[i] - sp_init, corp_ind[i]
-            );
+            int cb = columna_ad_byte(
+                l->initium, l->lon, corp_col[i]
+            ) - sp_init;
+            wp = corrige_corpus(wp, corpus, corp_lon, cb, corp_ind[i]);
             continue;
         }
 
         /* scissio post '(' */
         if (apert_col[i] >= 0) {
+            int ab = columna_ad_byte(
+                l->initium, l->lon, apert_col[i]
+            );
             wp = corrige_apertionem(
-                wp, corpus, corp_lon,
-                apert_col[i], apert_ind[i], sp_init
+                wp, corpus, corp_lon, ab, apert_ind[i], sp_init
             );
             continue;
         }
 
         /* scissio ')' ad lineam novam */
         if (split_col[i] >= 0) {
+            int sb = columna_ad_byte(
+                l->initium, l->lon, split_col[i]
+            );
             int transili = 0;
             wp = corrige_scissionem(
                 wp, corpus, corp_lon,
-                split_col[i], split_ind[i], sp_init,
+                sb, split_ind[i], sp_init,
                 l, lineae, i, nlin, &transili
             );
             if (transili)
@@ -205,9 +210,12 @@ int correctio_age(const char *via, const speculum_t *spec)
 
         /* colineatio adtributionum */
         if (equ_col[i] >= 0) {
+            int eb = columna_ad_byte(
+                l->initium, l->lon, equ_col[i]
+            );
             wp = corrige_colineationem(
                 wp, corpus, corp_lon,
-                equ_col[i], equ_spa[i], sp_init
+                eb, equ_spa[i], sp_init
             );
             continue;
         }

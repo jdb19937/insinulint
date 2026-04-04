@@ -24,6 +24,20 @@ int scinde_in_lineas(
     return n;
 }
 
+int columna_ad_byte(const char *initium, int lon, int columna)
+{
+    int col = 0;
+    for (int i = 0; i < lon; i++) {
+        if (col >= columna)
+            return i;
+        if (initium[i] == '\t')
+            col += 8 - (col % 8);
+        else
+            col++;
+    }
+    return lon;
+}
+
 int linea_vacua(const linea_t *l)
 {
     for (int i = 0; i < l->lon; i++) {

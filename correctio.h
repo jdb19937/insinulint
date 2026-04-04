@@ -33,6 +33,9 @@ int scinde_in_lineas(
 );
 int linea_vacua(const linea_t *l);
 
+/* converte columnam (tab=8) ad byte offset in linea */
+int columna_ad_byte(const char *initium, int lon, int columna);
+
 /* ================================================================
  * correctiones linearum
  * ================================================================ */
