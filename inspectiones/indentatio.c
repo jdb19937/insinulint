@@ -19,7 +19,9 @@ void inspice_indentationem(
     const versus_t *versus, int num_versus,
     const speculum_t *spec
 ) {
-    int lat = spec->ind_latitudo;
+    int lat = spec->ind_tabulis
+        ? spec->ind_latitudo * 8
+        : spec->ind_latitudo;
     const signum_t *signa = lex->signa;
     int n = lex->num_signa;
 
@@ -224,7 +226,7 @@ adiusta_statum:
                                 "indentatio",
                                 "'(' debet esse ultimum signum"
                                 " in linea (stilus pendens/patens)",
-                                v->spatia + spec->ind_latitudo,
+                                v->spatia + lat,
                                 signa[j].columna
                             );
                         }

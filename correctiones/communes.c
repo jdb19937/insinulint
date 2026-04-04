@@ -41,9 +41,8 @@ int columna_ad_byte(const char *initium, int lon, int columna)
 char *scribe_indentationem(char *wp, int spatia, const speculum_t *spec)
 {
     if (spec->ind_tabulis) {
-        int lat  = spec->ind_latitudo > 0 ? spec->ind_latitudo : 1;
-        int tabs = spatia / lat;
-        int rest = spatia % lat;
+        int tabs = spatia / 8;
+        int rest = spatia % 8;
         for (int j = 0; j < tabs; j++) *wp++ = '\t';
         for (int j = 0; j < rest; j++) *wp++ = ' ';
     } else {
