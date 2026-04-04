@@ -91,7 +91,7 @@ void inspice_spatia_terminalia(
 void inspice_longitudinem(
     inspector_t *ins, const lexator_t *lex,
     const versus_t *versus, int num_versus,
-    int maxima
+    int maxima, int lat
 );
 
 void inspice_lineas_vacuas(

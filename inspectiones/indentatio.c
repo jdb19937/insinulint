@@ -29,6 +29,7 @@ void inspice_indentationem(
     continuatio_gradus_t acervus[CONTINUATIO_MAX];
     int prof_par         = 0;       /* profunditas parenthesium */
     int gradus_virtualis = 0;  /* +1 pro corpore sine bracchiis */
+    int cont_basis       = -1; /* basis indentationis continuationis */
 
     for (int vi = 0; vi < num_versus; vi++) {
         const versus_t *v = &versus[vi];
@@ -122,41 +123,112 @@ void inspice_indentationem(
             }
         }
 
-        /* transili continuationem expressionis sine parenthesibus:
-         * linea praecedens finit cum operatore binario vel '?' */
-        if (prof_par == 0 && v->spatia > expectata) {
-            int vp = vi - 1;
-            while (vp >= 0 && versus_vacuus(&versus[vp]))
-                vp--;
-            if (vp >= 0) {
-                int ult = ultimus_significans(
-                    signa,
-                    versus[vp].tok_initium,
-                    versus[vp].tok_finis
-                );
-                if (
-                    ult >= 0 &&
-                    (
-                        est_operator_binarius(&signa[ult]) ||
-                        est_operator(&signa[ult], "?")
-                    )
-                )
-                    goto adiusta_statum;
-            }
-            /* ternarium: linea incipit cum ':' */
-            if (est_operator(&signa[primus], ":"))
-                goto adiusta_statum;
-            /* concatenatio implicita chordarum: "a"\n"b"\n"c" */
+        /* continuatio expressionis sine parenthesibus */
+        if (prof_par == 0) {
+            int est_cont = 0;
+
+            /* bracchia non sunt continuatio */
+            if (
+                signa[primus].genus == SIGNUM_APERTIO ||
+                signa[primus].genus == SIGNUM_CLAUSIO
+            )
+                goto non_cont;
+
+            /* concatenatio implicita chordarum — praetermitte */
             if (signa[primus].genus == SIGNUM_CHORDA) {
                 int vp = vi - 1;
                 while (vp >= 0 && versus_vacuus(&versus[vp]))
                     vp--;
                 if (
                     vp >= 0 &&
-                    signa[versus[vp].tok_primus].genus == SIGNUM_CHORDA &&
+                    signa[versus[vp].tok_primus].genus ==
+                        SIGNUM_CHORDA &&
                     versus[vp].spatia == v->spatia
-                )
+                ) {
                     goto adiusta_statum;
+                }
+            }
+
+            /* post-stilus: linea incipit cum operatore binario,
+             * '?' vel ':' */
+            if (
+                est_operator_binarius(&signa[primus]) ||
+                est_operator(&signa[primus], "?") ||
+                est_operator(&signa[primus], ":")
+            ) {
+                est_cont = 1;
+            } else if (
+                signa[primus].genus == SIGNUM_OPERATOR &&
+                !est_operator(&signa[primus], "++") &&
+                !est_operator(&signa[primus], "--") &&
+                !est_operator(&signa[primus], "!") &&
+                !est_operator(&signa[primus], "~") &&
+                !est_operator(&signa[primus], "*") &&
+                !est_operator(&signa[primus], "&")
+            ) {
+                est_cont = 1;
+            }
+
+            /* prae-stilus: linea prior finit cum operatore */
+            if (!est_cont) {
+                int vp = vi - 1;
+                while (vp >= 0 && versus_vacuus(&versus[vp]))
+                    vp--;
+                if (vp >= 0) {
+                    int ult = ultimus_significans(
+                        signa,
+                        versus[vp].tok_initium,
+                        versus[vp].tok_finis
+                    );
+                    if (ult >= 0) {
+                        const signum_t *su = &signa[ult];
+                        if (
+                            est_operator_binarius(su) ||
+                            est_operator(su, "?")
+                        ) {
+                            est_cont = 1;
+                        } else if (
+                            su->genus == SIGNUM_OPERATOR &&
+                            !est_operator(su, "++") &&
+                            !est_operator(su, "--") &&
+                            !est_operator(su, "->") &&
+                            !est_operator(su, ".")
+                        ) {
+                            est_cont = 1;
+                        }
+                    }
+                }
+            }
+
+            if (est_cont) {
+                /* determina basim sententiae */
+                if (cont_basis < 0) {
+                    int vp = vi - 1;
+                    while (vp >= 0 && versus_vacuus(&versus[vp]))
+                        vp--;
+                    cont_basis = (vp >= 0) ? versus[vp].spatia
+                                           : 0;
+                }
+                int cont_exp = cont_basis + lat;
+
+                if (v->spatia != cont_exp) {
+                    char nuntius[NUNTIUS_MAX];
+                    snprintf(
+                        nuntius, sizeof(nuntius),
+                        "%d spatia inventa, %d expectata"
+                        " (continuatio, basis %d)",
+                        v->spatia, cont_exp, cont_basis
+                    );
+                    adde_fix(
+                        ins, GRAVITAS_MONITUM,
+                        v->numero, 0,
+                        "indentatio", nuntius, cont_exp
+                    );
+                }
+                goto adiusta_statum;
+            } else {
+non_cont:
+                cont_basis = -1;
             }
         }
 

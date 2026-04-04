@@ -9,7 +9,7 @@
 void inspice_longitudinem(
     inspector_t *ins, const lexator_t *lex,
     const versus_t *versus, int num_versus,
-    int maxima
+    int maxima, int lat
 ) {
     if (maxima <= 0)
         return;
@@ -49,10 +49,11 @@ void inspice_longitudinem(
                 nuntius, sizeof(nuntius),
                 "linea %d columnarum (max %d)", lon, maxima
             );
-            inspector_adde(
+            adde_fix(
                 ins, GRAVITAS_MONITUM,
                 v->numero, maxima,
-                "longitudo_lineae", nuntius
+                "longitudo_lineae", nuntius,
+                v->spatia + lat
             );
         }
     }

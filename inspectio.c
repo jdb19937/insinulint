@@ -326,7 +326,11 @@ void inspice_omnia(
 
     /* 3. longitudo lineae */
     if (spec->lin_longitudo_max > 0)
-        inspice_longitudinem(ins, lex, versus, nv, spec->lin_longitudo_max);
+        inspice_longitudinem(
+            ins, lex, versus, nv, spec->lin_longitudo_max,
+            spec->ind_tabulis ? spec->ind_latitudo * 8
+                              : spec->ind_latitudo
+        );
 
     /* 4. lineae vacuae consecutivae */
     if (spec->lin_vacuae_max > 0)

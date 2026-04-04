@@ -56,11 +56,16 @@ int correctio_age(const char *via, const speculum_t *spec)
     int *virg_fix  = calloc((size_t)(nlin + 1), sizeof(int));
     int *cub_fix   = calloc((size_t)(nlin + 1), sizeof(int));
     int *op_fix    = calloc((size_t)(nlin + 1), sizeof(int));
+    int *verb_fix  = calloc((size_t)(nlin + 1), sizeof(int));
+    int *semi_fix  = calloc((size_t)(nlin + 1), sizeof(int));
+    int *long_fix  = calloc((size_t)(nlin + 1), sizeof(int));
+    int *long_ind  = calloc((size_t)(nlin + 1), sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
         !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind ||
-        !virg_fix || !cub_fix || !op_fix
+        !virg_fix || !cub_fix || !op_fix || !verb_fix || !semi_fix ||
+        !long_fix || !long_ind
     ) {
         free(fons);
         free(lineae);
@@ -80,6 +85,10 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(virg_fix);
         free(cub_fix);
         free(op_fix);
+        free(verb_fix);
+        free(semi_fix);
+        free(long_fix);
+        free(long_ind);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -147,6 +156,15 @@ int correctio_age(const char *via, const speculum_t *spec)
             cub_fix[li] = 1;
         } else if (strcmp(m->regula, "spatium_operator") == 0) {
             op_fix[li] = 1;
+        } else if (strcmp(m->regula, "spatium_verbum") == 0) {
+            verb_fix[li] = 1;
+        } else if (strcmp(m->regula, "spatium_semicolon") == 0) {
+            semi_fix[li] = 1;
+        } else if (strcmp(m->regula, "longitudo_lineae") == 0) {
+            if (!long_fix[li]) {
+                long_fix[li] = 1;
+                long_ind[li] = (m->fix_valor >= 0) ? m->fix_valor : 0;
+            }
         }
     }
 
@@ -184,6 +202,24 @@ int correctio_age(const char *via, const speculum_t *spec)
             (l->initium[sp_init] == ' ' || l->initium[sp_init] == '\t')
         )
             sp_init++;
+
+        /* si linea est solum ';' vel ',' cum correctione, iunge ad
+         * lineam praecedentem */
+        {
+            const char *cont = l->initium + sp_init;
+            int clon         = l->lon - sp_init;
+            if (
+                clon == 1 && (cont[0] == ';' || cont[0] == ',') &&
+                (semi_fix[i] || virg_fix[i]) && wp > out
+            ) {
+                /* retrahe ante '\n' praecedentem */
+                if (*(wp - 1) == '\n')
+                    wp--;
+                *wp++ = cont[0];
+                *wp++ = '\n';
+                continue;
+            }
+        }
 
         /* scribe indentationem (correctionis vel originalem) */
         int ind = ind_exp[i];
@@ -288,6 +324,16 @@ int correctio_age(const char *via, const speculum_t *spec)
             continue;
         }
 
+        /* scissio linearum longarum */
+        if (long_fix[i]) {
+            wp = corrige_longitudinem(
+                wp, corpus, corp_lon,
+                sp_init, long_ind[i],
+                spec->lin_longitudo_max, spec
+            );
+            continue;
+        }
+
         /* remove spatia terminalia */
         if (trim_fin[i]) {
             while (
@@ -298,12 +344,6 @@ int correctio_age(const char *via, const speculum_t *spec)
                 )
             )
                 corp_lon--;
-        }
-
-        /* virgulae */
-        if (virg_fix[i]) {
-            wp = corrige_virgulas(wp, corpus, corp_lon);
-            continue;
         }
 
         /* colineatio adtributionum */
@@ -318,10 +358,50 @@ int correctio_age(const char *via, const speculum_t *spec)
             continue;
         }
 
-        /* spatia circa operatores */
-        if (op_fix[i]) {
-            wp = corrige_operatores(wp, corpus, corp_lon);
-            continue;
+        /* correctiones inline catenatae: virgulae, operatores,
+         * verba clavis, semicolona */
+        {
+            int inl = virg_fix[i] | op_fix[i] |
+                      verb_fix[i] | semi_fix[i];
+            if (inl) {
+                /* alveus temporarius pro catenatione */
+                char tmp1[8192], tmp2[8192];
+                const char *src = corpus;
+                int slon        = corp_lon;
+                char *dst;
+                int dlon;
+
+                if (virg_fix[i]) {
+                    dst  = corrige_virgulas(tmp1, src, slon);
+                    dlon = (int)(dst - tmp1) - 1; /* sine '\n' */
+                    src  = tmp1;
+                    slon = dlon;
+                }
+                if (op_fix[i]) {
+                    dst  = corrige_operatores(tmp2, src, slon);
+                    dlon = (int)(dst - tmp2) - 1;
+                    src  = tmp2;
+                    slon = dlon;
+                }
+                if (verb_fix[i]) {
+                    char *d = (src == tmp2) ? tmp1 : tmp2;
+                    dst  = corrige_spatium_verbum(d, src, slon);
+                    dlon = (int)(dst - d) - 1;
+                    src  = d;
+                    slon = dlon;
+                }
+                if (semi_fix[i]) {
+                    char *d = (src == tmp2) ? tmp1 : tmp2;
+                    dst  = corrige_spatium_semicolon(d, src, slon);
+                    dlon = (int)(dst - d) - 1;
+                    src  = d;
+                    slon = dlon;
+                }
+                memcpy(wp, src, slon);
+                wp += slon;
+                *wp++ = '\n';
+                continue;
+            }
         }
 
         memcpy(wp, corpus, corp_lon);
@@ -371,6 +451,10 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(virg_fix);
     free(cub_fix);
     free(op_fix);
+    free(verb_fix);
+    free(semi_fix);
+    free(long_fix);
+    free(long_ind);
     free(out);
     return (res < 0) ? -1 : mutatum;
 }

@@ -38,7 +38,10 @@ CORRECTIONES = correctiones/communes.c \
 	correctiones/una_sententia.c \
 	correctiones/virgula.c \
 	correctiones/cubitus.c \
-	correctiones/operatores.c
+	correctiones/operatores.c \
+	correctiones/verbum.c \
+	correctiones/semicolon.c \
+	correctiones/longitudo.c
 
 FONTES  = principale.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
 OBJECTA = $(FONTES:.c=.o)

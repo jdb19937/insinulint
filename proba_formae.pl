@@ -62,6 +62,12 @@ make_path($DIR_ARTIF);
 
 my @formae = sort glob("$DIR_FORMAE/*.ison");
 
+if (@ARGV) {
+    my %electae = map { $_ => 1 } @ARGV;
+    @formae = grep { $electae{basename($_, ".ison")} } @formae;
+    die "Nullae formae inventae pro: @ARGV\n" unless @formae;
+}
+
 for my $forma (@formae) {
     my $nomen_formae = basename($forma, ".ison");
     my $dir1 = "$DIR_ARTIF/${nomen_formae}.1";

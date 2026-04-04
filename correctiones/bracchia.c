@@ -28,12 +28,50 @@ char *corrige_bracchia_kr(
         (corpus[lon - 1] == ' ' || corpus[lon - 1] == '\t')
     )
         lon--;
-    memcpy(wp, corpus, lon);
-    wp += lon;
 
-    /* adde ' {' */
-    *wp++ = ' ';
-    *wp++ = '{';
+    /* inveni '//' commentarium (extra chordas) */
+    int comm = -1;
+    for (int j = 0; j < lon; j++) {
+        if (corpus[j] == '"' || corpus[j] == '\'') {
+            char d = corpus[j];
+            for (j++; j < lon; j++) {
+                if (corpus[j] == '\\' && j + 1 < lon)
+                    j++;
+                else if (corpus[j] == d)
+                    break;
+            }
+            continue;
+        }
+        if (
+            corpus[j] == '/' && j + 1 < lon &&
+            corpus[j + 1] == '/'
+        ) {
+            comm = j;
+            break;
+        }
+    }
+
+    if (comm >= 0) {
+        /* insere '{' ante '//' commentarium */
+        int ante = comm;
+        while (
+            ante > 0 &&
+            (corpus[ante - 1] == ' ' || corpus[ante - 1] == '\t')
+        )
+            ante--;
+        memcpy(wp, corpus, ante);
+        wp += ante;
+        *wp++ = ' ';
+        *wp++ = '{';
+        *wp++ = ' ';
+        memcpy(wp, corpus + comm, lon - comm);
+        wp += lon - comm;
+    } else {
+        memcpy(wp, corpus, lon);
+        wp += lon;
+        *wp++ = ' ';
+        *wp++ = '{';
+    }
 
     /* emitte contentum post '{' in linea proxima */
     if (i + 1 < nlin) {

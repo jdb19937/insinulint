@@ -1,5 +1,8 @@
 /*
  * correctiones/scissio.c — scissio ')' ad lineam novam (stilus patens)
+ *
+ * CAVENDUM: commentaria inline ante ')' nondum tractantur —
+ * possunt manglari. Vide turres.c.
  */
 
 #include "../correctio.h"

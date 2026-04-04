@@ -1,5 +1,9 @@
 /*
  * correctiones/apertio.c — scissio post '(' (stilus patens)
+ *
+ * CAVENDUM: commentaria inline intra argumenta nondum tractantur.
+ * Cum linea scinditur, commentaria possunt in positionem falsam
+ * cadere. Vide turres.c pro exemplo.
  */
 
 #include "../correctio.h"

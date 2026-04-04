@@ -96,4 +96,18 @@ char *corrige_operatores(
     char *wp, const char *corpus, int corp_lon
 );
 
+char *corrige_spatium_verbum(
+    char *wp, const char *corpus, int corp_lon
+);
+
+char *corrige_spatium_semicolon(
+    char *wp, const char *corpus, int corp_lon
+);
+
+char *corrige_longitudinem(
+    char *wp, const char *corpus, int corp_lon,
+    int sp_init, int cont_ind, int maxima,
+    const speculum_t *spec
+);
+
 #endif /* CORRECTIO_H */
