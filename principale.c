@@ -149,7 +149,8 @@ int main(int argc, char **argv)
             stderr, "\ninsinulint: %d monita inventa.\n",
             summa_monitorum
         );
-        return 1;
+        if (!corrige)
+            return 1;
     }
 
     return 0;

@@ -1,0 +1,29 @@
+{
+    "indentatio": {
+        "latitudo": 4,
+        "modus": "spatia",
+        "continuatio": "massa"
+    },
+    "bracchia": {
+        "stilus": "kr",
+        "else_coniunctum": 1,
+        "necessaria": 0
+    },
+    "spatia": {
+        "post_verba_clavis": 1,
+        "circa_operatores": 0,
+        "post_virgulam": 1,
+        "ante_semicolon": 0,
+        "adtributio_colineata": 0
+    },
+    "lineae": {
+        "longitudo_maxima": 120,
+        "spatia_terminalia": 1,
+        "vacuae_max": 3,
+        "finis_linea_nova": 1,
+        "tabulae_mixtae": 0
+    },
+    "corpus": {
+        "separatum": 0
+    }
+}
