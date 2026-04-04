@@ -54,11 +54,12 @@ int correctio_age(const char *via, const speculum_t *spec)
     int *bra_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
     int *una_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
     int *virg_fix  = calloc((size_t)(nlin + 1), sizeof(int));
+    int *cub_fix   = calloc((size_t)(nlin + 1), sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
         !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind ||
-        !virg_fix
+        !virg_fix || !cub_fix
     ) {
         free(fons);
         free(lineae);
@@ -76,6 +77,7 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(bra_ind);
         free(una_ind);
         free(virg_fix);
+        free(cub_fix);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -139,6 +141,8 @@ int correctio_age(const char *via, const speculum_t *spec)
                 una_ind[li] = m->fix_valor;
         } else if (strcmp(m->regula, "spatium_virgula") == 0) {
             virg_fix[li] = 1;
+        } else if (strcmp(m->regula, "cubitus") == 0) {
+            cub_fix[li] = 1;
         }
     }
 
@@ -189,6 +193,22 @@ int correctio_age(const char *via, const speculum_t *spec)
         /* contentum post indentationem */
         const char *corpus   = l->initium + sp_init;
         int         corp_lon = l->lon - sp_init;
+
+        /* cubitus: iunge '}' cum 'else' in linea sequente */
+        if (
+            spec->bra_else_coniunctum &&
+            i + 1 < nlin &&
+            cub_fix[i + 1]
+        ) {
+            int transili = 0;
+            wp = corrige_cubitum(
+                wp, corpus, corp_lon,
+                lineae, i, nlin, &transili
+            );
+            if (transili)
+                i++;
+            continue;
+        }
 
         /* bracchia stilus K&R: iunge '{' ex linea proxima */
         if (
@@ -335,6 +355,7 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(bra_ind);
     free(una_ind);
     free(virg_fix);
+    free(cub_fix);
     free(out);
     return res;
 }

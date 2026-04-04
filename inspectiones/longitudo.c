@@ -22,6 +22,17 @@ void inspice_longitudinem(
         /* columna ultimi characteris */
         int ultimus = v->tok_finis - 1;
         int eff_lon = signa[ultimus].longitudo;
+        /* praeprocessor continuatus: transili (longitudo artificialis) */
+        if (signa[ultimus].genus == SIGNUM_PRAEPROCESSOR) {
+            if (
+                memchr(
+                    signa[ultimus].initium, '\n',
+                    (size_t)signa[ultimus].longitudo
+                )
+            )
+                continue;
+        }
+
         /* commentaria multiliniaria: solum primam lineam metiamur */
         if (signa[ultimus].genus == SIGNUM_COMMENTARIUM) {
             for (int k = 0; k < signa[ultimus].longitudo; k++) {

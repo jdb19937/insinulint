@@ -86,4 +86,10 @@ char *corrige_virgulas(
     char *wp, const char *corpus, int corp_lon
 );
 
+char *corrige_cubitum(
+    char *wp, const char *corpus, int corp_lon,
+    const linea_t *lineae, int i, int nlin,
+    int *transili
+);
+
 #endif /* CORRECTIO_H */
