@@ -50,14 +50,18 @@ int correctio_age(const char *via, const speculum_t *spec)
     int *equ_spa   = malloc((size_t)(nlin + 1) * sizeof(int));
     int *corp_col  = malloc((size_t)(nlin + 1) * sizeof(int));
     int *corp_ind  = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *bra_col   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *bra_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *una_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
-        !corp_col || !corp_ind
+        !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind
     ) {
         free(fons); free(lineae); free(ind_exp); free(trim_fin);
         free(split_col); free(split_ind); free(apert_col); free(apert_ind);
         free(equ_col); free(equ_spa); free(corp_col); free(corp_ind);
+        free(bra_col); free(bra_ind); free(una_ind);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -70,6 +74,9 @@ int correctio_age(const char *via, const speculum_t *spec)
         equ_spa[i]   = 0;
         corp_col[i]  = -1;
         corp_ind[i]  = 0;
+        bra_col[i]   = -1;
+        bra_ind[i]   = 0;
+        una_ind[i]   = -1;
     }
 
     /* popula tabulam ex monitis */
@@ -105,6 +112,14 @@ int correctio_age(const char *via, const speculum_t *spec)
                 corp_col[li] = m->columna;
                 corp_ind[li] = m->fix_valor;
             }
+        } else if (strcmp(m->regula, "bracchia_stilus") == 0) {
+            if (m->bra_columna >= 0 && bra_col[li] < 0) {
+                bra_col[li] = m->bra_columna;
+                bra_ind[li] = m->fix_valor;
+            }
+        } else if (strcmp(m->regula, "una_sententia") == 0) {
+            if (m->fix_valor >= 0 && una_ind[li] < 0)
+                una_ind[li] = m->fix_valor;
         }
     }
 
@@ -152,6 +167,41 @@ int correctio_age(const char *via, const speculum_t *spec)
         /* contentum post indentationem */
         const char *corpus   = l->initium + sp_init;
         int         corp_lon = l->lon - sp_init;
+
+        /* bracchia stilus K&R: iunge '{' ex linea proxima */
+        if (
+            spec->bra_stilus == 0 &&
+            i + 1 < nlin &&
+            bra_col[i + 1] >= 0
+        ) {
+            int transili = 0;
+            wp = corrige_bracchia_kr(
+                wp, corpus, corp_lon,
+                lineae, i, nlin, &transili, spec
+            );
+            if (transili)
+                i++;
+            continue;
+        }
+
+        /* bracchia stilus Allman: scinde '{' ad lineam novam */
+        if (spec->bra_stilus == 1 && bra_col[i] >= 0) {
+            int cb = columna_ad_byte(
+                l->initium, l->lon, bra_col[i]
+            ) - sp_init;
+            wp = corrige_bracchia_allman(
+                wp, corpus, corp_lon, cb, bra_ind[i], spec
+            );
+            continue;
+        }
+
+        /* una sententia */
+        if (una_ind[i] >= 0) {
+            wp = corrige_unam_sententiam(
+                wp, corpus, corp_lon, una_ind[i], spec
+            );
+            continue;
+        }
 
         /* corpus separatum */
         if (corp_col[i] >= 0) {
@@ -252,6 +302,9 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(equ_spa);
     free(corp_col);
     free(corp_ind);
+    free(bra_col);
+    free(bra_ind);
+    free(una_ind);
     free(out);
     return res;
 }

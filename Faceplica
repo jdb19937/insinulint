@@ -25,14 +25,17 @@ INSPECTIONES = inspectiones/auxiliaria.c \
 	inspectiones/bracchia_necessaria.c \
 	inspectiones/colineatio.c \
 	inspectiones/commentaria.c \
-	inspectiones/corpus_separatum.c
+	inspectiones/corpus_separatum.c \
+	inspectiones/una_sententia.c
 
 CORRECTIONES = correctiones/communes.c \
 	correctiones/corpus.c \
 	correctiones/apertio.c \
 	correctiones/scissio.c \
 	correctiones/colineatio.c \
-	correctiones/excommenta.c
+	correctiones/excommenta.c \
+	correctiones/bracchia.c \
+	correctiones/una_sententia.c
 
 FONTES  = principale.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
 OBJECTA = $(FONTES:.c=.o)

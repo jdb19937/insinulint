@@ -35,6 +35,7 @@ void inspector_adde(
     m->fix_valor     = -1;
     m->split_columna = -1;
     m->apert_columna = -1;
+    m->bra_columna   = -1;
     snprintf(m->regula,  sizeof(m->regula),  "%s", regula);
     snprintf(m->nuntius, sizeof(m->nuntius), "%s", nuntius);
 }
@@ -146,6 +147,7 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->lin_vacuae_max        = 2;
     spec->lin_finis_nova        = 1;
     spec->lin_tabulae_mixtae    = 1;
+    spec->lin_una_sententia     = 1;
 
     spec->cor_separatum = 1;
 
@@ -249,6 +251,10 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->lin_tabulae_mixtae = lege_verum(
         ison, "lineae.tabulae_mixtae",
         spec->lin_tabulae_mixtae
+    );
+    spec->lin_una_sententia = lege_verum(
+        ison, "lineae.una_sententia",
+        spec->lin_una_sententia
     );
 
     /* corpus */
@@ -371,6 +377,10 @@ void inspice_omnia(
     /* 16. corpus separatum */
     if (spec->cor_separatum)
         inspice_corpus_separatum(ins, lex, spec);
+
+    /* 17. una sententia per lineam */
+    if (spec->lin_una_sententia)
+        inspice_unam_sententiam(ins, lex, versus, nv);
 
     free(versus);
 }

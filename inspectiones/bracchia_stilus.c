@@ -63,21 +63,39 @@ void inspice_bracchia_stilum(
         /* Allman: omnia in nova linea */
         int linea_nova = habet_lineam_novam(signa, ante + 1, i);
 
+        /* computa indentationem lineae '{' */
+        int ind_bra = 0;
+        {
+            int k = i;
+            while (k > 0 && signa[k - 1].genus != SIGNUM_LINEA_NOVA)
+                k--;
+            if (signa[k].genus == SIGNUM_SPATIUM) {
+                for (int j = 0; j < signa[k].longitudo; j++) {
+                    if (signa[k].initium[j] == '\t')
+                        ind_bra += 8;
+                    else
+                        ind_bra++;
+                }
+            }
+        }
+
         if (controlum) {
             if (spec->bra_stilus == 0 && linea_nova) {
-                inspector_adde(
+                adde_bracchia(
                     ins, GRAVITAS_MONITUM,
                     signa[i].linea, signa[i].columna,
                     "bracchia_stilus",
-                    "'{' debet esse in eadem linea (stilus K&R)"
+                    "'{' debet esse in eadem linea (stilus K&R)",
+                    ind_bra, signa[i].columna
                 );
             }
             if (spec->bra_stilus == 1 && !linea_nova) {
-                inspector_adde(
+                adde_bracchia(
                     ins, GRAVITAS_MONITUM,
                     signa[i].linea, signa[i].columna,
                     "bracchia_stilus",
-                    "'{' debet esse in nova linea (stilus Allman)"
+                    "'{' debet esse in nova linea (stilus Allman)",
+                    ind_bra, signa[i].columna
                 );
             }
         } else {
@@ -89,12 +107,13 @@ void inspice_bracchia_stilum(
                     est_verbum(&signa[ante], "union") ||
                     est_verbum(&signa[ante], "enum")
                 ) {
-                    inspector_adde(
+                    adde_bracchia(
                         ins, GRAVITAS_MONITUM,
                         signa[i].linea, signa[i].columna,
                         "bracchia_stilus",
                         "'{' debet esse in nova linea "
-                        "(stilus Allman)"
+                        "(stilus Allman)",
+                        ind_bra, signa[i].columna
                     );
                 }
             }

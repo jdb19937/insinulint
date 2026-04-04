@@ -256,3 +256,16 @@ void adde_apert(
         ins->monita[pre].apert_columna = apert_col;
     }
 }
+
+void adde_bracchia(
+    inspector_t *ins, gravitas_t g, int linea, int columna,
+    const char *regula, const char *nuntius,
+    int fix_valor, int bra_col
+) {
+    int pre = ins->num_monita;
+    inspector_adde(ins, g, linea, columna, regula, nuntius);
+    if (ins->num_monita > pre) {
+        ins->monita[pre].fix_valor   = fix_valor;
+        ins->monita[pre].bra_columna = bra_col;
+    }
+}

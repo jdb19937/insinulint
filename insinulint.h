@@ -81,6 +81,7 @@ typedef struct {
     int         fix_valor;      /* -1 = non fixabile; >= 0 = spatia */
     int         split_columna;  /* -1 = non; >= 0 = columna ')' */
     int         apert_columna;  /* -1 = non; >= 0 = columna '(' */
+    int         bra_columna;    /* -1 = non; >= 0 = columna '{' */
 } monitum_t;
 
 /* ================================================================
@@ -130,6 +131,7 @@ typedef struct {
     int lin_vacuae_max;         /* lineae vacuae consecutivae maximae */
     int lin_finis_nova;         /* 1 = fasciculus debet finire cum \n */
     int lin_tabulae_mixtae;     /* 1 = veta tabulas et spatia mixtas */
+    int lin_una_sententia;     /* 1 = veta plures sententias in eadem linea */
 
     /* corpus */
     int cor_separatum;          /* 1 = corpus unius sententiae in linea propria */

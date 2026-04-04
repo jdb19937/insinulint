@@ -67,6 +67,11 @@ void adde_apert(
     int columna, const char *regula, const char *nuntius,
     int ind_cont, int apert_col
 );
+void adde_bracchia(
+    inspector_t *ins, gravitas_t g, int linea, int columna,
+    const char *regula, const char *nuntius,
+    int fix_valor, int bra_col
+);
 
 /* ================================================================
  * inspectiones — una functio per regulam
@@ -148,6 +153,11 @@ void inspice_commentaria(
 void inspice_corpus_separatum(
     inspector_t *ins, const lexator_t *lex,
     const speculum_t *spec
+);
+
+void inspice_unam_sententiam(
+    inspector_t *ins, const lexator_t *lex,
+    const versus_t *versus, int num_versus
 );
 
 #endif /* INSPECTIO_H */

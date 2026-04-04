@@ -63,6 +63,9 @@
       },
       "tabulae_mixtae": {
         "type": "integer"
+      },
+      "una_sententia": {
+        "type": "integer"
       }
     },
     "required": []

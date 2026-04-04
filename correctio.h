@@ -66,4 +66,20 @@ char *corrige_colineationem(
     int col, int spa, int sp_init
 );
 
+char *corrige_bracchia_kr(
+    char *wp, const char *corpus, int corp_lon,
+    const linea_t *lineae, int i, int nlin,
+    int *transili, const speculum_t *spec
+);
+
+char *corrige_bracchia_allman(
+    char *wp, const char *corpus, int corp_lon,
+    int col, int ind, const speculum_t *spec
+);
+
+char *corrige_unam_sententiam(
+    char *wp, const char *corpus, int corp_lon,
+    int ind, const speculum_t *spec
+);
+
 #endif /* CORRECTIO_H */
