@@ -24,8 +24,8 @@ void inspice_unam_sententiam(
             continue;
 
         /* numera semicolona extra parentheses */
-        int prof_par = 0;
-        int semicolona = 0;
+        int prof_par     = 0;
+        int semicolona   = 0;
         int primum_extra = -1;  /* index primi ';' extra — ad nuntium */
 
         for (int j = v->tok_initium; j < v->tok_finis; j++) {

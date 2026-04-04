@@ -11,9 +11,7 @@ void inspice_corpus_separatum(
     const speculum_t *spec
 ) {
     int n   = lex->num_signa;
-    int lat = spec->ind_tabulis
-        ? spec->ind_latitudo * 8
-        : spec->ind_latitudo;
+    int lat = spec->ind_tabulis ? spec->ind_latitudo * 8 : spec->ind_latitudo;
     const signum_t *signa = lex->signa;
 
     for (int i = 0; i < n; i++) {

@@ -105,8 +105,13 @@ static void inspice_colineationes(
         if (vi >= num_versus)
             break;
 
-        int gi = vi;
-        while (vi < num_versus && praedicatum(signa, &versus[vi]))
+        int gi         = vi;
+        int ind_gregis = versus[vi].spatia;
+        while (
+            vi < num_versus &&
+            praedicatum(signa, &versus[vi]) &&
+            versus[vi].spatia == ind_gregis
+        )
             vi++;
         int gf = vi;
 

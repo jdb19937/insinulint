@@ -43,10 +43,13 @@ char *scribe_indentationem(char *wp, int spatia, const speculum_t *spec)
     if (spec->ind_tabulis) {
         int tabs = spatia / 8;
         int rest = spatia % 8;
-        for (int j = 0; j < tabs; j++) *wp++ = '\t';
-        for (int j = 0; j < rest; j++) *wp++ = ' ';
+        for (int j = 0; j < tabs; j++)
+            *wp++ = '\t';
+        for (int j = 0; j < rest; j++)
+            *wp++ = ' ';
     } else {
-        for (int j = 0; j < spatia; j++) *wp++ = ' ';
+        for (int j = 0; j < spatia; j++)
+            *wp++ = ' ';
     }
     return wp;
 }

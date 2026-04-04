@@ -59,14 +59,16 @@ char *corrige_bracchia_kr(
             int rest_lon = ln->lon - k;
             while (
                 rest_lon > 0 &&
-                (ln->initium[k + rest_lon - 1] == ' ' ||
-                 ln->initium[k + rest_lon - 1] == '\t')
+                (
+                    ln->initium[k + rest_lon - 1] == ' ' ||
+                    ln->initium[k + rest_lon - 1] == '\t'
+                )
             )
                 rest_lon--;
 
             /* computa indentationem: linea praecedentis + unus gradus */
             const linea_t *lc = &lineae[i];
-            int ind_cur = 0;
+            int ind_cur       = 0;
             for (int j = 0; j < lc->lon; j++) {
                 if (lc->initium[j] == ' ')
                     ind_cur++;
@@ -76,7 +78,7 @@ char *corrige_bracchia_kr(
                     break;
             }
             int lat = spec->ind_tabulis
-                ? spec->ind_latitudo * 8
+            ? spec->ind_latitudo * 8
                 : spec->ind_latitudo;
             if (lat <= 0)
                 lat = 4;
@@ -117,7 +119,7 @@ char *corrige_bracchia_allman(
 ) {
     /* inveni '{' in corpore */
     int bra_byte = -1;
-    int cur_col = 0;
+    int cur_col  = 0;
     for (int j = 0; j < corp_lon; j++) {
         if (cur_col >= col && corpus[j] == '{') {
             bra_byte = j;
@@ -147,7 +149,7 @@ char *corrige_bracchia_allman(
     *wp++ = '\n';
 
     /* '{' cum indentione in nova linea */
-    wp = scribe_indentationem(wp, ind, spec);
+    wp    = scribe_indentationem(wp, ind, spec);
     *wp++ = '{';
 
     /* contentum post '{' */
@@ -160,13 +162,15 @@ char *corrige_bracchia_allman(
     if (post < corp_lon) {
         int lat = spec->ind_latitudo;
         if (lat <= 0)
-            lat = 4;
-        *wp++ = '\n';
+            lat      = 4;
+        *wp++        = '\n';
         int rest_lon = corp_lon - post;
         while (
             rest_lon > 0 &&
-            (corpus[post + rest_lon - 1] == ' ' ||
-             corpus[post + rest_lon - 1] == '\t')
+            (
+                corpus[post + rest_lon - 1] == ' ' ||
+                corpus[post + rest_lon - 1] == '\t'
+            )
         )
             rest_lon--;
         wp = scribe_indentationem(wp, ind + lat, spec);

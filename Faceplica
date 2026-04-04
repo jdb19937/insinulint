@@ -72,10 +72,10 @@ proba: $(PROBA_OBJECTA) $(LIBISON)
 %.o: %.c insinulint.h inspectio.h correctio.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-inspice: $(NOMEN)
-	./$(NOMEN) $(FONTES)
-
 purga:
 	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba
 
-.PHONY: omnia purga proba para expara inspice
+linte:
+	./insinulint -c $(FONTES)
+
+.PHONY: omnia purga proba para expara inspice linte

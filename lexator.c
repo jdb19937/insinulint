@@ -204,7 +204,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     p++;
                 }
             }
-            if (p < fin) { p++; columna++; } /* transili '"' */
+            if (p < fin) {
+                p++;
+                columna++;
+            }/* transili '"' */
             lex_adde(
                 lex, SIGNUM_CHORDA, lin0, col0, initium,
                 (int)(p - initium)
@@ -225,7 +228,10 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     p++;
                 }
             }
-            if (p < fin) { p++; columna++; }
+            if (p < fin) {
+                p++;
+                columna++;
+            }
             lex_adde(
                 lex, SIGNUM_LITTERA, lin0, col0, initium,
                 (int)(p - initium)
@@ -236,37 +242,44 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
         /* --- interpunctio structuralis --- */
         if (*p == '{') {
             lex_adde(lex, SIGNUM_APERTIO, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
         if (*p == '}') {
             lex_adde(lex, SIGNUM_CLAUSIO, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
         if (*p == '(') {
             lex_adde(lex, SIGNUM_APERTIO_PAR, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
         if (*p == ')') {
             lex_adde(lex, SIGNUM_CLAUSIO_PAR, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
         if (*p == '[') {
             lex_adde(lex, SIGNUM_APERTIO_QUAD, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
         if (*p == ']') {
             lex_adde(lex, SIGNUM_CLAUSIO_QUAD, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
         if (*p == ';') {
             lex_adde(lex, SIGNUM_SEMICOLON, linea, columna, p, 1);
-            p++; columna++;
+            p++;
+            columna++;
             continue;
         }
 
@@ -290,9 +303,11 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 *p == '0' && p + 1 < fin &&
                 (p[1] == 'x' || p[1] == 'X')
             ) {
-                p += 2; columna += 2;
+                p += 2;
+                columna += 2;
                 while (p < fin && isxdigit((unsigned char)*p)) {
-                    p++; columna++;
+                    p++;
+                    columna++;
                 }
             } else {
                 while (
@@ -306,7 +321,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                         *p == 'F'
                     )
                 ) {
-                    p++; columna++;
+                    p++;
+                    columna++;
                 }
             }
             /* suffixum: u, l, ul, ll, ull, f */
@@ -317,7 +333,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     *p == 'f' || *p == 'F'
                 )
             ) {
-                p++; columna++;
+                p++;
+                columna++;
             }
             lex_adde(
                 lex, SIGNUM_NUMERUS, lin0, col0, initium,

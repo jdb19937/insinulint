@@ -20,7 +20,7 @@ void inspice_indentationem(
     const speculum_t *spec
 ) {
     int lat = spec->ind_tabulis
-        ? spec->ind_latitudo * 8
+    ? spec->ind_latitudo * 8
         : spec->ind_latitudo;
     const signum_t *signa = lex->signa;
     int n = lex->num_signa;

@@ -1,7 +1,7 @@
 /*
  * correctiones/una_sententia.c — scinde plures sententias in lineas proprias
  *
- * "d++; q++; continue; }" → lineae separatae cum indentione.
+ * "{ d++; q++; continue; }" → lineae separatae cum indentione.
  */
 
 #include "../correctio.h"
@@ -13,13 +13,14 @@ char *corrige_unam_sententiam(
     int ind, const speculum_t *spec
 ) {
     int lat = spec->ind_tabulis
-        ? spec->ind_latitudo * 8
+    ? spec->ind_latitudo * 8
         : spec->ind_latitudo;
     if (lat <= 0)
         lat = 4;
 
     int prof_par = 0;
-    int pos = 0;
+    int prof_bra = 0;
+    int pos      = 0;
 
     while (pos < corp_lon) {
         char c = corpus[pos];
@@ -31,11 +32,54 @@ char *corrige_unam_sententiam(
                 prof_par--;
         }
 
+        if (prof_par > 0) {
+            *wp++ = c;
+            pos++;
+            continue;
+        }
+
+        /* '{' — scribe et scinde ad novam lineam cum indentione aucta */
+        if (c == '{') {
+            *wp++ = '{';
+            pos++;
+            prof_bra++;
+            /* transili spatia post '{' */
+            while (
+                pos < corp_lon &&
+                (corpus[pos] == ' ' || corpus[pos] == '\t')
+            )
+                pos++;
+            if (pos < corp_lon) {
+                *wp++ = '\n';
+                wp = scribe_indentationem(
+                    wp, ind + prof_bra * lat, spec
+                );
+            }
+            continue;
+        }
+
+        /* '}' — scinde ad novam lineam cum indentione reducta */
+        if (c == '}') {
+            if (prof_bra > 0)
+                prof_bra--;
+            *wp++ = '\n';
+            wp    = scribe_indentationem(wp, ind + prof_bra * lat, spec);
+            *wp++ = '}';
+            pos++;
+            /* transili spatia post '}' */
+            while (
+                pos < corp_lon &&
+                (corpus[pos] == ' ' || corpus[pos] == '\t')
+            )
+                pos++;
+            continue;
+        }
+
         *wp++ = c;
         pos++;
 
         /* post ';' extra parentheses, scinde si restat contentum */
-        if (c == ';' && prof_par == 0 && pos < corp_lon) {
+        if (c == ';' && pos < corp_lon) {
             /* transili spatia */
             int rest = pos;
             while (
@@ -47,18 +91,17 @@ char *corrige_unam_sententiam(
             if (rest >= corp_lon)
                 continue;
 
-            /* si '}' sequitur, pone in linea propria cum indentione reducta */
+            /* si '}' sequitur, permitte handler '}' tractare */
             if (corpus[rest] == '}') {
-                *wp++ = '\n';
-                int ind_cl = (ind >= lat) ? ind - lat : 0;
-                wp = scribe_indentationem(wp, ind_cl, spec);
                 pos = rest;
                 continue;
             }
 
-            /* aliter scinde ad novam sententiam */
+            /* scinde ad novam lineam */
             *wp++ = '\n';
-            wp = scribe_indentationem(wp, ind, spec);
+            wp = scribe_indentationem(
+                wp, ind + prof_bra * lat, spec
+            );
             pos = rest;
         }
     }

@@ -58,10 +58,21 @@ int correctio_age(const char *via, const speculum_t *spec)
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
         !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind
     ) {
-        free(fons); free(lineae); free(ind_exp); free(trim_fin);
-        free(split_col); free(split_ind); free(apert_col); free(apert_ind);
-        free(equ_col); free(equ_spa); free(corp_col); free(corp_ind);
-        free(bra_col); free(bra_ind); free(una_ind);
+        free(fons);
+        free(lineae);
+        free(ind_exp);
+        free(trim_fin);
+        free(split_col);
+        free(split_ind);
+        free(apert_col);
+        free(apert_ind);
+        free(equ_col);
+        free(equ_spa);
+        free(corp_col);
+        free(corp_ind);
+        free(bra_col);
+        free(bra_ind);
+        free(una_ind);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -130,7 +141,10 @@ int correctio_age(const char *via, const speculum_t *spec)
     size_t outsz = fons_lon * 2 + (size_t)nlin * 64 + 4;
     char *out    = malloc(outsz);
     if (!out) {
-        free(fons); free(lineae); free(ind_exp); free(trim_fin);
+        free(fons);
+        free(lineae);
+        free(ind_exp);
+        free(trim_fin);
         return -1;
     }
 
