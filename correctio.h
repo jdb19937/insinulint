@@ -69,7 +69,7 @@ char *corrige_colineationem(
 char *corrige_bracchia_kr(
     char *wp, const char *corpus, int corp_lon,
     const linea_t *lineae, int i, int nlin,
-    int *transili, const speculum_t *spec
+    int *transili, int una_ind_prox, const speculum_t *spec
 );
 
 char *corrige_bracchia_allman(

@@ -12,16 +12,15 @@
 /*
  * corrige_bracchia_kr — iunge '{' ad finem lineae currentis
  *
- * Linea currens (i) est linea ante '{'. Linea i+1 continet '{' solam.
+ * Linea currens (i) est linea ante '{'. Linea i+1 continet '{'.
  * Scribit contentum lineae currentis, addit ' {', transit lineam i+1.
+ * Si contentum post '{' adest et una_ind_prox >= 0, scindit sententias.
  */
 char *corrige_bracchia_kr(
     char *wp, const char *corpus, int corp_lon,
     const linea_t *lineae, int i, int nlin,
-    int *transili, const speculum_t *spec
+    int *transili, int una_ind_prox, const speculum_t *spec
 ) {
-    (void)spec;
-
     /* scribe contentum lineae currentis sine spatiis terminalibus */
     int lon = corp_lon;
     while (
@@ -35,7 +34,6 @@ char *corrige_bracchia_kr(
     /* adde ' {' */
     *wp++ = ' ';
     *wp++ = '{';
-    *wp++ = '\n';
 
     /* emitte contentum post '{' in linea proxima */
     if (i + 1 < nlin) {
@@ -55,18 +53,20 @@ char *corrige_bracchia_kr(
             (ln->initium[k] == ' ' || ln->initium[k] == '\t')
         )
             k++;
-        /* si restat contentum post '{', scribe in nova linea */
+
         if (k < ln->lon) {
-            /* computa indentationem lineae currentis */
-            int ind_cur = 0;
-            for (int j = 0; j < lon; j++) {
-                /* iam habemus corpus post indentationem — non possumus;
-                 * utimur indentationem originalem lineae praecedentis */
-                (void)j;
-                break;
-            }
-            /* indentatio lineae praecedentis + unus gradus */
+            /* restat contentum post '{' */
+            int rest_lon = ln->lon - k;
+            while (
+                rest_lon > 0 &&
+                (ln->initium[k + rest_lon - 1] == ' ' ||
+                 ln->initium[k + rest_lon - 1] == '\t')
+            )
+                rest_lon--;
+
+            /* computa indentationem: linea praecedentis + unus gradus */
             const linea_t *lc = &lineae[i];
+            int ind_cur = 0;
             for (int j = 0; j < lc->lon; j++) {
                 if (lc->initium[j] == ' ')
                     ind_cur++;
@@ -75,24 +75,34 @@ char *corrige_bracchia_kr(
                 else
                     break;
             }
-            int lat = spec->ind_latitudo;
-            if (spec->ind_tabulis)
-                lat = spec->ind_latitudo * 8;
+            int lat = spec->ind_tabulis
+                ? spec->ind_latitudo * 8
+                : spec->ind_latitudo;
             if (lat <= 0)
                 lat = 4;
-            wp = scribe_indentationem(wp, ind_cur + lat, spec);
-            int rest_lon = ln->lon - k;
-            while (
-                rest_lon > 0 &&
-                (ln->initium[k + rest_lon - 1] == ' ' ||
-                 ln->initium[k + rest_lon - 1] == '\t')
-            )
-                rest_lon--;
-            memcpy(wp, ln->initium + k, rest_lon);
-            wp += rest_lon;
+            int ind_rest = ind_cur + lat;
+
+            *wp++ = '\n';
+            if (una_ind_prox >= 0) {
+                /* sententias scinde */
+                wp = scribe_indentationem(wp, ind_rest, spec);
+                wp = corrige_unam_sententiam(
+                    wp, ln->initium + k, rest_lon,
+                    ind_rest, spec
+                );
+                /* corrige_unam_sententiam iam '\n' addidit */
+            } else {
+                wp = scribe_indentationem(wp, ind_rest, spec);
+                memcpy(wp, ln->initium + k, rest_lon);
+                wp += rest_lon;
+                *wp++ = '\n';
+            }
+        } else {
             *wp++ = '\n';
         }
         *transili = 1;
+    } else {
+        *wp++ = '\n';
     }
 
     return wp;
@@ -100,9 +110,6 @@ char *corrige_bracchia_kr(
 
 /*
  * corrige_bracchia_allman — scinde '{' ad lineam novam
- *
- * Linea currens continet '...) {' vel '...else {'.
- * Scindimus ante '{': contentum ante + '\n' + indentatio + '{' + '\n'.
  */
 char *corrige_bracchia_allman(
     char *wp, const char *corpus, int corp_lon,
@@ -151,7 +158,9 @@ char *corrige_bracchia_allman(
     )
         post++;
     if (post < corp_lon) {
-        /* restat contentum — scribe in eadem linea post '{' */
+        int lat = spec->ind_latitudo;
+        if (lat <= 0)
+            lat = 4;
         *wp++ = '\n';
         int rest_lon = corp_lon - post;
         while (
@@ -160,7 +169,7 @@ char *corrige_bracchia_allman(
              corpus[post + rest_lon - 1] == '\t')
         )
             rest_lon--;
-        wp = scribe_indentationem(wp, ind + (spec->ind_latitudo > 0 ? spec->ind_latitudo : 4), spec);
+        wp = scribe_indentationem(wp, ind + lat, spec);
         memcpy(wp, corpus + post, rest_lon);
         wp += rest_lon;
     }

@@ -100,6 +100,9 @@ int correctio_age(const char *via, const speculum_t *spec)
             } else if (m->fix_valor >= 0 && ind_exp[li] < 0) {
                 ind_exp[li] = m->fix_valor;
             }
+        } else if (strcmp(m->regula, "tabulae_mixtae") == 0) {
+            if (m->fix_valor >= 0 && ind_exp[li] < 0)
+                ind_exp[li] = m->fix_valor;
         } else if (strcmp(m->regula, "spatia_terminalia") == 0) {
             trim_fin[li] = 1;
         } else if (strcmp(m->regula, "adtributio_colineata") == 0) {
@@ -177,7 +180,8 @@ int correctio_age(const char *via, const speculum_t *spec)
             int transili = 0;
             wp = corrige_bracchia_kr(
                 wp, corpus, corp_lon,
-                lineae, i, nlin, &transili, spec
+                lineae, i, nlin, &transili,
+                (i + 1 < nlin) ? una_ind[i + 1] : -1, spec
             );
             if (transili)
                 i++;

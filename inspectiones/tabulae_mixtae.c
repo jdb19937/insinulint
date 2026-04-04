@@ -25,11 +25,12 @@ void inspice_tabulas_mixtas(
                 habet_sp = 1;
         }
         if (habet_tab && habet_sp) {
-            inspector_adde(
+            adde_fix(
                 ins, GRAVITAS_MONITUM,
                 v->numero, 0,
                 "tabulae_mixtae",
-                "tabulae et spatia mixta in indentatione"
+                "tabulae et spatia mixta in indentatione",
+                v->spatia
             );
         }
     }

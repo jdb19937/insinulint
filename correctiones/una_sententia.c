@@ -1,7 +1,7 @@
 /*
  * correctiones/una_sententia.c — scinde plures sententias in lineas proprias
  *
- * "{ d++; q++; continue; }" → lineae separatae cum indentione.
+ * "d++; q++; continue; }" → lineae separatae cum indentione.
  */
 
 #include "../correctio.h"
@@ -12,6 +12,12 @@ char *corrige_unam_sententiam(
     char *wp, const char *corpus, int corp_lon,
     int ind, const speculum_t *spec
 ) {
+    int lat = spec->ind_tabulis
+        ? spec->ind_latitudo * 8
+        : spec->ind_latitudo;
+    if (lat <= 0)
+        lat = 4;
+
     int prof_par = 0;
     int pos = 0;
 
@@ -38,12 +44,22 @@ char *corrige_unam_sententiam(
             )
                 rest++;
 
-            /* si restat contentum (non solum spatia), scinde */
-            if (rest < corp_lon) {
+            if (rest >= corp_lon)
+                continue;
+
+            /* si '}' sequitur, pone in linea propria cum indentione reducta */
+            if (corpus[rest] == '}') {
                 *wp++ = '\n';
-                wp = scribe_indentationem(wp, ind, spec);
+                int ind_cl = (ind >= lat) ? ind - lat : 0;
+                wp = scribe_indentationem(wp, ind_cl, spec);
                 pos = rest;
+                continue;
             }
+
+            /* aliter scinde ad novam sententiam */
+            *wp++ = '\n';
+            wp = scribe_indentationem(wp, ind, spec);
+            pos = rest;
         }
     }
     *wp++ = '\n';
