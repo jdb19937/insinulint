@@ -92,4 +92,8 @@ char *corrige_cubitum(
     int *transili
 );
 
+char *corrige_operatores(
+    char *wp, const char *corpus, int corp_lon
+);
+
 #endif /* CORRECTIO_H */

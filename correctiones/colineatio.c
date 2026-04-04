@@ -28,8 +28,19 @@ char *corrige_colineationem(
         memcpy(wp, corpus, new_off);
         wp += new_off;
     }
-    memcpy(wp, corpus + eq_off, corp_lon - eq_off);
-    wp += corp_lon - eq_off;
+    /* scribe '=' et residuum, curans spatium post '=' */
+    int rest = eq_off;
+    if (rest < corp_lon && corpus[rest] == '=') {
+        *wp++ = '=';
+        rest++;
+        if (
+            rest < corp_lon &&
+            corpus[rest] != ' ' && corpus[rest] != '\t'
+        )
+            *wp++ = ' ';
+    }
+    memcpy(wp, corpus + rest, corp_lon - rest);
+    wp += corp_lon - rest;
     *wp++ = '\n';
     return wp;
 }

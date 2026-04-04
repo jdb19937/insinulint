@@ -127,8 +127,14 @@ int main(int argc, char **argv)
     for (int i = primus_fasciculus; i < argc; i++) {
         if (corrige && spec.com_veta)
             correctio_excommenta(argv[i]);
-        if (corrige)
-            correctio_age(argv[i], &spec);
+        if (corrige) {
+            /* itera usque ad stabilitatem */
+            for (int passus = 0; passus < 16; passus++) {
+                int res = correctio_age(argv[i], &spec);
+                if (res <= 0)
+                    break;
+            }
+        }
         int res = insinulint_inspice(argv[i], &spec);
         if (res < 0) {
             summa_monitorum++;

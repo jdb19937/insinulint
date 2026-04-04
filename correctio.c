@@ -55,11 +55,12 @@ int correctio_age(const char *via, const speculum_t *spec)
     int *una_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
     int *virg_fix  = calloc((size_t)(nlin + 1), sizeof(int));
     int *cub_fix   = calloc((size_t)(nlin + 1), sizeof(int));
+    int *op_fix    = calloc((size_t)(nlin + 1), sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
         !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind ||
-        !virg_fix || !cub_fix
+        !virg_fix || !cub_fix || !op_fix
     ) {
         free(fons);
         free(lineae);
@@ -78,6 +79,7 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(una_ind);
         free(virg_fix);
         free(cub_fix);
+        free(op_fix);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -143,6 +145,8 @@ int correctio_age(const char *via, const speculum_t *spec)
             virg_fix[li] = 1;
         } else if (strcmp(m->regula, "cubitus") == 0) {
             cub_fix[li] = 1;
+        } else if (strcmp(m->regula, "spatium_operator") == 0) {
+            op_fix[li] = 1;
         }
     }
 
@@ -314,6 +318,12 @@ int correctio_age(const char *via, const speculum_t *spec)
             continue;
         }
 
+        /* spatia circa operatores */
+        if (op_fix[i]) {
+            wp = corrige_operatores(wp, corpus, corp_lon);
+            continue;
+        }
+
         memcpy(wp, corpus, corp_lon);
         wp += corp_lon;
         *wp++ = '\n';
@@ -325,18 +335,22 @@ int correctio_age(const char *via, const speculum_t *spec)
 
     size_t outlon = (size_t)(wp - out);
 
-    /* scribe in plicam */
+    /* si nihil mutatum est, non scribe */
+    int mutatum = (outlon != fons_lon || memcmp(fons, out, outlon) != 0);
+
     int res = 0;
-    FILE *f = fopen(via, "wb");
-    if (!f) {
-        fprintf(stderr, "correctio: non possum scribere '%s'\n", via);
-        res = -1;
-    } else {
-        if (fwrite(out, 1, outlon, f) != outlon) {
-            fprintf(stderr, "correctio: erratum scribendi '%s'\n", via);
+    if (mutatum) {
+        FILE *f = fopen(via, "wb");
+        if (!f) {
+            fprintf(stderr, "correctio: non possum scribere '%s'\n", via);
             res = -1;
+        } else {
+            if (fwrite(out, 1, outlon, f) != outlon) {
+                fprintf(stderr, "correctio: erratum scribendi '%s'\n", via);
+                res = -1;
+            }
+            fclose(f);
         }
-        fclose(f);
     }
 
     free(fons);
@@ -356,6 +370,7 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(una_ind);
     free(virg_fix);
     free(cub_fix);
+    free(op_fix);
     free(out);
-    return res;
+    return (res < 0) ? -1 : mutatum;
 }
