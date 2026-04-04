@@ -18,6 +18,17 @@ char *corrige_unam_sententiam(
     if (lat <= 0)
         lat = 4;
 
+    /* case/default: corpus scindendum indentatur uno gradu profundius */
+    int est_casus = 0;
+    if (corp_lon >= 5 && strncmp(corpus, "case ", 5) == 0)
+        est_casus = 1;
+    else if (corp_lon >= 7 && strncmp(corpus, "default", 7) == 0) {
+        char seq = (corp_lon > 7) ? corpus[7] : 0;
+        if (seq == ':' || seq == ' ' || seq == '\t')
+            est_casus = 1;
+    }
+    int ind_scindi = est_casus ? ind + lat : ind;
+
     int prof_par = 0;
     int prof_bra = 0;
     int pos      = 0;
@@ -100,7 +111,7 @@ char *corrige_unam_sententiam(
             /* scinde ad novam lineam */
             *wp++ = '\n';
             wp = scribe_indentationem(
-                wp, ind + prof_bra * lat, spec
+                wp, ind_scindi + prof_bra * lat, spec
             );
             pos = rest;
         }

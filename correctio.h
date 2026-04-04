@@ -82,4 +82,8 @@ char *corrige_unam_sententiam(
     int ind, const speculum_t *spec
 );
 
+char *corrige_virgulas(
+    char *wp, const char *corpus, int corp_lon
+);
+
 #endif /* CORRECTIO_H */

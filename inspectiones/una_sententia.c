@@ -23,6 +23,14 @@ void inspice_unam_sententiam(
         if (signa[v->tok_primus].genus == SIGNUM_PRAEPROCESSOR)
             continue;
 
+        /* case/default: permitte duas sententias (stmt; break;) */
+        int limen = 1;
+        if (
+            est_verbum(&signa[v->tok_primus], "case") ||
+            est_verbum(&signa[v->tok_primus], "default")
+        )
+            limen = 2;
+
         /* numera semicolona extra parentheses */
         int prof_par     = 0;
         int semicolona   = 0;
@@ -44,17 +52,19 @@ void inspice_unam_sententiam(
                 signa[j].genus == SIGNUM_SEMICOLON && prof_par == 0
             ) {
                 semicolona++;
-                if (semicolona == 2 && primum_extra < 0)
+                if (semicolona == limen + 1 && primum_extra < 0)
                     primum_extra = j;
             }
         }
 
-        if (semicolona > 1 && primum_extra >= 0) {
+        if (semicolona > limen && primum_extra >= 0) {
             char nuntius[NUNTIUS_MAX];
             snprintf(
                 nuntius, sizeof(nuntius),
-                "%d sententiae in eadem linea (una expectata)",
-                semicolona
+                "%d sententiae in eadem linea (%s expectat%s)",
+                semicolona,
+                limen == 1 ? "una" : "duae",
+                limen == 1 ? "a" : "ae"
             );
             adde_fix(
                 ins, GRAVITAS_MONITUM,

@@ -35,7 +35,8 @@ CORRECTIONES = correctiones/communes.c \
 	correctiones/colineatio.c \
 	correctiones/excommenta.c \
 	correctiones/bracchia.c \
-	correctiones/una_sententia.c
+	correctiones/una_sententia.c \
+	correctiones/virgula.c
 
 FONTES  = principale.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
 OBJECTA = $(FONTES:.c=.o)

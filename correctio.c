@@ -53,10 +53,12 @@ int correctio_age(const char *via, const speculum_t *spec)
     int *bra_col   = malloc((size_t)(nlin + 1) * sizeof(int));
     int *bra_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
     int *una_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *virg_fix  = calloc((size_t)(nlin + 1), sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
-        !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind
+        !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind ||
+        !virg_fix
     ) {
         free(fons);
         free(lineae);
@@ -73,6 +75,7 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(bra_col);
         free(bra_ind);
         free(una_ind);
+        free(virg_fix);
         return -1;
     }
     for (int i = 0; i <= nlin; i++) {
@@ -134,6 +137,8 @@ int correctio_age(const char *via, const speculum_t *spec)
         } else if (strcmp(m->regula, "una_sententia") == 0) {
             if (m->fix_valor >= 0 && una_ind[li] < 0)
                 una_ind[li] = m->fix_valor;
+        } else if (strcmp(m->regula, "spatium_virgula") == 0) {
+            virg_fix[li] = 1;
         }
     }
 
@@ -271,6 +276,12 @@ int correctio_age(const char *via, const speculum_t *spec)
                 corp_lon--;
         }
 
+        /* virgulae */
+        if (virg_fix[i]) {
+            wp = corrige_virgulas(wp, corpus, corp_lon);
+            continue;
+        }
+
         /* colineatio adtributionum */
         if (equ_col[i] >= 0) {
             int eb = columna_ad_byte(
@@ -323,6 +334,7 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(bra_col);
     free(bra_ind);
     free(una_ind);
+    free(virg_fix);
     free(out);
     return res;
 }
