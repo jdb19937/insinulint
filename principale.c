@@ -1,7 +1,7 @@
 /*
  * principale.c — punctum ingressus lintoris insinulint
  *
- * Usus: insinulint [-s speculum.ison] [-c] plica.c [plicaque.c ...]
+ * Usus: insinulint [-s insinulint.ison] [-c] plica.c [plicaque.c ...]
  */
 
 #include "insinulint.h"
@@ -35,10 +35,11 @@ static void auxilium(void)
 {
     fprintf(
         stderr,
-        "Usus: insinulint [-s speculum.ison] [-c] fasciculus.c [...]\n"
+        "Usus: insinulint [-s insinulint.ison] [-c] fasciculus.c [...]\n"
         "\n"
         "Optiones:\n"
         "  -s VIA    speculum configurationis (ISON)\n"
+        "            defaltum: ./insinulint.ison si exstat\n"
         "  -c        corriges fasciculos in loco (non solum inspice)\n"
         "  -h        hoc auxilium monstra\n"
         "\n"
@@ -69,6 +70,7 @@ static void auxilium(void)
 int main(int argc, char **argv)
 {
     const char *via_speculi = NULL;
+    int speculum_explicatum = 0;
     int primus_fasciculus = 1;
     int corrige = 0;
 
@@ -84,6 +86,7 @@ int main(int argc, char **argv)
                 return 1;
             }
             via_speculi       = argv[++i];
+            speculum_explicatum = 1;
             primus_fasciculus = i + 1;
             continue;
         }
@@ -103,6 +106,15 @@ int main(int argc, char **argv)
         fprintf(stderr, "insinulint: nullus fasciculus datus\n");
         auxilium();
         return 1;
+    }
+
+    /* si -s non datur, proba insinulint.ison in directorio currenti */
+    if (!speculum_explicatum) {
+        FILE *f = fopen("insinulint.ison", "rb");
+        if (f) {
+            fclose(f);
+            via_speculi = "insinulint.ison";
+        }
     }
 
     /* lege speculum */

@@ -67,6 +67,14 @@
     },
     "required": []
   },
+  "corpus": {
+    "properties": {
+      "separatum": {
+        "type": "integer"
+      }
+    },
+    "required": []
+  },
   "commentaria": {
     "properties": {
       "veta": {

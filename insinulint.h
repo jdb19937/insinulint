@@ -131,6 +131,9 @@ typedef struct {
     int lin_finis_nova;         /* 1 = fasciculus debet finire cum \n */
     int lin_tabulae_mixtae;     /* 1 = veta tabulas et spatia mixtas */
 
+    /* corpus */
+    int cor_separatum;          /* 1 = corpus unius sententiae in linea propria */
+
     /* commentaria */
     int com_veta;               /* 1 = veta omnia commentaria */
 } speculum_t;

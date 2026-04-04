@@ -1124,6 +1124,179 @@ static void proba_correctio_excommenta(void)
 }
 
 /* ================================================================
+ * probationes: corpus separatum
+ * ================================================================ */
+
+static const char *via_temp_corp = "/tmp/insinulint_proba_corp.c";
+
+static void proba_corpus_separatum(void)
+{
+    fprintf(stderr, "proba: corpus separatum\n");
+    speculum_t spec = spec_solum();
+    spec.cor_separatum = 1;
+    inspector_t ins;
+
+    /* corpus in eadem linea — flagellandum */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    if (x) return;\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("if inline", &ins, "corpus_separatum", 1);
+
+    /* corpus in linea propria — mundum */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    if (x)\n"
+        "        return;\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("if separatum", &ins, "corpus_separatum", 0);
+
+    /* for inline */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    for (int i = 0; i < n; i++) sum += i;\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("for inline", &ins, "corpus_separatum", 1);
+
+    /* while inline */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    while (p) p = p->next;\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("while inline", &ins, "corpus_separatum", 1);
+
+    /* else inline */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    if (x) {\n"
+        "        a;\n"
+        "    } else b;\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("else inline", &ins, "corpus_separatum", 1);
+
+    /* else if — non flagellandum */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    if (x) {\n"
+        "        a;\n"
+        "    } else if (y) {\n"
+        "        b;\n"
+        "    }\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("else if", &ins, "corpus_separatum", 0);
+
+    /* do-while: while non flagellandum */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    do {\n"
+        "        a;\n"
+        "    } while (x);\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("do-while", &ins, "corpus_separatum", 0);
+
+    /* corpus cum bracchiis — non flagellandum */
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    if (x) { return; }\n"
+        "}\n",
+        &spec, &ins
+    );
+    expecta("bracchia", &ins, "corpus_separatum", 0);
+
+    /* regula inactiva — non flagellandum */
+    speculum_t spec2 = spec_solum();
+    spec2.cor_separatum = 0;
+    curre_lintorem(
+        "void f(void)\n"
+        "{\n"
+        "    if (x) return;\n"
+        "}\n",
+        &spec2, &ins
+    );
+    expecta("inactiva", &ins, "corpus_separatum", 0);
+}
+
+static void proba_correctio_corpus_separatum(void)
+{
+    fprintf(stderr, "proba: correctio corpus separatum\n");
+    speculum_t spec;
+    speculum_lege(&spec, NULL);
+    spec.cor_separatum = 1;
+
+    const char *fons =
+        "void f(void)\n"
+        "{\n"
+        "    if (x) return;\n"
+        "    for (int i = 0; i < n; i++) sum += i;\n"
+        "}\n";
+
+    const char *expectatum =
+        "void f(void)\n"
+        "{\n"
+        "    if (x)\n"
+        "        return;\n"
+        "    for (int i = 0; i < n; i++)\n"
+        "        sum += i;\n"
+        "}\n";
+
+    FILE *f = fopen(via_temp_corp, "wb");
+    if (!f) return;
+    fwrite(fons, 1, strlen(fons), f);
+    fclose(f);
+
+    correctio_age(via_temp_corp, &spec);
+
+    f = fopen(via_temp_corp, "rb");
+    if (!f) return;
+    fseek(f, 0, SEEK_END);
+    long lon = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    char *res = malloc((size_t)lon + 1);
+    if (!res) { fclose(f); return; }
+    fread(res, 1, (size_t)lon, f);
+    res[lon] = '\0';
+    fclose(f);
+
+    probationes_totae++;
+    if (strcmp(res, expectatum) == 0) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(
+            stderr, "  MALUM: correctio corpus_separatum\n"
+            "    expectatum:\n%s"
+            "    inventum:\n%s",
+            expectatum, res
+        );
+    }
+
+    free(res);
+    remove(via_temp_corp);
+}
+
+/* ================================================================
  * principale
  * ================================================================ */
 
@@ -1167,6 +1340,10 @@ int main(void)
     /* commentaria */
     proba_commentaria_vetita();
     proba_correctio_excommenta();
+
+    /* corpus separatum */
+    proba_corpus_separatum();
+    proba_correctio_corpus_separatum();
 
     /* codex mundus */
     proba_codex_mundus();

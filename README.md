@@ -35,7 +35,7 @@ make omnia
 ## Usage
 
 ```bash
-./insinulint [-s speculum.ison] file.c [file2.c ...]
+./insinulint [-s insinulint.ison] file.c [file2.c ...]
 ```
 
 Without a configuration file, sensible defaults apply: 4 spaces, K&R braces, 80 columns.

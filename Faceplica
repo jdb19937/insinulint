@@ -45,7 +45,7 @@ proba: $(PROBA_OBJECTA) $(LIBISON)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 inspice: $(NOMEN)
-	./$(NOMEN) -s speculum.ison $(FONTES)
+	./$(NOMEN) $(FONTES)
 
 purga:
 	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba
