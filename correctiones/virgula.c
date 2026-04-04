@@ -28,12 +28,12 @@ char *corrige_virgulas(
 
         if (c == '"' && !in_littera) {
             in_chorda = !in_chorda;
-            *wp++ = c;
+            *wp++     = c;
             continue;
         }
         if (c == '\'' && !in_chorda) {
             in_littera = !in_littera;
-            *wp++ = c;
+            *wp++      = c;
             continue;
         }
 

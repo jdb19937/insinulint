@@ -13,7 +13,7 @@ char *corrige_unam_sententiam(
     int ind, const speculum_t *spec
 ) {
     int lat = spec->ind_tabulis
-    ? spec->ind_latitudo * 8
+        ? spec->ind_latitudo * 8
         : spec->ind_latitudo;
     if (lat <= 0)
         lat = 4;

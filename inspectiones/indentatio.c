@@ -20,7 +20,7 @@ void inspice_indentationem(
     const speculum_t *spec
 ) {
     int lat = spec->ind_tabulis
-    ? spec->ind_latitudo * 8
+        ? spec->ind_latitudo * 8
         : spec->ind_latitudo;
     const signum_t *signa = lex->signa;
     int n = lex->num_signa;
@@ -102,8 +102,7 @@ void inspice_indentationem(
                 est_verbum(&signa[primus], "case") ||
                 est_verbum(&signa[primus], "default")
             ) {
-                expectata = (profunditas > 0) ? (profunditas - 1) * lat
-                                              : 0;
+                expectata        = (profunditas > 0) ? (profunditas - 1) * lat : 0;
                 gradus_virtualis = 0;
             }
 
@@ -141,8 +140,7 @@ void inspice_indentationem(
                     vp--;
                 if (
                     vp >= 0 &&
-                    signa[versus[vp].tok_primus].genus ==
-                        SIGNUM_CHORDA &&
+                    signa[versus[vp].tok_primus].genus == SIGNUM_CHORDA &&
                     versus[vp].spatia == v->spatia
                 ) {
                     goto adiusta_statum;
@@ -206,8 +204,7 @@ void inspice_indentationem(
                     int vp = vi - 1;
                     while (vp >= 0 && versus_vacuus(&versus[vp]))
                         vp--;
-                    cont_basis = (vp >= 0) ? versus[vp].spatia
-                                           : 0;
+                    cont_basis = (vp >= 0) ? versus[vp].spatia : 0;
                 }
                 int cont_exp = cont_basis + lat;
 
@@ -228,7 +225,7 @@ void inspice_indentationem(
                 goto adiusta_statum;
             } else {
 non_cont:
-                cont_basis = -1;
+    cont_basis = -1;
             }
         }
 

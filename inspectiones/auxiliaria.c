@@ -86,23 +86,23 @@ int est_verbum(const signum_t *s, const char *verbum)
 {
     int lon = (int)strlen(verbum);
     return s->genus == SIGNUM_VERBUM &&
-           s->longitudo == lon &&
-           memcmp(s->initium, verbum, (size_t)lon) == 0;
+        s->longitudo == lon &&
+        memcmp(s->initium, verbum, (size_t)lon) == 0;
 }
 
 int est_operator(const signum_t *s, const char *op)
 {
     int lon = (int)strlen(op);
     return s->genus == SIGNUM_OPERATOR &&
-           s->longitudo == lon &&
-           memcmp(s->initium, op, (size_t)lon) == 0;
+        s->longitudo == lon &&
+        memcmp(s->initium, op, (size_t)lon) == 0;
 }
 
 int est_verbum_cum_spatio(const signum_t *s)
 {
     return est_verbum(s, "if") || est_verbum(s, "for") ||
-           est_verbum(s, "while") || est_verbum(s, "switch") ||
-           est_verbum(s, "return") || est_verbum(s, "case");
+        est_verbum(s, "while") || est_verbum(s, "switch") ||
+        est_verbum(s, "return") || est_verbum(s, "case");
 }
 
 int est_operator_binarius(const signum_t *s)

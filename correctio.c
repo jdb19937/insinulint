@@ -362,7 +362,7 @@ int correctio_age(const char *via, const speculum_t *spec)
          * verba clavis, semicolona */
         {
             int inl = virg_fix[i] | op_fix[i] |
-                      verb_fix[i] | semi_fix[i];
+                verb_fix[i] | semi_fix[i];
             if (inl) {
                 /* alveus temporarius pro catenatione */
                 char tmp1[8192], tmp2[8192];
@@ -385,17 +385,17 @@ int correctio_age(const char *via, const speculum_t *spec)
                 }
                 if (verb_fix[i]) {
                     char *d = (src == tmp2) ? tmp1 : tmp2;
-                    dst  = corrige_spatium_verbum(d, src, slon);
-                    dlon = (int)(dst - d) - 1;
-                    src  = d;
-                    slon = dlon;
+                    dst     = corrige_spatium_verbum(d, src, slon);
+                    dlon    = (int)(dst - d) - 1;
+                    src     = d;
+                    slon    = dlon;
                 }
                 if (semi_fix[i]) {
                     char *d = (src == tmp2) ? tmp1 : tmp2;
-                    dst  = corrige_spatium_semicolon(d, src, slon);
-                    dlon = (int)(dst - d) - 1;
-                    src  = d;
-                    slon = dlon;
+                    dst     = corrige_spatium_semicolon(d, src, slon);
+                    dlon    = (int)(dst - d) - 1;
+                    src     = d;
+                    slon    = dlon;
                 }
                 memcpy(wp, src, slon);
                 wp += slon;

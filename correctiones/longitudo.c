@@ -71,7 +71,7 @@ char *corrige_longitudinem(
 
         /* transili chordas */
         if ((c == '"' || c == '\'') && !in_chorda) {
-            in_chorda = 1;
+            in_chorda  = 1;
             char delim = c;
             for (i++; i < corp_lon; i++) {
                 col++;

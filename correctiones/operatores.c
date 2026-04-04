@@ -32,7 +32,7 @@ static int transili_chordam(
     if (c != '"' && c != '\'')
         return -1;
     char delim = c;
-    *wp++ = corpus[i];
+    *wp++      = corpus[i];
     for (i++; i < corp_lon; i++) {
         *wp++ = corpus[i];
         if (corpus[i] == '\\' && i + 1 < corp_lon) {
