@@ -9,14 +9,39 @@ CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
 CFLAGS  += -I$(APOTHECA)/ison
 LDFLAGS =
 
-FONTES  = principale.c lexator.c inspectio.c correctio.c
+INSPECTIONES = inspectiones/auxiliaria.c \
+	inspectiones/indentatio.c \
+	inspectiones/spatia_terminalia.c \
+	inspectiones/longitudo.c \
+	inspectiones/lineae_vacuae.c \
+	inspectiones/finis.c \
+	inspectiones/tabulae_mixtae.c \
+	inspectiones/spatia_verborum.c \
+	inspectiones/spatia_operatorum.c \
+	inspectiones/virgulae.c \
+	inspectiones/semicolona.c \
+	inspectiones/cubitus.c \
+	inspectiones/bracchia_stilus.c \
+	inspectiones/bracchia_necessaria.c \
+	inspectiones/colineatio.c \
+	inspectiones/commentaria.c \
+	inspectiones/corpus_separatum.c
+
+CORRECTIONES = correctiones/communes.c \
+	correctiones/corpus.c \
+	correctiones/apertio.c \
+	correctiones/scissio.c \
+	correctiones/colineatio.c \
+	correctiones/excommenta.c
+
+FONTES  = principale.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
 OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 
 # bibliothecae externae
 LIBISON = $(APOTHECA)/ison/libison.a
 
-PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c
+PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
 omnia: $(NOMEN)
@@ -41,7 +66,7 @@ proba: $(PROBA_OBJECTA) $(LIBISON)
 	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA) $(LIBISON)
 	./$@
 
-%.o: %.c insinulint.h
+%.o: %.c insinulint.h inspectio.h correctio.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 inspice: $(NOMEN)
