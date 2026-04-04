@@ -187,14 +187,18 @@ void inspice_indentationem(
                             est_cont = 1;
                         } else if (
                             su->genus == SIGNUM_OPERATOR &&
-                            !est_operator(su, "++") &&
-                            !est_operator(su, "--") &&
-                            !est_operator(su, "->") &&
-                            !est_operator(su, ".") &&
-                            !est_operator(su, ",") &&
-                            !est_operator(su, ":")
+                            !est_operator(su, "++") && !est_operator(su, "--") &&
+                            !est_operator(su, "->") && !est_operator(su, ".") &&
+                            !est_operator(su, ",")
                         ) {
-                            est_cont = 1;
+                            if (
+                                est_operator(su, ":") && ult > 0 &&
+                                signa[ult - 1].genus != SIGNUM_SPATIUM
+                            ) {
+                                /* label/case/default — non * continuatio */
+                            } else {
+                                est_cont = 1;
+                            }
                         }
                     }
                 }
@@ -227,7 +231,7 @@ void inspice_indentationem(
                 goto adiusta_statum;
             } else {
 non_cont:
-    cont_basis = -1;
+                cont_basis = -1;
             }
         }
 
