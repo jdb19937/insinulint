@@ -191,7 +191,8 @@ void inspice_indentationem(
                             !est_operator(su, "--") &&
                             !est_operator(su, "->") &&
                             !est_operator(su, ".") &&
-                            !est_operator(su, ",")
+                            !est_operator(su, ",") &&
+                            !est_operator(su, ":")
                         ) {
                             est_cont = 1;
                         }
