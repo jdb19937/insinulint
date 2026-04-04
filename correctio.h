@@ -36,25 +36,29 @@ int linea_vacua(const linea_t *l);
 /* converte columnam (tab=8) ad byte offset in linea */
 int columna_ad_byte(const char *initium, int lon, int columna);
 
+/* scribe indentationem per spatia vel tabulas secundum speculum */
+char *scribe_indentationem(char *wp, int spatia, const speculum_t *spec);
+
 /* ================================================================
  * correctiones linearum
  * ================================================================ */
 
 char *corrige_corpus(
     char *wp, const char *corpus, int corp_lon,
-    int col, int ind
+    int col, int ind, const speculum_t *spec
 );
 
 char *corrige_apertionem(
     char *wp, const char *corpus, int corp_lon,
-    int col, int ind, int sp_init
+    int col, int ind, int sp_init, const speculum_t *spec
 );
 
 char *corrige_scissionem(
     char *wp, const char *corpus, int corp_lon,
     int col, int ind, int sp_init,
     const linea_t *l, const linea_t *lineae,
-    int i, int nlin, int *transili
+    int i, int nlin, int *transili,
+    const speculum_t *spec
 );
 
 char *corrige_colineationem(

@@ -38,6 +38,20 @@ int columna_ad_byte(const char *initium, int lon, int columna)
     return lon;
 }
 
+char *scribe_indentationem(char *wp, int spatia, const speculum_t *spec)
+{
+    if (spec->ind_tabulis) {
+        int lat  = spec->ind_latitudo > 0 ? spec->ind_latitudo : 1;
+        int tabs = spatia / lat;
+        int rest = spatia % lat;
+        for (int j = 0; j < tabs; j++) *wp++ = '\t';
+        for (int j = 0; j < rest; j++) *wp++ = ' ';
+    } else {
+        for (int j = 0; j < spatia; j++) *wp++ = ' ';
+    }
+    return wp;
+}
+
 int linea_vacua(const linea_t *l)
 {
     for (int i = 0; i < l->lon; i++) {

@@ -10,7 +10,8 @@ char *corrige_scissionem(
     char *wp, const char *corpus, int corp_lon,
     int col, int ind, int sp_init,
     const linea_t *l, const linea_t *lineae,
-    int i, int nlin, int *transili
+    int i, int nlin, int *transili,
+    const speculum_t *spec
 ) {
     int par_byte = col;
     int ante_lon = par_byte - sp_init;
@@ -30,8 +31,7 @@ char *corrige_scissionem(
     *wp++ = '\n';
 
     /* pars 2: ')' et residuum in linea nova */
-    for (int j = 0; j < ind; j++)
-        *wp++ = ' ';
+    wp = scribe_indentationem(wp, ind, spec);
 
     const char *rest     = l->initium + par_byte;
     int         rest_lon = l->lon - par_byte;

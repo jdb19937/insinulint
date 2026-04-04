@@ -8,7 +8,7 @@
 
 char *corrige_apertionem(
     char *wp, const char *corpus, int corp_lon,
-    int col, int ind, int sp_init
+    int col, int ind, int sp_init, const speculum_t *spec
 ) {
     int par_byte = col - sp_init;
     if (par_byte < 0)
@@ -23,8 +23,7 @@ char *corrige_apertionem(
     *wp++ = '\n';
 
     /* pars 2: contentum post '(' in linea nova */
-    for (int j = 0; j < ind; j++)
-        *wp++ = ' ';
+    wp = scribe_indentationem(wp, ind, spec);
 
     const char *rest     = corpus + ante_lon;
     int         rest_lon = corp_lon - ante_lon;

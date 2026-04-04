@@ -10,7 +10,7 @@
 
 char *corrige_corpus(
     char *wp, const char *corpus, int corp_lon,
-    int col, int ind
+    int col, int ind, const speculum_t *spec
 ) {
     int cc = col;
     if (cc < 0)
@@ -30,8 +30,7 @@ char *corrige_corpus(
     *wp++ = '\n';
 
     /* pars 2: corpus in linea nova cum indentatione */
-    for (int j = 0; j < ind; j++)
-        *wp++ = ' ';
+    wp = scribe_indentationem(wp, ind, spec);
 
     const char *rest     = corpus + cc;
     int         rest_lon = corp_lon - cc;

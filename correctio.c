@@ -143,14 +143,7 @@ int correctio_age(const char *via, const speculum_t *spec)
         /* scribe indentationem (correctionis vel originalem) */
         int ind = ind_exp[i];
         if (ind >= 0) {
-            if (spec->ind_tabulis) {
-                int tabs = ind / spec->ind_latitudo;
-                for (int j = 0; j < tabs; j++)
-                    *wp++ = '\t';
-            } else {
-                for (int j = 0; j < ind; j++)
-                    *wp++ = ' ';
-            }
+            wp = scribe_indentationem(wp, ind, spec);
         } else {
             memcpy(wp, l->initium, sp_init);
             wp += sp_init;
@@ -165,7 +158,9 @@ int correctio_age(const char *via, const speculum_t *spec)
             int cb = columna_ad_byte(
                 l->initium, l->lon, corp_col[i]
             ) - sp_init;
-            wp = corrige_corpus(wp, corpus, corp_lon, cb, corp_ind[i]);
+            wp = corrige_corpus(
+                wp, corpus, corp_lon, cb, corp_ind[i], spec
+            );
             continue;
         }
 
@@ -175,7 +170,7 @@ int correctio_age(const char *via, const speculum_t *spec)
                 l->initium, l->lon, apert_col[i]
             );
             wp = corrige_apertionem(
-                wp, corpus, corp_lon, ab, apert_ind[i], sp_init
+                wp, corpus, corp_lon, ab, apert_ind[i], sp_init, spec
             );
             continue;
         }
@@ -189,7 +184,7 @@ int correctio_age(const char *via, const speculum_t *spec)
             wp = corrige_scissionem(
                 wp, corpus, corp_lon,
                 sb, split_ind[i], sp_init,
-                l, lineae, i, nlin, &transili
+                l, lineae, i, nlin, &transili, spec
             );
             if (transili)
                 i++;
