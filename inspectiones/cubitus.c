@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "cubitus.h"
 
 void inspice_cubitum(
     inspector_t *ins, const lexator_t *lex,

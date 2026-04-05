@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "virgulae.h"
 
 void inspice_virgulas(
     inspector_t *ins, const lexator_t *lex,

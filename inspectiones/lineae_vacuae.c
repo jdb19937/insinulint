@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "lineae_vacuae.h"
 
 #include <stdio.h>
 

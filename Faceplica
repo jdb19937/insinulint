@@ -43,7 +43,7 @@ CORRECTIONES = correctiones/communes.c \
 	correctiones/semicolon.c \
 	correctiones/longitudo.c
 
-FONTES  = principale.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
+FONTES  = insinulint.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
 OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 

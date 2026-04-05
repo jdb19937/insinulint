@@ -7,6 +7,7 @@
  */
 
 #include "../correctio.h"
+#include "operatores.h"
 
 #include <string.h>
 

@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "spatia_verborum.h"
 
 #include <stdio.h>
 

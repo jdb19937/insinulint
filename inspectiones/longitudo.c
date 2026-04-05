@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "longitudo.h"
 
 #include <stdio.h>
 

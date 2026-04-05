@@ -6,6 +6,7 @@
  */
 
 #include "../correctio.h"
+#include "longitudo.h"
 
 #include <string.h>
 

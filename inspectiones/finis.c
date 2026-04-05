@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "finis.h"
 
 void inspice_finem(inspector_t *ins, const lexator_t *lex)
 {

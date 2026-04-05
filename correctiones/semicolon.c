@@ -5,6 +5,7 @@
  */
 
 #include "../correctio.h"
+#include "semicolon.h"
 
 #include <string.h>
 

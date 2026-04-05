@@ -5,6 +5,7 @@
  */
 
 #include "../correctio.h"
+#include "corpus.h"
 
 #include <string.h>
 

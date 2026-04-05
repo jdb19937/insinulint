@@ -6,6 +6,7 @@
  */
 
 #include "../correctio.h"
+#include "scissio.h"
 
 #include <string.h>
 

@@ -5,6 +5,7 @@
  */
 
 #include "../inspectio.h"
+#include "auxiliaria.h"
 
 #include <stdio.h>
 #include <stdlib.h>

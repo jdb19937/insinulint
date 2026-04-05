@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "tabulae_mixtae.h"
 
 void inspice_tabulas_mixtas(
     inspector_t *ins, const lexator_t *lex,

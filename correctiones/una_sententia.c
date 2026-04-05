@@ -5,6 +5,7 @@
  */
 
 #include "../correctio.h"
+#include "una_sententia.h"
 
 #include <string.h>
 

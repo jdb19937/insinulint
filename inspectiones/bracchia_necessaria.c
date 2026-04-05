@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "bracchia_necessaria.h"
 
 #include <stdio.h>
 

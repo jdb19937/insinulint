@@ -6,6 +6,7 @@
  */
 
 #include "insinulint.h"
+#include "inspectio.h"
 #include "correctio.h"
 
 #include <stdio.h>
@@ -219,7 +220,7 @@ static void proba_continuatio_congruens(void)
 {
     fprintf(stderr, "proba: continuatio congruens (aligned)\n");
     speculum_t spec      = spec_solum();
-    spec.ind_continuatio = 0;  /* congruens */
+    spec.ind_continuatio = CONTINUATIO_CONGRUENS;
     inspector_t ins;
 
     curre_lintorem(
@@ -238,7 +239,7 @@ static void proba_continuatio_massa(void)
 {
     fprintf(stderr, "proba: continuatio massa (block)\n");
     speculum_t spec      = spec_solum();
-    spec.ind_continuatio = 1;  /* massa */
+    spec.ind_continuatio = CONTINUATIO_MASSA;
     inspector_t ins;
 
     curre_lintorem(
@@ -259,7 +260,7 @@ static void proba_continuatio_pendens(void)
 {
     fprintf(stderr, "proba: continuatio pendens\n");
     speculum_t spec      = spec_solum();
-    spec.ind_continuatio = 2;  /* pendens */
+    spec.ind_continuatio = CONTINUATIO_PENDENS;
     inspector_t ins;
 
     /* mundus: '(' in fine lineae */
@@ -292,7 +293,7 @@ static void proba_continuatio_patens(void)
 {
     fprintf(stderr, "proba: continuatio patens\n");
     speculum_t spec      = spec_solum();
-    spec.ind_continuatio = 3;  /* patens */
+    spec.ind_continuatio = CONTINUATIO_PATENS;
     inspector_t ins;
 
     /* mundus: '(' in fine, ')' primum in linea propria */

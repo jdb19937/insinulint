@@ -3,6 +3,7 @@
  */
 
 #include "../correctio.h"
+#include "communes.h"
 
 int scinde_in_lineas(
     const char *fons, size_t fons_lon,

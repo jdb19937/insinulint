@@ -5,6 +5,7 @@
  */
 
 #include "../correctio.h"
+#include "virgula.h"
 
 char *corrige_virgulas(
     char *wp, const char *corpus, int corp_lon

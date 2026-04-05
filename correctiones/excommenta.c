@@ -3,6 +3,7 @@
  */
 
 #include "../correctio.h"
+#include "excommenta.h"
 #include "../insinulint.h"
 #include "../ison/ison.h"
 

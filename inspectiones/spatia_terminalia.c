@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "spatia_terminalia.h"
 
 void inspice_spatia_terminalia(
     inspector_t *ins,

@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "semicolona.h"
 
 void inspice_semicolona(
     inspector_t *ins, const lexator_t *lex,

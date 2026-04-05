@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "colineatio.h"
 
 #include <stdio.h>
 #include <string.h>

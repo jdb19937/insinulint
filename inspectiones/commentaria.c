@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "commentaria.h"
 
 void inspice_commentaria(
     inspector_t *ins, const lexator_t *lex

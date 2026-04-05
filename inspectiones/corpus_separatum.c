@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "corpus_separatum.h"
 
 #include <stdio.h>
 

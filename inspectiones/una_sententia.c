@@ -5,6 +5,7 @@
  */
 
 #include "../inspectio.h"
+#include "una_sententia.h"
 
 #include <stdio.h>
 

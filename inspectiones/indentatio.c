@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "indentatio.h"
 
 #include <stdio.h>
 
@@ -60,7 +61,7 @@ void inspice_indentationem(
 
             if (primus_est_clausio) {
                 expectata = ctx->basis_spatia;
-            } else if (spec->ind_continuatio == 0 && !ctx->modus_massa) {
+            } else if (spec->ind_continuatio == CONTINUATIO_CONGRUENS && !ctx->modus_massa) {
                 expectata = ctx->columna_post;
                 /* etiam accepta block indentatio inter basis+lat et
                  * columna_post — multi stili validi intra parentheses */
@@ -282,8 +283,8 @@ adiusta_statum:
                      * '[' non tractatur (subscripti fere semper unilineares). */
                     if (
                         (
-                            spec->ind_continuatio == 2 ||
-                            spec->ind_continuatio == 3
+                            spec->ind_continuatio == CONTINUATIO_PENDENS ||
+                            spec->ind_continuatio == CONTINUATIO_PATENS
                         ) &&
                         signa[j].genus == SIGNUM_APERTIO_PAR &&
                         !ctx->modus_massa
@@ -313,7 +314,7 @@ adiusta_statum:
                 if (prof_par > 0) {
                     /* stilus patens: ')' debet esse primum signum in linea */
                     if (
-                        spec->ind_continuatio == 3 &&
+                        spec->ind_continuatio == CONTINUATIO_PATENS &&
                         signa[j].genus == SIGNUM_CLAUSIO_PAR &&
                         j != v->tok_primus
                     ) {

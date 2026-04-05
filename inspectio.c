@@ -108,7 +108,7 @@ static int valida_sectionem(
 /* valida speculum integrum contra schema */
 static int speculum_valida(const char *ison)
 {
-    char *schema_ison = ison_lege_plicam("insinulint-schema.ison");
+    char *schema_ison = ison_lege_plicam("schemae/insinulint-schema.ison");
     if (!schema_ison)
         return 0;
 
@@ -130,11 +130,11 @@ int speculum_lege(speculum_t *spec, const char *via)
     /* defalta */
     spec->ind_latitudo    = 4;
     spec->ind_tabulis     = 0;
-    spec->ind_continuatio = 0;
+    spec->ind_continuatio = CONTINUATIO_PATENS;
 
     spec->bra_stilus           = 0;
     spec->bra_else_coniunctum  = 1;
-    spec->bra_necessaria       = 1;
+    spec->bra_necessaria       = 0;
 
     spec->spa_post_verba       = 1;
     spec->spa_circa_operatores = 1;
@@ -142,7 +142,7 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->spa_ante_semicolon   = 1;
     spec->spa_adtributio_colineata = 1;
 
-    spec->lin_longitudo_max     = 80;
+    spec->lin_longitudo_max     = 128;
     spec->lin_spatia_terminalia = 1;
     spec->lin_vacuae_max        = 2;
     spec->lin_finis_nova        = 1;
@@ -183,11 +183,11 @@ int speculum_lege(speculum_t *spec, const char *via)
     char *cont = ison_da_chordam(ison, "indentatio.continuatio");
     if (cont) {
         if (strcmp(cont, "massa") == 0)
-            spec->ind_continuatio = 1;
+            spec->ind_continuatio = CONTINUATIO_MASSA;
         else if (strcmp(cont, "pendens") == 0)
-            spec->ind_continuatio = 2;
+            spec->ind_continuatio = CONTINUATIO_PENDENS;
         else if (strcmp(cont, "patens") == 0)
-            spec->ind_continuatio = 3;
+            spec->ind_continuatio = CONTINUATIO_PATENS;
         free(cont);
     }
 

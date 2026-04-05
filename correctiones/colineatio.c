@@ -3,6 +3,7 @@
  */
 
 #include "../correctio.h"
+#include "colineatio.h"
 
 #include <string.h>
 

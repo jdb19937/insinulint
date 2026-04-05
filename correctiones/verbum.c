@@ -6,6 +6,7 @@
  */
 
 #include "../correctio.h"
+#include "verbum.h"
 
 #include <string.h>
 

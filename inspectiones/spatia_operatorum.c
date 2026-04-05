@@ -3,6 +3,7 @@
  */
 
 #include "../inspectio.h"
+#include "spatia_operatorum.h"
 
 #include <stdio.h>
 

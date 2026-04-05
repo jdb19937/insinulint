@@ -7,6 +7,7 @@
  */
 
 #include "../correctio.h"
+#include "apertio.h"
 
 #include <string.h>
 
