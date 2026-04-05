@@ -17,6 +17,7 @@
 
 int correctio_age(const char *via, const speculum_t *spec);
 int correctio_excommenta(const char *via);
+int correctio_bracchia_necessaria(const char *via, const speculum_t *spec);
 
 /* ================================================================
  * linea — portio fontis inter '\n'

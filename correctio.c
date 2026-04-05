@@ -176,6 +176,24 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(lineae);
         free(ind_exp);
         free(trim_fin);
+        free(split_col);
+        free(split_ind);
+        free(apert_col);
+        free(apert_ind);
+        free(equ_col);
+        free(equ_spa);
+        free(corp_col);
+        free(corp_ind);
+        free(bra_col);
+        free(bra_ind);
+        free(una_ind);
+        free(virg_fix);
+        free(cub_fix);
+        free(op_fix);
+        free(verb_fix);
+        free(semi_fix);
+        free(long_fix);
+        free(long_ind);
         return -1;
     }
 

@@ -130,8 +130,11 @@ int main(int argc, char **argv)
         if (corrige) {
             /* itera usque ad stabilitatem */
             for (int passus = 0; passus < 16; passus++) {
+                int res_b = correctio_bracchia_necessaria(
+                    argv[i], &spec
+                );
                 int res = correctio_age(argv[i], &spec);
-                if (res <= 0)
+                if (res_b <= 0 && res <= 0)
                     break;
             }
         }

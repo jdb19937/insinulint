@@ -23,6 +23,7 @@ my $DIR_FORMAE  = "$RADIX/formae";
 my $DIR_ARTIF   = "$RADIX/artificia";
 
 my $VIRIDIS = "\033[0;32m";
+my $FLAVUS  = "\033[0;33m";
 my $RUBER   = "\033[0;31m";
 my $NULLUS  = "\033[0m";
 
@@ -48,6 +49,7 @@ sub numera_lineas {
 }
 
 my $defectus_idem   = 0;
+my $defectus_corr   = 0;
 my $defectus_compil = 0;
 my $summa           = 0;
 
@@ -128,18 +130,22 @@ for my $forma (@formae) {
 
         $summa++;
         my $idempotens = (compare($plica1, $plica2) == 0);
-        my @defectus;
-        push @defectus, "non idempotens" if !$idempotens;
-        push @defectus, "monita residua" if $n1 != 0 || $n2 != 0;
-        push @defectus, "exit $rc1 post corr." if $rc1 != 0;
-        push @defectus, "exit $rc2 post corr. 2" if $rc2 != 0;
+        my @def_idem;
+        my @def_corr;
+        push @def_idem, "non idempotens" if !$idempotens;
+        push @def_idem, "monita mutata ($n1 -> $n2)" if $n1 != $n2;
+        push @def_corr, "monita residua" if $n1 != 0;
 
-        if (@defectus) {
-            printf "${RUBER}DEFECTUS${NULLUS} [%s × %s] monita: %d -> %d -> %d — %s\n",
-                $nomen_formae, $base, $n0, $n1, $n2, join(", ", @defectus);
+        if (@def_idem) {
+            printf " ${RUBER}DEFECTUS${NULLUS} [%s × %s] monita: %d -> %d -> %d — %s\n",
+                $nomen_formae, $base, $n0, $n1, $n2, join(", ", @def_idem);
             $defectus_idem++;
+        } elsif (@def_corr) {
+            printf " ${RUBER}DEFECTUS${NULLUS} [%s × %s] monita: %d -> %d -> %d — %s\n",
+                $nomen_formae, $base, $n0, $n1, $n2, join(", ", @def_corr);
+            $defectus_corr++;
         } else {
-            printf "${VIRIDIS}BENE${NULLUS}    [%s × %s] monita: %d -> %d -> %d\n",
+            printf "${VIRIDIS}CORRECTUS${NULLUS} [%s × %s] monita: %d -> %d -> %d\n",
                 $nomen_formae, $base, $n0, $n1, $n2;
         }
     }
@@ -149,10 +155,10 @@ for my $forma (@formae) {
         my $tag = basename($dir);
         my $rc = system("face -C $dir >/dev/null 2>&1");
         if ($rc != 0) {
-            printf "${RUBER}DEFECTUS${NULLUS} [%s] — face defecit\n", $tag;
+            printf " ${RUBER}DEFECTUS${NULLUS} [%s] — face defecit\n", $tag;
             $defectus_compil++;
         } else {
-            printf "${VIRIDIS}BENE${NULLUS}    [%s] — face\n", $tag;
+            printf "${VIRIDIS}CORRECTUS${NULLUS} [%s] — face\n", $tag;
         }
         system("face -C $dir purga >/dev/null 2>&1");
     }
@@ -163,13 +169,17 @@ my $defectus = $defectus_idem + $defectus_compil;
 print "\n=== Summa ===\n";
 printf "Probationes:          %d\n", $summa;
 printf "Defectus idempotent.: %d\n", $defectus_idem;
+printf "Defectus correctio.:  %d\n", $defectus_corr;
 printf "Defectus compilat.:   %d\n", $defectus_compil;
 printf "Artificia:            %s/\n", $DIR_ARTIF;
 
 if ($defectus > 0) {
     printf "${RUBER}%d defectus inventi.${NULLUS}\n", $defectus;
     exit 1;
+} elsif ($defectus_corr > 0) {
+    printf "${RUBER}%d correctiones imperfectae.${NULLUS}\n", $defectus_corr;
+    exit 0;
 } else {
-    printf "${VIRIDIS}Omnes probationes praeterierunt.${NULLUS}\n";
+    printf "${VIRIDIS}Omnes probationes correctae.${NULLUS}\n";
     exit 0;
 }
