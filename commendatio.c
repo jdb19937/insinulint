@@ -32,7 +32,7 @@
 static int aedifica_lineas(
     const char *fons, const char **lineae, int max
 ) {
-    int nl = 0;
+    int nl       = 0;
     lineae[nl++] = fons;
     for (const char *p = fons; *p && nl < max; p++) {
         if (*p == '\n')
@@ -53,11 +53,16 @@ static int lon_lineae(const char *linea)
 /* quot characteres numerus decimalis occupat */
 static int lat_numeri(int n)
 {
-    if (n < 10)     return 1;
-    if (n < 100)    return 2;
-    if (n < 1000)   return 3;
-    if (n < 10000)  return 4;
-    if (n < 100000) return 5;
+    if (n < 10)
+        return 1;
+    if (n < 100)
+        return 2;
+    if (n < 1000)
+        return 3;
+    if (n < 10000)
+        return 4;
+    if (n < 100000)
+        return 5;
     return 6;
 }
 
@@ -88,10 +93,14 @@ int commendatio_scribe(
         /* limites fenestrae */
         int ab = idx - ala;
         int ad = idx + ala;
-        if (ab < 0)           ab = 0;
-        if (ad >= num_lin)    ad = num_lin - 1;
-        if (idx < 0)          idx = 0;
-        if (idx >= num_lin)   idx = num_lin - 1;
+        if (ab < 0)
+            ab = 0;
+        if (ad >= num_lin)
+            ad = num_lin - 1;
+        if (idx < 0)
+            idx = 0;
+        if (idx >= num_lin)
+            idx = num_lin - 1;
 
         int lat = lat_numeri(ad + 1);
 

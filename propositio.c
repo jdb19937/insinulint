@@ -32,7 +32,7 @@
 static int aedifica_lineas(
     const char *fons, const char **lineae, int max
 ) {
-    int nl = 0;
+    int nl       = 0;
     lineae[nl++] = fons;
     for (const char *p = fons; *p && nl < max; p++) {
         if (*p == '\n')
@@ -76,13 +76,17 @@ int propositio_ex_inspectore(
         p->columna = m->columna;
 
         int idx = m->linea - 1;
-        if (idx < 0)        idx = 0;
-        if (idx >= num_lin) idx = num_lin - 1;
+        if (idx < 0)
+            idx = 0;
+        if (idx >= num_lin)
+            idx = num_lin - 1;
 
         int ab = idx - ala;
         int ad = idx + ala;
-        if (ab < 0)        ab = 0;
-        if (ad >= num_lin) ad = num_lin - 1;
+        if (ab < 0)
+            ab = 0;
+        if (ad >= num_lin)
+            ad = num_lin - 1;
 
         p->num_fen    = 0;
         p->idx_centri = -1;
