@@ -5,6 +5,7 @@
  */
 
 #include "insinulint.h"
+#include "commendatio.h"
 #include "correctio.h"
 #include "ison.h"
 
@@ -16,13 +17,16 @@
  * inspectio integra unius fasciculi
  * ================================================================ */
 
-int insinulint_inspice(const char *via_fontis, const speculum_t *spec)
-{
+int insinulint_inspice(
+    const char *via_fontis, const speculum_t *spec, int ala
+) {
     inspector_t ins;
     char *fons;
     if (insinulint_lege_inspice(via_fontis, spec, &ins, &fons) < 0)
         return -1;
     int num = inspector_scribe(&ins);
+    if (ala > 0)
+        commendatio_scribe(&ins, fons, ala);
     free(fons);
     return num;
 }
@@ -35,12 +39,13 @@ static void auxilium(void)
 {
     fprintf(
         stderr,
-        "Usus: insinulint [-s insinulint.ison] [-c] fasciculus.c [...]\n"
+        "Usus: insinulint [-s insinulint.ison] [-c] [-n NUM] fasciculus.c [...]\n"
         "\n"
         "Optiones:\n"
         "  -s VIA    speculum configurationis (ISON)\n"
         "            si non datur, defalta adhibentur\n"
         "  -c        corriges fasciculos in loco (non solum inspice)\n"
+        "  -n NUM    ala contextus (lineae ante/post; defaltum 3, -1 = sine)\n"
         "  -h        hoc auxilium monstra\n"
         "\n"
         "Stili continuationis (indentatio.continuatio in speculo):\n"
@@ -71,7 +76,8 @@ int main(int argc, char **argv)
 {
     const char *via_speculi = NULL;
     int primus_fasciculus = 1;
-    int corrige = 0;
+    int corrige   = 0;
+    int ala       = 3;
 
     /* argumenta */
     for (int i = 1; i < argc; i++) {
@@ -90,6 +96,15 @@ int main(int argc, char **argv)
         }
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--corrige") == 0) {
             corrige = 1;
+            primus_fasciculus = i + 1;
+            continue;
+        }
+        if (strcmp(argv[i], "-n") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "insinulint: -n requirit numerum\n");
+                return 1;
+            }
+            ala          = atoi(argv[++i]);
             primus_fasciculus = i + 1;
             continue;
         }
@@ -127,7 +142,7 @@ int main(int argc, char **argv)
                     break;
             }
         }
-        int res = insinulint_inspice(argv[i], &spec);
+        int res = insinulint_inspice(argv[i], &spec, ala);
         if (res < 0) {
             summa_monitorum++;
         } else {

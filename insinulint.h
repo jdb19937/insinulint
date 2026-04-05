@@ -161,7 +161,9 @@ int insinulint_lege_inspice(
     inspector_t *ins, char **fons_out
 );
 
-int insinulint_inspice(const char *via_fontis, const speculum_t *spec);
+int insinulint_inspice(
+    const char *via_fontis, const speculum_t *spec, int ala
+);
 
 /* ================================================================
  * correctio — correctio plicarum in loco

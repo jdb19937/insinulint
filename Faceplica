@@ -43,14 +43,16 @@ CORRECTIONES = correctiones/communes.c \
 	correctiones/semicolon.c \
 	correctiones/longitudo.c
 
-FONTES  = insinulint.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
+CAPITA  = insinulint.h inspectio.h correctio.h commendatio.h
+
+FONTES  = insinulint.c lexator.c inspectio.c correctio.c commendatio.c $(INSPECTIONES) $(CORRECTIONES)
 OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 
 # bibliothecae externae
 LIBISON = $(APOTHECA)/ison/libison.a
 
-PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c $(INSPECTIONES) $(CORRECTIONES)
+PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c commendatio.c $(INSPECTIONES) $(CORRECTIONES)
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
 omnia: $(NOMEN)
@@ -75,7 +77,7 @@ proba: $(PROBA_OBJECTA) $(LIBISON)
 	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA) $(LIBISON)
 	./$@
 
-%.o: %.c insinulint.h inspectio.h correctio.h
+%.o: %.c $(CAPITA)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 purga:
