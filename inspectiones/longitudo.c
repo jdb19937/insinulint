@@ -43,7 +43,7 @@ void inspice_longitudinem(
                 }
             }
         }
-        int lon = signa[ultimus].columna + eff_lon;
+        int lon = signa[ultimus].columna + lat_utf8(signa[ultimus].initium, eff_lon);
         if (lon > maxima) {
             char nuntius[NUNTIUS_MAX];
             snprintf(

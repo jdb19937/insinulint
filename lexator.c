@@ -51,6 +51,12 @@ static int est_verbale(int c)
     return isalnum((unsigned char)c) || c == '_' || (c & 0x80);
 }
 
+/* est initium characteris UTF-8? (non octorum continuatio 10xxxxxx) */
+static int est_initium_utf8(unsigned char c)
+{
+    return (c & 0xC0) != 0x80;
+}
+
 /* ----------------------------------------------------------------
  * dissectio principalis
  * ---------------------------------------------------------------- */
@@ -117,7 +123,9 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                 lex, SIGNUM_COMMENTARIUM, lin0, col0, initium,
                 (int)(p - initium)
             );
-            columna += (int)(p - initium);
+            for (const char *q = initium; q < p; q++)
+                if (est_initium_utf8((unsigned char)*q))
+                    columna++;
             continue;
         }
 
@@ -129,7 +137,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     linea++;
                     columna = 0;
                 } else {
-                    columna++;
+                    if (est_initium_utf8((unsigned char)*p))
+                        columna++;
                 }
                 p++;
             }
@@ -199,7 +208,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                         linea++;
                         columna = 0;
                     } else {
-                        columna++;
+                        if (est_initium_utf8((unsigned char)*p))
+                            columna++;
                     }
                     p++;
                 }
@@ -224,7 +234,8 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
                     p += 2;
                     columna += 2;
                 } else {
-                    columna++;
+                    if (est_initium_utf8((unsigned char)*p))
+                        columna++;
                     p++;
                 }
             }
@@ -286,8 +297,9 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
         /* --- verbum (identificator vel verbum clavium) --- */
         if (isalpha((unsigned char)*p) || *p == '_' || (*p & 0x80)) {
             while (p < fin && est_verbale(*p)) {
+                if (est_initium_utf8((unsigned char)*p))
+                    columna++;
                 p++;
-                columna++;
             }
             lex_adde(
                 lex, SIGNUM_VERBUM, lin0, col0, initium,

@@ -44,6 +44,7 @@ int ultimus_significans(
 int linea_habet_bracchium(
     const signum_t *signa, int initium, int finis
 );
+int lat_utf8(const char *s, int lon);
 
 /* ================================================================
  * adde monitum cum correctione

@@ -33,7 +33,7 @@ int columna_ad_byte(const char *initium, int lon, int columna)
             return i;
         if (initium[i] == '\t')
             col += 8 - (col % 8);
-        else
+        else if (((unsigned char)initium[i] & 0xC0) != 0x80)
             col++;
     }
     return lon;

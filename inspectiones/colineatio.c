@@ -88,7 +88,7 @@ static int columna_naturalis(
         prev--;
     if (prev < v->tok_initium)
         return -1;
-    return signa[prev].columna + signa[prev].longitudo + spatium_min;
+    return signa[prev].columna + lat_utf8(signa[prev].initium, signa[prev].longitudo) + spatium_min;
 }
 
 static void inspice_colineationes(

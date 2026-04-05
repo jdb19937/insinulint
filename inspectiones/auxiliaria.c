@@ -218,6 +218,15 @@ int linea_habet_bracchium(
     return 0;
 }
 
+int lat_utf8(const char *s, int lon)
+{
+    int n = 0;
+    for (int i = 0; i < lon; i++)
+        if (((unsigned char)s[i] & 0xC0) != 0x80)
+            n++;
+    return n;
+}
+
 /* ================================================================
  * adde monitum cum correctione
  * ================================================================ */
