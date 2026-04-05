@@ -9,18 +9,13 @@
 
 use strict;
 use warnings;
-use File::Basename;
-use File::Copy;
-use File::Path qw(make_path remove_tree);
-use File::Compare;
-use File::Find;
-use Cwd qw(abs_path);
 
-my $RADIX       = dirname(abs_path($0));
+my $RADIX       = $0 =~ m{(.+)/} ? $1 : ".";
+chomp($RADIX = `cd "$RADIX" && pwd`);
 my $INSINULINT  = "$RADIX/insinulint";
 my $DIR_CASUS   = "$RADIX/casus";
 my $DIR_FORMAE  = "$RADIX/formae";
-my $DIR_ARTIF   = "$RADIX/artificia";
+my $DIR_ARTIF   = "$RADIX/artificia/formae";
 
 my $VIRIDIS = "\033[0;32m";
 my $FLAVUS  = "\033[0;33m";
@@ -59,19 +54,36 @@ curre("face -C $RADIX");
 curre("face -C $DIR_CASUS");
 print "Aedificatio perfecta.\n\n";
 
-remove_tree($DIR_ARTIF);
-make_path($DIR_ARTIF);
+system("rm -rf $DIR_ARTIF");
+system("mkdir -p $DIR_ARTIF");
 
 my @formae = sort glob("$DIR_FORMAE/*.ison");
 
+sub nomen_base {
+    my ($via, $ext) = @_;
+    (my $n = $via) =~ s{.*/}{};
+    $n =~ s{\Q$ext\E$}{} if $ext;
+    return $n;
+}
+
+sub compara_plicas {
+    my ($a, $b) = @_;
+    open my $fa, '<', $a or return 1;
+    open my $fb, '<', $b or return 1;
+    local $/;
+    my $res = (<$fa> eq <$fb>) ? 0 : 1;
+    close $fa; close $fb;
+    return $res;
+}
+
 if (@ARGV) {
     my %electae = map { $_ => 1 } @ARGV;
-    @formae = grep { $electae{basename($_, ".ison")} } @formae;
+    @formae = grep { $electae{nomen_base($_, ".ison")} } @formae;
     die "Nullae formae inventae pro: @ARGV\n" unless @formae;
 }
 
 for my $forma (@formae) {
-    my $nomen_formae = basename($forma, ".ison");
+    my $nomen_formae = nomen_base($forma, ".ison");
     my $dir1 = "$DIR_ARTIF/${nomen_formae}.1";
     my $dir2 = "$DIR_ARTIF/${nomen_formae}.2";
     printf "--- %s ---\n", $nomen_formae;
@@ -81,18 +93,18 @@ for my $forma (@formae) {
     my @plicae1 = sort glob("$dir1/*.c");
 
     for my $plica1 (@plicae1) {
-        my $base = basename($plica1, ".c");
+        my $base = nomen_base($plica1, ".c");
         curre("$INSINULINT -s $forma $plica1 >/dev/null 2>$dir1/${base}.0.txt",
               "$dir1/${base}.0.rc");
     }
     for my $plica1 (@plicae1) {
-        my $base = basename($plica1, ".c");
+        my $base = nomen_base($plica1, ".c");
         my $rc = curre("$INSINULINT -s $forma -c $plica1 >/dev/null 2>&1",
                         "$dir1/${base}.c.rc");
         die "Correctio defecit (exit $rc): $plica1\n" if $rc != 0;
     }
     for my $plica1 (@plicae1) {
-        my $base = basename($plica1, ".c");
+        my $base = nomen_base($plica1, ".c");
         curre("$INSINULINT -s $forma $plica1 >/dev/null 2>$dir1/${base}.1.txt",
               "$dir1/${base}.1.rc");
     }
@@ -102,20 +114,20 @@ for my $forma (@formae) {
     my @plicae2 = sort glob("$dir2/*.c");
 
     for my $plica2 (@plicae2) {
-        my $base = basename($plica2, ".c");
+        my $base = nomen_base($plica2, ".c");
         my $rc = curre("$INSINULINT -s $forma -c $plica2 > /dev/null 2>&1",
                         "$dir2/${base}.c.rc");
         die "Correctio defecit (exit $rc): $plica2\n" if $rc != 0;
     }
     for my $plica2 (@plicae2) {
-        my $base = basename($plica2, ".c");
+        my $base = nomen_base($plica2, ".c");
         curre("$INSINULINT -s $forma $plica2 >/dev/null 2>$dir2/${base}.2.txt",
               "$dir2/${base}.2.rc");
     }
 
     # confirma idempotentiam: compara .c inter dir1 et dir2
     for my $plica1 (@plicae1) {
-        my $base = basename($plica1, ".c");
+        my $base = nomen_base($plica1, ".c");
         my $plica2 = "$dir2/${base}.c";
         my $n0 = numera_lineas("$dir1/${base}.0.txt");
         my $n1 = numera_lineas("$dir1/${base}.1.txt");
@@ -129,7 +141,7 @@ for my $forma (@formae) {
         my $rc2 = <$fh2> + 0; close $fh2;
 
         $summa++;
-        my $idempotens = (compare($plica1, $plica2) == 0);
+        my $idempotens = (compara_plicas($plica1, $plica2) == 0);
         my @def_idem;
         my @def_corr;
         push @def_idem, "non idempotens" if !$idempotens;
@@ -152,7 +164,7 @@ for my $forma (@formae) {
 
     # confirma compilationem per face in utroque directorio
     for my $dir ($dir1, $dir2) {
-        my $tag = basename($dir);
+        my $tag = nomen_base($dir);
         my $rc = system("face -C $dir >/dev/null 2>&1");
         if ($rc != 0) {
             printf " ${RUBER}DEFECTUS${NULLUS} [%s] — face defecit\n", $tag;

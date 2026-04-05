@@ -1,12 +1,13 @@
 /*
  * insinulint.c — punctum ingressus lintoris insinulint
  *
- * Usus: insinulint [-s insinulint.ison] [-c] plica.c [plicaque.c ...]
+ * Usus: insinulint [-s insinulint.ison] [-c|-p] plica.c [plicaque.c ...]
  */
 
 #include "insinulint.h"
 #include "commendatio.h"
 #include "correctio.h"
+#include "propositio.h"
 #include "ison.h"
 
 #include <stdio.h>
@@ -32,6 +33,34 @@ int insinulint_inspice(
 }
 
 /* ================================================================
+ * propositio integra unius fasciculi
+ * ================================================================ */
+
+int insinulint_propone(
+    const char *via_fontis, const speculum_t *spec, int ala
+) {
+    inspector_t ins;
+    char *fons;
+    if (insinulint_lege_inspice(via_fontis, spec, &ins, &fons) < 0)
+        return -1;
+    int num = inspector_scribe(&ins);
+
+    propositum_t *prop = malloc(
+        (size_t)PROPOSITA_MAX * sizeof(propositum_t)
+    );
+    if (prop) {
+        int np = propositio_ex_inspectore(
+            &ins, fons, ala, prop, PROPOSITA_MAX
+        );
+        propositio_scribe(prop, np);
+        free(prop);
+    }
+
+    free(fons);
+    return num;
+}
+
+/* ================================================================
  * functio principalis
  * ================================================================ */
 
@@ -39,12 +68,17 @@ static void auxilium(void)
 {
     fprintf(
         stderr,
-        "Usus: insinulint [-s insinulint.ison] [-c] [-n NUM] fasciculus.c [...]\n"
+        "Usus: insinulint [-s insinulint.ison] [-i|-p|-c] [-n NUM] fasciculus.c [...]\n"
+        "\n"
+        "Modi (exclusivi):\n"
+        "  -i        inspectio (defaltum): monita ad stderr, contextum ad stdout\n"
+        "  -p        propositio: ddiff propositionum ad stdout\n"
+        "            sine fasciculis: lege commendationem ex stdin\n"
+        "  -c        correctio: fige fasciculos in loco\n"
         "\n"
         "Optiones:\n"
         "  -s VIA    speculum configurationis (ISON)\n"
         "            si non datur, defalta adhibentur\n"
-        "  -c        corriges fasciculos in loco (non solum inspice)\n"
         "  -n NUM    ala contextus (lineae ante/post; defaltum 3, -1 = sine)\n"
         "  -h        hoc auxilium monstra\n"
         "\n"
@@ -77,6 +111,7 @@ int main(int argc, char **argv)
     const char *via_speculi = NULL;
     int primus_fasciculus = 1;
     int corrige   = 0;
+    int propone   = 0;
     int ala       = 3;
 
     /* argumenta */
@@ -94,8 +129,18 @@ int main(int argc, char **argv)
             primus_fasciculus = i + 1;
             continue;
         }
+        if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--inspice") == 0) {
+            /* explicite: inspectio (defaltum) */
+            primus_fasciculus = i + 1;
+            continue;
+        }
         if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--corrige") == 0) {
             corrige = 1;
+            primus_fasciculus = i + 1;
+            continue;
+        }
+        if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--propone") == 0) {
+            propone = 1;
             primus_fasciculus = i + 1;
             continue;
         }
@@ -115,6 +160,24 @@ int main(int argc, char **argv)
         break;
     }
 
+    if (corrige + propone > 1) {
+        fprintf(stderr, "insinulint: -i, -p, -c sunt exclusivi\n");
+        return 1;
+    }
+
+    /* -p sine fasciculis: lege commendationem ex stdin */
+    if (propone && primus_fasciculus >= argc) {
+        propositum_t *prop = malloc(
+            (size_t)PROPOSITA_MAX * sizeof(propositum_t)
+        );
+        if (!prop)
+            return 1;
+        int np = propositio_ex_stdin(prop, PROPOSITA_MAX);
+        int nm = propositio_scribe(prop, np);
+        free(prop);
+        return (nm > 0) ? 1 : 0;
+    }
+
     if (primus_fasciculus >= argc) {
         fprintf(stderr, "insinulint: nullus fasciculus datus\n");
         auxilium();
@@ -126,7 +189,7 @@ int main(int argc, char **argv)
     if (speculum_lege(&spec, via_speculi) < 0)
         return 1;
 
-    /* inspice (et corriges si -c) fasciculos */
+    /* inspice (et corriges vel propone) fasciculos */
     int summa_monitorum = 0;
     for (int i = primus_fasciculus; i < argc; i++) {
         if (corrige && spec.com_veta)
@@ -142,7 +205,11 @@ int main(int argc, char **argv)
                     break;
             }
         }
-        int res = insinulint_inspice(argv[i], &spec, ala);
+        int res;
+        if (propone)
+            res = insinulint_propone(argv[i], &spec, ala);
+        else
+            res = insinulint_inspice(argv[i], &spec, ala);
         if (res < 0) {
             summa_monitorum++;
         } else {

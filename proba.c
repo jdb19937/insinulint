@@ -8,6 +8,9 @@
 #include "insinulint.h"
 #include "inspectio.h"
 #include "correctio.h"
+#include "commendatio.h"
+#include "propositio.h"
+#include "ison.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1302,6 +1305,164 @@ static void proba_correctio_corpus_separatum(void)
 }
 
 /* ================================================================
+ * probatio: commendatio
+ * ================================================================ */
+
+static void proba_commendatio(void)
+{
+    fprintf(stderr, "proba: commendatio\n");
+    speculum_t spec = spec_solum();
+    spec.spa_post_verba = 1;
+
+    const char *fons =
+        "int main(void)\n"
+        "{\n"
+        "    if(x) return 1;\n"
+        "    return 0;\n"
+        "}\n";
+
+    lexator_t lex;
+    lexator_disseca(&lex, fons, strlen(fons));
+    inspector_t ins;
+    inspector_initia(&ins, "proba.c");
+    inspice_omnia(&ins, &lex, &spec);
+    lexator_purgare(&lex);
+
+    /* debet habere monitum in linea 3 */
+    probationes_totae++;
+    if (ins.num_monita > 0 && ins.monita[0].linea == 3) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: commendatio — monitum non in linea 3\n");
+        return;
+    }
+
+    /* commendatio scribit ad stdout — capimus in alveo */
+    /* verifica structuram: redirigimus stdout ad plicam */
+    FILE *antea = stdout;
+    FILE *f     = fopen("/tmp/proba_commendatio.txt", "w");
+    if (!f) {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: non possum aperire plicam temporariam\n");
+        return;
+    }
+    stdout = f;
+    commendatio_scribe(&ins, fons, 1);
+    fclose(f);
+    stdout = antea;
+
+    /* lege resultatum */
+    char *res = ison_lege_plicam("/tmp/proba_commendatio.txt");
+    remove("/tmp/proba_commendatio.txt");
+    if (!res) {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: non possum legere resultatum\n");
+        return;
+    }
+
+    /* verifica: caput continet 'proba.c:3' et '>' notationem */
+    probationes_totae++;
+    if (strstr(res, "proba.c:3:") && strstr(res, ">")) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: commendatio forma — caput vel '>' deest\n");
+        fprintf(stderr, "  inventum:\n%s", res);
+    }
+
+    free(res);
+}
+
+/* ================================================================
+ * probatio: propositio
+ * ================================================================ */
+
+static void proba_propositio(void)
+{
+    fprintf(stderr, "proba: propositio\n");
+    speculum_t spec = spec_solum();
+    spec.spa_post_verba = 1;
+
+    const char *fons =
+        "int main(void)\n"
+        "{\n"
+        "    if(x) return 1;\n"
+        "    return 0;\n"
+        "}\n";
+
+    lexator_t lex;
+    lexator_disseca(&lex, fons, strlen(fons));
+    inspector_t ins;
+    inspector_initia(&ins, "proba.c");
+    inspice_omnia(&ins, &lex, &spec);
+    lexator_purgare(&lex);
+
+    /* construi proposita */
+    propositum_t prop[16];
+    int np = propositio_ex_inspectore(&ins, fons, 3, prop, 16);
+
+    probationes_totae++;
+    if (np > 0) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: propositio — nulla proposita\n");
+        return;
+    }
+
+    /* scribe ddiff ad plicam */
+    FILE *antea = stdout;
+    FILE *f     = fopen("/tmp/proba_propositio.ddiff", "w");
+    if (!f) {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: non possum aperire plicam temporariam\n");
+        return;
+    }
+    stdout = f;
+    int nm = propositio_scribe(prop, np);
+    fclose(f);
+    stdout = antea;
+
+    /* verifica: ddiff productus */
+    probationes_totae++;
+    if (nm > 0) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: propositio — nullae mutationes\n");
+        remove("/tmp/proba_propositio.ddiff");
+        return;
+    }
+
+    /* verifica formam ddiff */
+    char *res = ison_lege_plicam("/tmp/proba_propositio.ddiff");
+    remove("/tmp/proba_propositio.ddiff");
+    if (!res) {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: non possum legere ddiff\n");
+        return;
+    }
+
+    probationes_totae++;
+    if (
+        strstr(res, "ddiff versio I") &&
+        strstr(res, "PLICAE") &&
+        strstr(res, "MUTATIONES") &&
+        strstr(res, "if(x)") &&
+        strstr(res, "if (x)")
+    ) {
+        probationes_bonae++;
+    } else {
+        probationes_malae++;
+        fprintf(stderr, "  MALUM: propositio ddiff — forma non valida\n");
+        fprintf(stderr, "  inventum:\n%s", res);
+    }
+
+    free(res);
+}
+
+/* ================================================================
  * principale
  * ================================================================ */
 
@@ -1352,6 +1513,12 @@ int main(void)
 
     /* codex mundus */
     proba_codex_mundus();
+
+    /* commendatio */
+    proba_commendatio();
+
+    /* propositio */
+    proba_propositio();
 
     /* summa */
     fprintf(stderr, "\n=== summa ===\n");
