@@ -47,7 +47,15 @@ PROPOSITIONES = propositiones/spatia_terminalia.c \
 	propositiones/spatium_virgula.c \
 	propositiones/spatium_operator.c \
 	propositiones/spatium_verbum.c \
-	propositiones/spatium_semicolon.c
+	propositiones/spatium_semicolon.c \
+	propositiones/indentatio.c \
+	propositiones/commentaria.c \
+	propositiones/colineatio.c \
+	propositiones/longitudo.c \
+	propositiones/bracchia_stilus.c \
+	propositiones/cubitus.c \
+	propositiones/corpus.c \
+	propositiones/una_sententia.c
 
 CAPITA  = insinulint.h inspectio.h correctio.h commendatio.h propositio.h
 

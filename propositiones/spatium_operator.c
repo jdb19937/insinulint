@@ -8,11 +8,14 @@
 #include <string.h>
 
 int propone_spatium_operator(
-    const prop_linea_t *centrum,
-    char *dest, int dest_max
+    const propositum_t *prop,
+    prop_eventus_t *ev
 ) {
-    const char *corpus = centrum->textus;
-    int corp_lon       = centrum->lon;
+    if (prop->idx_centri < 0)
+        return 0;
+    const prop_linea_t *cl = &prop->fen[prop->idx_centri];
+    const char *corpus     = cl->textus;
+    int corp_lon           = cl->lon;
 
     int sp_init = 0;
     while (
@@ -28,13 +31,23 @@ int propone_spatium_operator(
     int clon = (int)(wp - tmp) - 1;
 
     int tot = sp_init + clon;
-    if (tot >= dest_max)
-        return -1;
+    if (tot >= PROP_LINEA_MAX)
+        return 0;
+
+    char dest[PROP_LINEA_MAX];
     memcpy(dest, corpus, sp_init);
     memcpy(dest + sp_init, tmp, clon);
     dest[tot] = '\0';
 
     if (tot == corp_lon && memcmp(dest, corpus, corp_lon) == 0)
-        return -1;
-    return tot;
+        return 0;
+
+    ev->idx_ab = prop->idx_centri;
+    ev->idx_ad = prop->idx_centri;
+    ev->num_novi = 1;
+    ev->novi[0].numerus = cl->numerus;
+    ev->novi[0].lon = tot;
+    memcpy(ev->novi[0].textus, dest, tot);
+    ev->novi[0].textus[tot] = '\0';
+    return 1;
 }

@@ -69,6 +69,7 @@ static int lat_numeri(int n)
 int commendatio_scribe(
     const inspector_t *ins,
     const char *fons,
+    const speculum_t *spec,
     int ala
 ) {
     if (ins->num_monita == 0 || ala < 0)
@@ -111,6 +112,19 @@ int commendatio_scribe(
             m->gravitas == GRAVITAS_ERRATUM ? "erratum" : "monitum",
             m->regula, m->nuntius
         );
+
+        /* metadata structurata */
+        if (spec) {
+            printf("  @fix_valor=%d", m->fix_valor);
+            printf(" @split_columna=%d", m->split_columna);
+            printf(" @apert_columna=%d", m->apert_columna);
+            printf(" @bra_columna=%d", m->bra_columna);
+            printf(" @ind_latitudo=%d", spec->ind_latitudo);
+            printf(" @ind_tabulis=%d", spec->ind_tabulis);
+            printf(" @bra_stilus=%d", spec->bra_stilus);
+            printf(" @lin_longitudo_max=%d", spec->lin_longitudo_max);
+            printf("\n");
+        }
 
         /* lineae contextus */
         for (int j = ab; j <= ad; j++) {

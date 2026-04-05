@@ -7,11 +7,14 @@
 #include <string.h>
 
 int propone_spatia_terminalia(
-    const prop_linea_t *centrum,
-    char *dest, int dest_max
+    const propositum_t *prop,
+    prop_eventus_t *ev
 ) {
-    const char *corpus = centrum->textus;
-    int lon            = centrum->lon;
+    if (prop->idx_centri < 0)
+        return 0;
+    const prop_linea_t *cl = &prop->fen[prop->idx_centri];
+    const char *corpus     = cl->textus;
+    int lon                = cl->lon;
 
     /* inveni finem sine spatiis */
     int nov = lon;
@@ -22,11 +25,14 @@ int propone_spatia_terminalia(
         nov--;
 
     if (nov == lon)
-        return -1;
-    if (nov >= dest_max)
-        return -1;
+        return 0;
 
-    memcpy(dest, corpus, nov);
-    dest[nov] = '\0';
-    return nov;
+    ev->idx_ab = prop->idx_centri;
+    ev->idx_ad = prop->idx_centri;
+    ev->num_novi = 1;
+    ev->novi[0].numerus = cl->numerus;
+    ev->novi[0].lon = nov;
+    memcpy(ev->novi[0].textus, corpus, nov);
+    ev->novi[0].textus[nov] = '\0';
+    return 1;
 }

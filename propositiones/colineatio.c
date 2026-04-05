@@ -1,13 +1,16 @@
 /*
- * propositiones/spatium_semicolon.c — propositio semicolonorum
+ * propositiones/colineatio.c — colinea '=' per spatia
+ *
+ * fix_valor continet delta spatiorum (positivum = adde, negativum = remove).
+ * columna indicat columnam '=' in linea.
  */
 
-#include "spatium_semicolon.h"
-#include "../correctiones/semicolon.h"
+#include "colineatio.h"
+#include "../correctiones/colineatio.h"
 
 #include <string.h>
 
-int propone_spatium_semicolon(
+int propone_colineationem(
     const propositum_t *prop,
     prop_eventus_t *ev
 ) {
@@ -17,6 +20,7 @@ int propone_spatium_semicolon(
     const char *corpus     = cl->textus;
     int corp_lon           = cl->lon;
 
+    /* computa sp_init (spatia initialia) */
     int sp_init = 0;
     while (
         sp_init < corp_lon &&
@@ -25,21 +29,15 @@ int propone_spatium_semicolon(
         sp_init++;
 
     char tmp[PROP_LINEA_MAX * 2];
-    char *wp = corrige_spatium_semicolon(
-        tmp, corpus + sp_init, corp_lon - sp_init
+    char *wp = corrige_colineationem(
+        tmp, corpus, corp_lon,
+        prop->columna, prop->fix_valor, sp_init
     );
-    int clon = (int)(wp - tmp) - 1;
+    int tot = (int)(wp - tmp) - 1; /* sine '\n' */
 
-    int tot = sp_init + clon;
-    if (tot >= PROP_LINEA_MAX)
+    if (tot <= 0 || tot >= PROP_LINEA_MAX)
         return 0;
-
-    char dest[PROP_LINEA_MAX];
-    memcpy(dest, corpus, sp_init);
-    memcpy(dest + sp_init, tmp, clon);
-    dest[tot] = '\0';
-
-    if (tot == corp_lon && memcmp(dest, corpus, corp_lon) == 0)
+    if (tot == corp_lon && memcmp(tmp, corpus, corp_lon) == 0)
         return 0;
 
     ev->idx_ab = prop->idx_centri;
@@ -47,7 +45,7 @@ int propone_spatium_semicolon(
     ev->num_novi = 1;
     ev->novi[0].numerus = cl->numerus;
     ev->novi[0].lon = tot;
-    memcpy(ev->novi[0].textus, dest, tot);
+    memcpy(ev->novi[0].textus, tmp, tot);
     ev->novi[0].textus[tot] = '\0';
     return 1;
 }

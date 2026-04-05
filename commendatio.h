@@ -13,11 +13,13 @@
 /*
  * commendatio_scribe — scribe monita cum contextu ad stdout.
  * ala = lineae ante et post centrum (totum = 2*ala+1).
+ * spec potest esse NULL (metadata non scribentur).
  * reddit numerum monitorum scriptorum.
  */
 int commendatio_scribe(
     const inspector_t *ins,
     const char *fons,
+    const speculum_t *spec,
     int ala
 );
 

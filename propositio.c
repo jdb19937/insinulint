@@ -17,6 +17,14 @@
 #include "propositiones/spatium_operator.h"
 #include "propositiones/spatium_verbum.h"
 #include "propositiones/spatium_semicolon.h"
+#include "propositiones/indentatio.h"
+#include "propositiones/commentaria.h"
+#include "propositiones/colineatio.h"
+#include "propositiones/longitudo.h"
+#include "propositiones/bracchia_stilus.h"
+#include "propositiones/cubitus.h"
+#include "propositiones/corpus.h"
+#include "propositiones/una_sententia.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,6 +59,7 @@ static int lon_lineae(const char *linea)
 
 int propositio_ex_inspectore(
     const inspector_t *ins, const char *fons,
+    const speculum_t *spec,
     int ala, propositum_t *dest, int max
 ) {
     const char **lineae = malloc(
@@ -74,6 +83,25 @@ int propositio_ex_inspectore(
         snprintf(p->nuntius, sizeof(p->nuntius), "%s", m->nuntius);
         p->linea   = m->linea;
         p->columna = m->columna;
+
+        /* metadata ex monitum_t */
+        p->fix_valor     = m->fix_valor;
+        p->split_columna = m->split_columna;
+        p->apert_columna = m->apert_columna;
+        p->bra_columna   = m->bra_columna;
+
+        /* metadata ex speculum_t */
+        if (spec) {
+            p->ind_latitudo     = spec->ind_latitudo;
+            p->ind_tabulis      = spec->ind_tabulis;
+            p->bra_stilus       = spec->bra_stilus;
+            p->lin_longitudo_max = spec->lin_longitudo_max;
+        } else {
+            p->ind_latitudo     = 4;
+            p->ind_tabulis      = 0;
+            p->bra_stilus       = 0;
+            p->lin_longitudo_max = 0;
+        }
 
         int idx = m->linea - 1;
         if (idx < 0)
@@ -115,6 +143,15 @@ int propositio_ex_inspectore(
  * propositio_ex_stdin — parser formae commendationis
  * ================================================================ */
 
+/* compara clavem non-terminatam cum chorda nota */
+static int clavis_aequat(const char *cv, int cv_lon, const char *nomen)
+{
+    int nlon = 0;
+    while (nomen[nlon])
+        nlon++;
+    return cv_lon == nlon && strncmp(cv, nomen, nlon) == 0;
+}
+
 /*
  * Forma commendationis:
  *   via:linea:col: tipo [regula] nuntius
@@ -139,6 +176,48 @@ int propositio_ex_stdin(propositum_t *dest, int max)
         /* separator */
         if (strcmp(buf, "--") == 0) {
             cur = NULL;
+            continue;
+        }
+
+        /* metadata: '  @clavem=valorem ...' */
+        if (
+            cur && blon >= 3 &&
+            buf[0] == ' ' && buf[1] == ' ' && buf[2] == '@'
+        ) {
+            const char *p = buf + 2;
+            while (*p == '@') {
+                p++; /* transili '@' */
+                /* parse clavem */
+                const char *cv = p;
+                while (*p && *p != '=' && *p != ' ')
+                    p++;
+                int cv_lon = (int)(p - cv);
+                if (*p != '=') break;
+                p++; /* transili '=' */
+                /* parse valorem */
+                int val = atoi(p);
+                while (*p && *p != ' ')
+                    p++;
+                while (*p == ' ')
+                    p++;
+
+                if (clavis_aequat(cv, cv_lon, "fix_valor"))
+                    cur->fix_valor = val;
+                else if (clavis_aequat(cv, cv_lon, "split_columna"))
+                    cur->split_columna = val;
+                else if (clavis_aequat(cv, cv_lon, "apert_columna"))
+                    cur->apert_columna = val;
+                else if (clavis_aequat(cv, cv_lon, "bra_columna"))
+                    cur->bra_columna = val;
+                else if (clavis_aequat(cv, cv_lon, "ind_latitudo"))
+                    cur->ind_latitudo = val;
+                else if (clavis_aequat(cv, cv_lon, "ind_tabulis"))
+                    cur->ind_tabulis = val;
+                else if (clavis_aequat(cv, cv_lon, "bra_stilus"))
+                    cur->bra_stilus = val;
+                else if (clavis_aequat(cv, cv_lon, "lin_longitudo_max"))
+                    cur->lin_longitudo_max = val;
+            }
             continue;
         }
 
@@ -261,8 +340,16 @@ int propositio_ex_stdin(propositum_t *dest, int max)
             /* nuntius — residuum */
             snprintf(cur->nuntius, sizeof(cur->nuntius), "%s", p);
 
-            cur->num_fen    = 0;
-            cur->idx_centri = -1;
+            cur->num_fen        = 0;
+            cur->idx_centri     = -1;
+            cur->fix_valor      = -1;
+            cur->split_columna  = -1;
+            cur->apert_columna  = -1;
+            cur->bra_columna    = -1;
+            cur->ind_latitudo   = 4;
+            cur->ind_tabulis    = 0;
+            cur->bra_stilus     = 0;
+            cur->lin_longitudo_max = 0;
             np++;
         }
     }
@@ -271,14 +358,8 @@ int propositio_ex_stdin(propositum_t *dest, int max)
 }
 
 /* ================================================================
- * dispatch — voca propositio appropriatam pro regula
+ * dispatch — voca propositionem appropriatam pro regula
  * ================================================================ */
-
-/* tabula dispatch: nomen regulae → functio propositionis */
-typedef int (*propone_fn)(
-    const prop_linea_t *centrum,
-    char *dest, int dest_max
-);
 
 static const struct {
     const char *regula;
@@ -289,78 +370,79 @@ static const struct {
     { "spatium_operator",   propone_spatium_operator },
     { "spatium_verbum",     propone_spatium_verbum },
     { "spatium_semicolon",  propone_spatium_semicolon },
+    { "indentatio",         propone_indentationem },
+    { "commentaria_vetita", propone_commentaria },
+    { "adtributio_colineata", propone_colineationem },
+    { "longitudo_lineae",   propone_longitudinem },
+    { "bracchia_stilus",    propone_bracchia_stilum },
+    { "cubitus",            propone_cubitum },
+    { "corpus_separatum",   propone_corpus },
+    { "una_sententia",      propone_unam_sententiam },
 };
-static const int num_prop = 5;
+static const int num_prop = (int)(
+    sizeof(tabula_prop) / sizeof(tabula_prop[0])
+);
 
 /*
- * propone_lineam — inveni propositionem pro regula, applica.
- * Reddit longitudinem lineae propositae, vel -1 si nulla mutatio.
+ * propone_mutationem — inveni propositionem pro regula, applica.
+ * Reddit 1 si mutatio proposita, 0 si nulla.
  */
-static int propone_lineam(
+static int propone_mutationem(
     const propositum_t *p,
-    char *dest, int dest_max
+    prop_eventus_t *ev
 ) {
-    if (p->idx_centri < 0)
-        return -1;
-
-    const prop_linea_t *cl = &p->fen[p->idx_centri];
-
     for (int i = 0; i < num_prop; i++) {
         if (strcmp(p->regula, tabula_prop[i].regula) == 0)
-            return tabula_prop[i].fn(cl, dest, dest_max);
+            return tabula_prop[i].fn(p, ev);
     }
-    return -1;
+    return 0;
 }
 
 /* ================================================================
  * propositio_scribe — exitus ddiff
  * ================================================================ */
 
-/* mutatio: una linea mutata */
-typedef struct {
-    int  linea;
-    char vetus[PROP_LINEA_MAX];
-    int  vet_lon;
-    char novus[PROP_LINEA_MAX];
-    int  nov_lon;
-} mutatio_t;
+#define EVENTUS_MAX 4096
 
 int propositio_scribe(const propositum_t *prop, int num)
 {
     if (num <= 0)
         return 0;
 
-    /* collige mutationes: applica propositiones, retine quae mutantur */
-    mutatio_t *mutationes = malloc(
-        (size_t)num * sizeof(mutatio_t)
+    prop_eventus_t *eventus = malloc(
+        (size_t)num * sizeof(prop_eventus_t)
     );
-    char **viae = malloc((size_t)num * sizeof(char *));
-    if (!mutationes || !viae) {
-        free(mutationes);
-        free(viae);
+    int *prop_idx = malloc((size_t)num * sizeof(int));
+    if (!eventus || !prop_idx) {
+        free(eventus);
+        free(prop_idx);
         return 0;
     }
     int nm = 0;
 
-    /* indeces viarum unicarum pro PLICAE */
+    /* viae unicae pro PLICAE */
     char viae_unicae[256][VIA_MAX];
     int num_viarum = 0;
 
     for (int i = 0; i < num; i++) {
         const propositum_t *p = &prop[i];
-        char dest[PROP_LINEA_MAX * 2];
+        prop_eventus_t ev;
+        memset(&ev, 0, sizeof(ev));
 
-        int nov_lon = propone_lineam(p, dest, (int)sizeof(dest));
-        if (nov_lon < 0)
+        if (!propone_mutationem(p, &ev))
             continue;
 
-        /* deduplica: si iam habemus mutationem pro hac linea, praetermitte */
+        /* deduplica: si iam habemus mutationem pro eisdem lineis */
         int dup = 0;
         for (int j = 0; j < nm; j++) {
-            if (
-                strcmp(viae[j], p->via) == 0 &&
-                mutationes[j].linea == p->linea
-            )  {
+            const propositum_t *pj = &prop[prop_idx[j]];
+            if (strcmp(pj->via, p->via) != 0)
+                continue;
+            int a_ab = p->fen[ev.idx_ab].numerus;
+            int a_ad = p->fen[ev.idx_ad].numerus;
+            int b_ab = pj->fen[eventus[j].idx_ab].numerus;
+            int b_ad = pj->fen[eventus[j].idx_ad].numerus;
+            if (a_ab <= b_ad && a_ad >= b_ab) {
                 dup = 1;
                 break;
             }
@@ -368,19 +450,8 @@ int propositio_scribe(const propositum_t *prop, int num)
         if (dup)
             continue;
 
-        mutatio_t *m = &mutationes[nm];
-        m->linea     = p->linea;
-
-        const prop_linea_t *cl = &p->fen[p->idx_centri];
-        m->vet_lon             = cl->lon;
-        memcpy(m->vetus, cl->textus, cl->lon);
-        m->vetus[cl->lon] = '\0';
-
-        m->nov_lon = nov_lon;
-        memcpy(m->novus, dest, nov_lon);
-        m->novus[nov_lon] = '\0';
-
-        viae[nm] = (char *)p->via;
+        eventus[nm]  = ev;
+        prop_idx[nm] = i;
 
         /* adde viam ad unicae si nondum */
         int inventa = 0;
@@ -400,8 +471,8 @@ int propositio_scribe(const propositum_t *prop, int num)
     }
 
     if (nm == 0) {
-        free(mutationes);
-        free(viae);
+        free(eventus);
+        free(prop_idx);
         return 0;
     }
 
@@ -422,15 +493,32 @@ int propositio_scribe(const propositum_t *prop, int num)
     for (int v = 0; v < num_viarum; v++) {
         printf("M %s\n", viae_unicae[v]);
         for (int i = 0; i < nm; i++) {
-            if (strcmp(viae[i], viae_unicae[v]) != 0)
+            const propositum_t *p    = &prop[prop_idx[i]];
+            const prop_eventus_t *ev = &eventus[i];
+            if (strcmp(p->via, viae_unicae[v]) != 0)
                 continue;
-            printf("  -%d %s\n", mutationes[i].linea, mutationes[i].vetus);
-            printf("  +%d %s\n", mutationes[i].linea, mutationes[i].novus);
+
+            /* lineae veteres */
+            for (int k = ev->idx_ab; k <= ev->idx_ad; k++) {
+                if (k >= 0 && k < p->num_fen)
+                    printf(
+                        "  -%d %s\n",
+                        p->fen[k].numerus,
+                        p->fen[k].textus
+                    );
+            }
+            /* lineae novae */
+            for (int k = 0; k < ev->num_novi; k++)
+                printf(
+                    "  +%d %s\n",
+                    ev->novi[k].numerus,
+                    ev->novi[k].textus
+                );
         }
         printf(".\n");
     }
 
-    free(mutationes);
-    free(viae);
+    free(eventus);
+    free(prop_idx);
     return nm;
 }

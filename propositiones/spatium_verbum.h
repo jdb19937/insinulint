@@ -8,8 +8,8 @@
 #include "../propositio.h"
 
 int propone_spatium_verbum(
-    const prop_linea_t *centrum,
-    char *dest, int dest_max
+    const propositum_t *prop,
+    prop_eventus_t *ev
 );
 
 #endif /* PROPOSITIONES_SPATIUM_VERBUM_H */

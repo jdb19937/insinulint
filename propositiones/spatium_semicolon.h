@@ -8,8 +8,8 @@
 #include "../propositio.h"
 
 int propone_spatium_semicolon(
-    const prop_linea_t *centrum,
-    char *dest, int dest_max
+    const propositum_t *prop,
+    prop_eventus_t *ev
 );
 
 #endif /* PROPOSITIONES_SPATIUM_SEMICOLON_H */

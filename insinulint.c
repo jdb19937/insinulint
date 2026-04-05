@@ -27,7 +27,7 @@ int insinulint_inspice(
         return -1;
     int num = inspector_scribe(&ins);
     if (ala > 0)
-        commendatio_scribe(&ins, fons, ala);
+        commendatio_scribe(&ins, fons, spec, ala);
     free(fons);
     return num;
 }
@@ -50,7 +50,7 @@ int insinulint_propone(
     );
     if (prop) {
         int np = propositio_ex_inspectore(
-            &ins, fons, ala, prop, PROPOSITA_MAX
+            &ins, fons, spec, ala, prop, PROPOSITA_MAX
         );
         propositio_scribe(prop, np);
         free(prop);

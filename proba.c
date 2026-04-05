@@ -765,10 +765,10 @@ static void proba_speculum_defaltum(void)
         spec.ind_tabulis == 0 &&
         spec.bra_stilus == 0 &&
         spec.bra_else_coniunctum == 1 &&
-        spec.bra_necessaria == 1 &&
+        spec.bra_necessaria == 0 &&
         spec.spa_post_verba == 1 &&
         spec.spa_circa_operatores == 1 &&
-        spec.lin_longitudo_max == 80 &&
+        spec.lin_longitudo_max == 128 &&
         spec.lin_vacuae_max == 2
     ) {
         probationes_bonae++;
@@ -1348,7 +1348,7 @@ static void proba_commendatio(void)
         return;
     }
     stdout = f;
-    commendatio_scribe(&ins, fons, 1);
+    commendatio_scribe(&ins, fons, &spec, 1);
     fclose(f);
     stdout = antea;
 
@@ -1400,7 +1400,7 @@ static void proba_propositio(void)
 
     /* construi proposita */
     propositum_t prop[16];
-    int np = propositio_ex_inspectore(&ins, fons, 3, prop, 16);
+    int np = propositio_ex_inspectore(&ins, fons, &spec, 3, prop, 16);
 
     probationes_totae++;
     if (np > 0) {

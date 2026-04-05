@@ -8,8 +8,8 @@
 #include "../propositio.h"
 
 int propone_spatia_terminalia(
-    const prop_linea_t *centrum,
-    char *dest, int dest_max
+    const propositum_t *prop,
+    prop_eventus_t *ev
 );
 
 #endif /* PROPOSITIONES_SPATIA_TERMINALIA_H */
