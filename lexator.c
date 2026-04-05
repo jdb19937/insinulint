@@ -45,10 +45,10 @@ static int lex_adde(
     return 0;
 }
 
-/* est character vocabuli? (litterae, digiti, _) */
+/* est character vocabuli? (litterae, digiti, _, UTF-8 multibyte) */
 static int est_verbale(int c)
 {
-    return isalnum((unsigned char)c) || c == '_';
+    return isalnum((unsigned char)c) || c == '_' || (c & 0x80);
 }
 
 /* ----------------------------------------------------------------
@@ -284,7 +284,7 @@ int lexator_disseca(lexator_t *lex, const char *fons, size_t lon)
         }
 
         /* --- verbum (identificator vel verbum clavium) --- */
-        if (isalpha((unsigned char)*p) || *p == '_') {
+        if (isalpha((unsigned char)*p) || *p == '_' || (*p & 0x80)) {
             while (p < fin && est_verbale(*p)) {
                 p++;
                 columna++;
