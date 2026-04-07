@@ -66,7 +66,7 @@ NOMEN   = insinulint
 # bibliothecae externae
 LIBISON = $(PREFIX)/lib/libison.a
 
-PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c commendatio.c propositio.c $(INSPECTIONES) $(CORRECTIONES) $(PROPOSITIONES)
+PROBA_FONTES = proba_prima.c lexator.c inspectio.c correctio.c commendatio.c propositio.c $(INSPECTIONES) $(CORRECTIONES) $(PROPOSITIONES)
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
 omnia: $(NOMEN)
@@ -74,9 +74,11 @@ omnia: $(NOMEN)
 $(NOMEN): $(OBJECTA) $(LIBISON)
 	$(CC) $(LDFLAGS) -o $@ $^
 
-proba: $(PROBA_OBJECTA) $(LIBISON)
+proba_prima: $(PROBA_OBJECTA) $(LIBISON)
 	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA) $(LIBISON)
-	./$@
+
+proba: proba_prima
+	./proba_prima
 
 %.o: %.c $(CAPITA)
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -86,7 +88,7 @@ colloca: omnia
 	install -m 755 $(NOMEN) $(PREFIX)/bin/
 
 purga:
-	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba
+	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba_prima
 	rm -rf artificia
 
 linte:
