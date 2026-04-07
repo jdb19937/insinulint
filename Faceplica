@@ -2,11 +2,11 @@
 #
 # Solum instrumenta POSIX et compilator C requiruntur.
 
-APOTHECA ?= .
+PREFIX = /opt/apotheca
 
 CC      ?= cc
 CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
-CFLAGS  += -I$(APOTHECA)/ison
+CFLAGS  += -I$(PREFIX)/include/ison
 LDFLAGS =
 
 INSPECTIONES = inspectiones/auxiliaria.c \
@@ -64,25 +64,12 @@ OBJECTA = $(FONTES:.c=.o)
 NOMEN   = insinulint
 
 # bibliothecae externae
-LIBISON = $(APOTHECA)/ison/libison.a
+LIBISON = $(PREFIX)/lib/libison.a
 
 PROBA_FONTES = proba.c lexator.c inspectio.c correctio.c commendatio.c propositio.c $(INSPECTIONES) $(CORRECTIONES) $(PROPOSITIONES)
 PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
 
 omnia: $(NOMEN)
-
-para:
-	git submodule update --init ison
-	$(FACE) -C ison
-
-expara:
-	git submodule deinit -f ison
-
-$(LIBISON):
-	$(FACE) -C $(APOTHECA)/ison
-
-$(LIBCRISPUS):
-	$(FACE) -C $(APOTHECA)/crispus
 
 $(NOMEN): $(OBJECTA) $(LIBISON)
 	$(CC) $(LDFLAGS) -o $@ $^
@@ -94,6 +81,10 @@ proba: $(PROBA_OBJECTA) $(LIBISON)
 %.o: %.c $(CAPITA)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+colloca: omnia
+	install -d $(PREFIX)/bin
+	install -m 755 $(NOMEN) $(PREFIX)/bin/
+
 purga:
 	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba
 	rm -rf artificia
@@ -101,4 +92,4 @@ purga:
 linte:
 	./insinulint -c $(FONTES)
 
-.PHONY: omnia purga proba para expara inspice linte
+.PHONY: omnia colloca purga proba linte
