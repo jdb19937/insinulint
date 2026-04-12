@@ -93,12 +93,15 @@ static int valida_sectionem(
 
     ison_par_t pares[32];
     int np = ison_lege(sec_data, pares, 32);
-    free(sec_data);
-    if (np <= 0)
+    if (np <= 0) {
+        free(sec_data);
         return 0;
+    }
 
     char error[256];
-    if (schema_valida(&s, pares, np, error, sizeof(error)) < 0) {
+    int r = schema_valida(&s, pares, np, sec_data, error, sizeof(error));
+    free(sec_data);
+    if (r < 0) {
         fprintf(stderr, "insinulint: speculum.%s: %s\n", nomen, error);
         return -1;
     }
