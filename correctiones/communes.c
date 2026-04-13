@@ -29,11 +29,13 @@ int columna_ad_byte(const char *initium, int lon, int columna)
 {
     int col = 0;
     for (int i = 0; i < lon; i++) {
+        if (((unsigned char)initium[i] & 0xC0) == 0x80)
+            continue;
         if (col >= columna)
             return i;
         if (initium[i] == '\t')
             col += 8 - (col % 8);
-        else if (((unsigned char)initium[i] & 0xC0) != 0x80)
+        else
             col++;
     }
     return lon;
