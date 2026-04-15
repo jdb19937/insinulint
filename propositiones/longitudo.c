@@ -67,9 +67,9 @@ int propone_longitudinem(
     ev->idx_ad   = prop->idx_centri;
     ev->num_novi = 0;
 
-    const char *p = tmp;
+    const char *p   = tmp;
     const char *fin = tmp + tot;
-    int lin_num = cl->numerus;
+    int lin_num     = cl->numerus;
 
     while (p < fin && ev->num_novi < PROP_NOVI_MAX) {
         const char *nl = p;
@@ -80,7 +80,7 @@ int propone_longitudinem(
             llon = PROP_LINEA_MAX - 1;
 
         ev->novi[ev->num_novi].numerus = lin_num++;
-        ev->novi[ev->num_novi].lon = llon;
+        ev->novi[ev->num_novi].lon     = llon;
         memcpy(ev->novi[ev->num_novi].textus, p, llon);
         ev->novi[ev->num_novi].textus[llon] = '\0';
         ev->num_novi++;

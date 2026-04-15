@@ -92,14 +92,14 @@ int propositio_ex_inspectore(
 
         /* metadata ex speculum_t */
         if (spec) {
-            p->ind_latitudo     = spec->ind_latitudo;
-            p->ind_tabulis      = spec->ind_tabulis;
-            p->bra_stilus       = spec->bra_stilus;
+            p->ind_latitudo      = spec->ind_latitudo;
+            p->ind_tabulis       = spec->ind_tabulis;
+            p->bra_stilus        = spec->bra_stilus;
             p->lin_longitudo_max = spec->lin_longitudo_max;
         } else {
-            p->ind_latitudo     = 4;
-            p->ind_tabulis      = 0;
-            p->bra_stilus       = 0;
+            p->ind_latitudo      = 4;
+            p->ind_tabulis       = 0;
+            p->bra_stilus        = 0;
             p->lin_longitudo_max = 0;
         }
 
@@ -192,7 +192,8 @@ int propositio_ex_stdin(propositum_t *dest, int max)
                 while (*p && *p != '=' && *p != ' ')
                     p++;
                 int cv_lon = (int)(p - cv);
-                if (*p != '=') break;
+                if (*p != '=')
+                    break;
                 p++; /* transili '=' */
                 /* parse valorem */
                 int val = atoi(p);

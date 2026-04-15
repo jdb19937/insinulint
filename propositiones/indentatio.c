@@ -62,7 +62,7 @@ int propone_indentationem(
     ev->novi[0].numerus = cl->numerus;
     memcpy(ev->novi[0].textus, ind, ind_lon);
     memcpy(ev->novi[0].textus + ind_lon, corpus + vet_fin, rest_lon);
-    ev->novi[0].lon = tot;
+    ev->novi[0].lon         = tot;
     ev->novi[0].textus[tot] = '\0';
     return 1;
 }

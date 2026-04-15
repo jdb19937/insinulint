@@ -60,8 +60,10 @@ int propone_bracchia_stilum(
         int ante_lon = ante_l->lon;
         while (
             ante_lon > 0 &&
-            (ante_l->textus[ante_lon - 1] == ' ' ||
-             ante_l->textus[ante_lon - 1] == '\t')
+            (
+                ante_l->textus[ante_lon - 1] == ' ' ||
+                ante_l->textus[ante_lon - 1] == '\t'
+            )
         )
             ante_lon--;
 
@@ -70,7 +72,7 @@ int propone_bracchia_stilum(
         if (ante_lon + 3 >= PROP_LINEA_MAX)
             return 0;
         memcpy(dest, ante_l->textus, ante_lon);
-        dp = ante_lon;
+        dp         = ante_lon;
         dest[dp++] = ' ';
         dest[dp++] = '{';
 
@@ -126,12 +128,12 @@ int propone_bracchia_stilum(
 
     int ind = computa_ind(cl->textus, cl->lon);
 
-    ev->idx_ab = prop->idx_centri;
-    ev->idx_ad = prop->idx_centri;
+    ev->idx_ab   = prop->idx_centri;
+    ev->idx_ad   = prop->idx_centri;
     ev->num_novi = 2;
 
     ev->novi[0].numerus = cl->numerus;
-    ev->novi[0].lon = ante;
+    ev->novi[0].lon     = ante;
     memcpy(ev->novi[0].textus, cl->textus, ante);
     ev->novi[0].textus[ante] = '\0';
 
@@ -153,7 +155,7 @@ int propone_bracchia_stilum(
     dest2[dp2]   = '\0';
 
     ev->novi[1].numerus = cl->numerus + 1;
-    ev->novi[1].lon = dp2;
+    ev->novi[1].lon     = dp2;
     memcpy(ev->novi[1].textus, dest2, dp2 + 1);
 
     return 1;

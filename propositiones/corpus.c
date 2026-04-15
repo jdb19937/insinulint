@@ -50,8 +50,10 @@ int propone_corpus(
     int rest_lon = corp_lon - corp_byte;
     while (
         rest_lon > 0 &&
-        (corpus[corp_byte + rest_lon - 1] == ' ' ||
-         corpus[corp_byte + rest_lon - 1] == '\t')
+        (
+            corpus[corp_byte + rest_lon - 1] == ' ' ||
+            corpus[corp_byte + rest_lon - 1] == '\t'
+        )
     )
         rest_lon--;
 
@@ -59,12 +61,12 @@ int propone_corpus(
         return 0;
 
     /* linea 1: controlum */
-    ev->idx_ab = prop->idx_centri;
-    ev->idx_ad = prop->idx_centri;
+    ev->idx_ab   = prop->idx_centri;
+    ev->idx_ad   = prop->idx_centri;
     ev->num_novi = 2;
 
     ev->novi[0].numerus = cl->numerus;
-    ev->novi[0].lon = ante;
+    ev->novi[0].lon     = ante;
     memcpy(ev->novi[0].textus, corpus, ante);
     ev->novi[0].textus[ante] = '\0';
 
@@ -90,7 +92,7 @@ int propone_corpus(
     dest2[dp2] = '\0';
 
     ev->novi[1].numerus = cl->numerus + 1;
-    ev->novi[1].lon = dp2;
+    ev->novi[1].lon     = dp2;
     memcpy(ev->novi[1].textus, dest2, dp2 + 1);
 
     return 1;

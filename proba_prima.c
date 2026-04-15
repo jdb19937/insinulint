@@ -1052,7 +1052,10 @@ static char *lege_temp(void)
     long lon = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buf = malloc((size_t)lon + 1);
-    if (!buf) { fclose(f); return NULL; }
+    if (!buf) {
+        fclose(f);
+        return NULL;
+    }
     fread(buf, 1, (size_t)lon, f);
     buf[lon] = '\0';
     fclose(f);
@@ -1282,7 +1285,10 @@ static void proba_correctio_corpus_separatum(void)
     long lon = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *res = malloc((size_t)lon + 1);
-    if (!res) { fclose(f); return; }
+    if (!res) {
+        fclose(f);
+        return;
+    }
     fread(res, 1, (size_t)lon, f);
     res[lon] = '\0';
     fclose(f);
@@ -1311,7 +1317,7 @@ static void proba_correctio_corpus_separatum(void)
 static void proba_commendatio(void)
 {
     fprintf(stderr, "proba: commendatio\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec     = spec_solum();
     spec.spa_post_verba = 1;
 
     const char *fons =
@@ -1381,7 +1387,7 @@ static void proba_commendatio(void)
 static void proba_propositio(void)
 {
     fprintf(stderr, "proba: propositio\n");
-    speculum_t spec = spec_solum();
+    speculum_t spec     = spec_solum();
     spec.spa_post_verba = 1;
 
     const char *fons =

@@ -48,8 +48,10 @@ int propone_cubitum(
     int rest_lon = cl_else->lon - k;
     while (
         rest_lon > 0 &&
-        (cl_else->textus[k + rest_lon - 1] == ' ' ||
-         cl_else->textus[k + rest_lon - 1] == '\t')
+        (
+            cl_else->textus[k + rest_lon - 1] == ' ' ||
+            cl_else->textus[k + rest_lon - 1] == '\t'
+        )
     )
         rest_lon--;
 
@@ -61,7 +63,7 @@ int propone_cubitum(
     if (ante + 1 + rest_lon >= PROP_LINEA_MAX)
         return 0;
     memcpy(dest, cl_bra->textus, ante);
-    dp = ante;
+    dp         = ante;
     dest[dp++] = ' ';
     memcpy(dest + dp, cl_else->textus + k, rest_lon);
     dp += rest_lon;
