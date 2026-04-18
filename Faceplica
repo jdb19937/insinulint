@@ -4,94 +4,93 @@
 
 PREFIX = /opt/apotheca
 
-CC      ?= cc
-CFLAGS  ?= -Wall -Wextra -pedantic -std=c99 -O2
-CFLAGS  += -I$(PREFIX)/include/ison
-LDFLAGS =
+INSPECTIONES = \
+    inspectiones/auxiliaria.c \
+    inspectiones/indentatio.c \
+    inspectiones/spatia_terminalia.c \
+    inspectiones/longitudo.c \
+    inspectiones/lineae_vacuae.c \
+    inspectiones/finis.c \
+    inspectiones/tabulae_mixtae.c \
+    inspectiones/spatia_verborum.c \
+    inspectiones/spatia_operatorum.c \
+    inspectiones/virgulae.c \
+    inspectiones/semicolona.c \
+    inspectiones/cubitus.c \
+    inspectiones/bracchia_stilus.c \
+    inspectiones/bracchia_necessaria.c \
+    inspectiones/colineatio.c \
+    inspectiones/commentaria.c \
+    inspectiones/corpus_separatum.c \
+    inspectiones/una_sententia.c
 
-INSPECTIONES = inspectiones/auxiliaria.c \
-	inspectiones/indentatio.c \
-	inspectiones/spatia_terminalia.c \
-	inspectiones/longitudo.c \
-	inspectiones/lineae_vacuae.c \
-	inspectiones/finis.c \
-	inspectiones/tabulae_mixtae.c \
-	inspectiones/spatia_verborum.c \
-	inspectiones/spatia_operatorum.c \
-	inspectiones/virgulae.c \
-	inspectiones/semicolona.c \
-	inspectiones/cubitus.c \
-	inspectiones/bracchia_stilus.c \
-	inspectiones/bracchia_necessaria.c \
-	inspectiones/colineatio.c \
-	inspectiones/commentaria.c \
-	inspectiones/corpus_separatum.c \
-	inspectiones/una_sententia.c
+CORRECTIONES = \
+    correctiones/communes.c \
+    correctiones/corpus.c \
+    correctiones/apertio.c \
+    correctiones/scissio.c \
+    correctiones/colineatio.c \
+    correctiones/excommenta.c \
+    correctiones/bracchia.c \
+    correctiones/una_sententia.c \
+    correctiones/virgula.c \
+    correctiones/cubitus.c \
+    correctiones/operatores.c \
+    correctiones/verbum.c \
+    correctiones/semicolon.c \
+    correctiones/longitudo.c
 
-CORRECTIONES = correctiones/communes.c \
-	correctiones/corpus.c \
-	correctiones/apertio.c \
-	correctiones/scissio.c \
-	correctiones/colineatio.c \
-	correctiones/excommenta.c \
-	correctiones/bracchia.c \
-	correctiones/una_sententia.c \
-	correctiones/virgula.c \
-	correctiones/cubitus.c \
-	correctiones/operatores.c \
-	correctiones/verbum.c \
-	correctiones/semicolon.c \
-	correctiones/longitudo.c
+PROPOSITIONES = \
+    propositiones/spatia_terminalia.c \
+    propositiones/spatium_virgula.c \
+    propositiones/spatium_operator.c \
+    propositiones/spatium_verbum.c \
+    propositiones/spatium_semicolon.c \
+    propositiones/indentatio.c \
+    propositiones/commentaria.c \
+    propositiones/colineatio.c \
+    propositiones/longitudo.c \
+    propositiones/bracchia_stilus.c \
+    propositiones/cubitus.c \
+    propositiones/corpus.c \
+    propositiones/una_sententia.c
 
-PROPOSITIONES = propositiones/spatia_terminalia.c \
-	propositiones/spatium_virgula.c \
-	propositiones/spatium_operator.c \
-	propositiones/spatium_verbum.c \
-	propositiones/spatium_semicolon.c \
-	propositiones/indentatio.c \
-	propositiones/commentaria.c \
-	propositiones/colineatio.c \
-	propositiones/longitudo.c \
-	propositiones/bracchia_stilus.c \
-	propositiones/cubitus.c \
-	propositiones/corpus.c \
-	propositiones/una_sententia.c
+CAPITA = \
+    insinulint.h inspectio.h correctio.h commendatio.h propositio.h
 
-CAPITA  = insinulint.h inspectio.h correctio.h commendatio.h propositio.h
+FONTES = \
+    lexator.c inspectio.c correctio.c commendatio.c propositio.c \
+    $(INSPECTIONES) $(CORRECTIONES) $(PROPOSITIONES)
 
-FONTES  = insinulint.c lexator.c inspectio.c correctio.c commendatio.c propositio.c $(INSPECTIONES) $(CORRECTIONES) $(PROPOSITIONES)
 OBJECTA = $(FONTES:.c=.o)
-NOMEN   = insinulint
 
 # bibliothecae externae
 LIBISON = $(PREFIX)/lib/libison.a
 
-PROBA_FONTES = proba_prima.c lexator.c inspectio.c correctio.c commendatio.c propositio.c $(INSPECTIONES) $(CORRECTIONES) $(PROPOSITIONES)
-PROBA_OBJECTA = $(PROBA_FONTES:.c=.o)
+omnia: insinulint
 
-omnia: $(NOMEN)
+insinulint: insinulint.o $(OBJECTA) $(LIBISON)
+	ldi $^
 
-$(NOMEN): $(OBJECTA) $(LIBISON)
-	$(CC) $(LDFLAGS) -o $@ $^
-
-proba_prima: $(PROBA_OBJECTA) $(LIBISON)
-	$(CC) $(LDFLAGS) -o $@ $(PROBA_OBJECTA) $(LIBISON)
+proba_prima: proba_prima.o $(OBJECTA) $(LIBISON)
+	ldi $^
 
 proba: proba_prima
 	./proba_prima
 
 %.o: %.c $(CAPITA)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	ccc -I $(PREFIX)/include/ison $<
 
 colloca: omnia
 	install -d $(PREFIX)/bin
-	install -m 755 $(NOMEN) $(PREFIX)/bin/
+	install -m 755 insinulint $(PREFIX)/bin/
 
 purga:
-	rm -f $(OBJECTA) $(PROBA_OBJECTA) $(NOMEN) proba_prima
+	rm -f $(OBJECTA) insinulint proba_prima
+	rm -f insinulint.o proba_prima.o
 	rm -rf artificia
 
 linte:
-	./insinulint -c $(FONTES)
+	./insinulint -c $(FONTES) insinulint.c proba_prima.c
 
 .PHONY: omnia colloca purga proba linte
