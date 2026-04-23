@@ -151,6 +151,7 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->lin_finis_nova        = 1;
     spec->lin_tabulae_mixtae    = 1;
     spec->lin_una_sententia     = 1;
+    spec->lin_schedae_propria   = 1;
 
     spec->cor_separatum = 1;
 
@@ -258,6 +259,10 @@ int speculum_lege(speculum_t *spec, const char *via)
     spec->lin_una_sententia = lege_verum(
         ison, "lineae.una_sententia",
         spec->lin_una_sententia
+    );
+    spec->lin_schedae_propria = lege_verum(
+        ison, "lineae.schedae_propria",
+        spec->lin_schedae_propria
     );
 
     /* corpus */
@@ -386,7 +391,7 @@ void inspice_omnia(
 
     /* 17. una sententia per lineam */
     if (spec->lin_una_sententia)
-        inspice_unam_sententiam(ins, lex, versus, nv);
+        inspice_unam_sententiam(ins, lex, versus, nv, spec);
 
     free(versus);
 }

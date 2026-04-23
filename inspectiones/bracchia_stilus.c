@@ -43,12 +43,57 @@ static int est_bracchium_controli(const signum_t *signa, int idx_apertio)
     return 0;
 }
 
+/*
+ * spatium_unicum — verifica exactly unum spatium inter duo signa in
+ * eadem linea. Reddit 1 si iam ' ' unicum est; 0 aliter (insistit).
+ * Praesumit nullam lineam novam inter a et b (praesertim).
+ */
+static int spatium_unicum(const signum_t *a, const signum_t *b)
+{
+    const char *end_a = a->initium + a->longitudo;
+    const char *beg_b = b->initium;
+    return (beg_b - end_a) == 1 && *end_a == ' ';
+}
+
 void inspice_bracchia_stilum(
     inspector_t *ins, const lexator_t *lex,
     const speculum_t *spec
 ) {
     int n = lex->num_signa;
     const signum_t *signa = lex->signa;
+
+    /* spatium post '}' in eadem linea: exacte unum, nisi sequens signum
+     * sit terminator/clausio ')' ']' '}' ';' ',' '.'. */
+    for (int i = 0; i < n; i++) {
+        if (signa[i].genus != SIGNUM_CLAUSIO)
+            continue;
+        int post = prox_significans(signa, n, i + 1);
+        if (post >= n)
+            continue;
+        if (habet_lineam_novam(signa, i + 1, post))
+            continue;
+        signum_genus_t g = signa[post].genus;
+        if (
+            g == SIGNUM_CLAUSIO_PAR ||
+            g == SIGNUM_CLAUSIO_QUAD ||
+            g == SIGNUM_CLAUSIO ||
+            g == SIGNUM_SEMICOLON
+        )
+            continue;
+        if (
+            g == SIGNUM_OPERATOR && signa[post].longitudo == 1 &&
+            (signa[post].initium[0] == ',' || signa[post].initium[0] == '.')
+        )
+            continue;
+        if (spatium_unicum(&signa[i], &signa[post]))
+            continue;
+        inspector_adde(
+            ins, GRAVITAS_MONITUM,
+            signa[post].linea, signa[post].columna,
+            "bracchia_stilus",
+            "unum spatium requiritur post '}'"
+        );
+    }
 
     for (int i = 0; i < n; i++) {
         if (signa[i].genus != SIGNUM_APERTIO)
@@ -57,6 +102,26 @@ void inspice_bracchia_stilum(
         int ante = prox_significans_retro(signa, i - 1);
         if (ante < 0)
             continue;
+
+        /* spatium inter ')' vel verbum et '{' in eadem linea: exacte unum.
+         * Signa initializantia ('{{', ',{', '={' cum spatio, etc.) non
+         * postulant hanc regulam. */
+        if (
+            !habet_lineam_novam(signa, ante + 1, i) &&
+            (
+                signa[ante].genus == SIGNUM_CLAUSIO_PAR ||
+                signa[ante].genus == SIGNUM_VERBUM
+            )
+        ) {
+            if (!spatium_unicum(&signa[ante], &signa[i])) {
+                inspector_adde(
+                    ins, GRAVITAS_MONITUM,
+                    signa[i].linea, signa[i].columna,
+                    "bracchia_stilus",
+                    "unum spatium requiritur ante '{'"
+                );
+            }
+        }
 
         int controlum = est_bracchium_controli(signa, i);
 

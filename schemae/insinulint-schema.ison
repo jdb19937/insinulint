@@ -66,6 +66,9 @@
       },
       "una_sententia": {
         "type": "integer"
+      },
+      "schedae_propria": {
+        "type": "integer"
       }
     },
     "required": []

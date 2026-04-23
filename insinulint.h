@@ -132,6 +132,8 @@ typedef struct {
     int lin_finis_nova;         /* 1 = fasciculus debet finire cum \n */
     int lin_tabulae_mixtae;     /* 1 = veta tabulas et spatia mixtas */
     int lin_una_sententia;     /* 1 = veta plures sententias in eadem linea */
+    int lin_schedae_propria;   /* 1 = labella (case/default/foo:) in linea
+                                *     propria et indentata ad bracchia */
 
     /* corpus */
     int cor_separatum;          /* 1 = corpus unius sententiae in linea propria */

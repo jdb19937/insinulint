@@ -40,31 +40,33 @@ int correctio_age(const char *via, const speculum_t *spec)
     int nlin = scinde_in_lineas(fons, fons_lon, lineae, nlin_max);
 
     /* construi tabulam correctionum (per lineam, 0-basis) */
-    int *ind_exp   = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *trim_fin  = calloc((size_t)(nlin + 1), sizeof(int));
-    int *split_col = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *split_ind = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *apert_col = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *apert_ind = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *equ_col   = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *equ_spa   = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *corp_col  = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *corp_ind  = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *bra_col   = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *bra_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *una_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
-    int *virg_fix  = calloc((size_t)(nlin + 1), sizeof(int));
-    int *cub_fix   = calloc((size_t)(nlin + 1), sizeof(int));
-    int *op_fix    = calloc((size_t)(nlin + 1), sizeof(int));
-    int *verb_fix  = calloc((size_t)(nlin + 1), sizeof(int));
-    int *semi_fix  = calloc((size_t)(nlin + 1), sizeof(int));
-    int *long_fix  = calloc((size_t)(nlin + 1), sizeof(int));
-    int *long_ind  = calloc((size_t)(nlin + 1), sizeof(int));
+    int *ind_exp     = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *trim_fin    = calloc((size_t)(nlin + 1), sizeof(int));
+    int *split_col   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *split_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *apert_col   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *apert_ind   = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *equ_col     = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *equ_spa     = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *corp_col    = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *corp_ind    = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *bra_col     = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *bra_ind     = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *una_ind     = malloc((size_t)(nlin + 1) * sizeof(int));
+    int *virg_fix    = calloc((size_t)(nlin + 1), sizeof(int));
+    int *cub_fix     = calloc((size_t)(nlin + 1), sizeof(int));
+    int *bra_spa_fix = calloc((size_t)(nlin + 1), sizeof(int));
+    int *op_fix      = calloc((size_t)(nlin + 1), sizeof(int));
+    int *verb_fix    = calloc((size_t)(nlin + 1), sizeof(int));
+    int *semi_fix    = calloc((size_t)(nlin + 1), sizeof(int));
+    int *long_fix    = calloc((size_t)(nlin + 1), sizeof(int));
+    int *long_ind    = calloc((size_t)(nlin + 1), sizeof(int));
     if (
         !ind_exp || !trim_fin || !split_col || !split_ind ||
         !apert_col || !apert_ind || !equ_col || !equ_spa ||
         !corp_col || !corp_ind || !bra_col || !bra_ind || !una_ind ||
-        !virg_fix || !cub_fix || !op_fix || !verb_fix || !semi_fix ||
+        !virg_fix || !cub_fix || !bra_spa_fix ||
+        !op_fix || !verb_fix || !semi_fix ||
         !long_fix || !long_ind
     ) {
         free(fons);
@@ -84,6 +86,7 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(una_ind);
         free(virg_fix);
         free(cub_fix);
+        free(bra_spa_fix);
         free(op_fix);
         free(verb_fix);
         free(semi_fix);
@@ -146,6 +149,8 @@ int correctio_age(const char *via, const speculum_t *spec)
             if (m->bra_columna >= 0 && bra_col[li] < 0) {
                 bra_col[li] = m->bra_columna;
                 bra_ind[li] = m->fix_valor;
+            } else if (m->bra_columna < 0) {
+                bra_spa_fix[li] = 1;
             }
         } else if (strcmp(m->regula, "una_sententia") == 0) {
             if (m->fix_valor >= 0 && una_ind[li] < 0)
@@ -189,6 +194,7 @@ int correctio_age(const char *via, const speculum_t *spec)
         free(una_ind);
         free(virg_fix);
         free(cub_fix);
+        free(bra_spa_fix);
         free(op_fix);
         free(verb_fix);
         free(semi_fix);
@@ -380,7 +386,7 @@ int correctio_age(const char *via, const speculum_t *spec)
          * verba clavis, semicolona */
         {
             int inl = virg_fix[i] | op_fix[i] |
-                verb_fix[i] | semi_fix[i];
+                verb_fix[i] | semi_fix[i] | bra_spa_fix[i];
             if (inl) {
                 /* alveus temporarius pro catenatione */
                 char tmp1[8192], tmp2[8192];
@@ -411,6 +417,13 @@ int correctio_age(const char *via, const speculum_t *spec)
                 if (semi_fix[i]) {
                     char *d = (src == tmp2) ? tmp1 : tmp2;
                     dst     = corrige_spatium_semicolon(d, src, slon);
+                    dlon    = (int)(dst - d) - 1;
+                    src     = d;
+                    slon    = dlon;
+                }
+                if (bra_spa_fix[i]) {
+                    char *d = (src == tmp2) ? tmp1 : tmp2;
+                    dst     = corrige_spatium_bracchium(d, src, slon);
                     dlon    = (int)(dst - d) - 1;
                     src     = d;
                     slon    = dlon;
@@ -468,6 +481,7 @@ int correctio_age(const char *via, const speculum_t *spec)
     free(una_ind);
     free(virg_fix);
     free(cub_fix);
+    free(bra_spa_fix);
     free(op_fix);
     free(verb_fix);
     free(semi_fix);

@@ -23,4 +23,8 @@ int correctio_bracchia_necessaria(
     const char *via, const speculum_t *spec
 );
 
+char *corrige_spatium_bracchium(
+    char *wp, const char *corpus, int corp_lon
+);
+
 #endif /* CORRECTIONES_BRACCHIA_H */

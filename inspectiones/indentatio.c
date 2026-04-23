@@ -105,7 +105,8 @@ void inspice_indentationem(
                 gradus_virtualis = 0;
             }
 
-            /* label (verbum sequitur ':'): unus gradus minus */
+            /* label (verbum sequitur ':'): ad columnam bracchii amplectentis
+             * — idem ac case/default */
             if (
                 signa[primus].genus == SIGNUM_VERBUM &&
                 !est_verbum(&signa[primus], "case") &&
@@ -114,8 +115,11 @@ void inspice_indentationem(
                 for (int j = primus + 1; j < v->tok_finis; j++) {
                     if (signa[j].genus == SIGNUM_SPATIUM)
                         continue;
-                    if (est_operator(&signa[j], ":"))
-                        expectata = 0;
+                    if (est_operator(&signa[j], ":")) {
+                        expectata        = (profunditas > 0)
+                            ? (profunditas - 1) * lat : 0;
+                        gradus_virtualis = 0;
+                    }
                     break;
                 }
             }
@@ -229,7 +233,7 @@ void inspice_indentationem(
                 }
                 goto adiusta_statum;
             } else {
-non_cont:
+            non_cont:
                 cont_basis = -1;
             }
         }
@@ -248,7 +252,7 @@ non_cont:
             );
         }
 
-adiusta_statum:
+    adiusta_statum:
         /* percurre signa lineae et adiusta statum */
         for (int j = v->tok_initium; j < v->tok_finis; j++) {
             if (signa[j].genus == SIGNUM_APERTIO) {

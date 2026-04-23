@@ -10,7 +10,8 @@
 
 void inspice_unam_sententiam(
     inspector_t *ins, const lexator_t *lex,
-    const versus_t *versus, int num_versus
+    const versus_t *versus, int num_versus,
+    const speculum_t *spec
 );
 
 #endif /* INSPECTIONES_UNA_SENTENTIA_H */

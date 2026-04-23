@@ -10,9 +10,138 @@
 #include "bracchia.h"
 #include "../inspectio.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* ================================================================
+ * corrige_spatium_bracchium — normaliza ad unum spatium:
+ *   ')'+ws+'{', '}'+ws+'else', 'else'/'do'+ws+'{', etc.
+ * Agit per lineam. Chordae, litterae, commentaria intacta relinquuntur.
+ * ================================================================ */
+
+static int est_verbum_char(char c)
+{
+    return isalnum((unsigned char)c) || c == '_';
+}
+
+char *corrige_spatium_bracchium(
+    char *wp, const char *corpus, int corp_lon
+) {
+    char *wp_initium = wp;
+    int in_chorda    = 0;
+    int in_littera   = 0;
+    int in_comm_b    = 0;
+    int in_comm_l    = 0;
+
+    for (int i = 0; i < corp_lon; i++) {
+        char c = corpus[i];
+
+        /* effugium intra chordam vel litteram */
+        if (
+            (in_chorda || in_littera) &&
+            c == '\\' && i + 1 < corp_lon
+        ) {
+            *wp++ = c;
+            *wp++ = corpus[++i];
+            continue;
+        }
+
+        if (!in_comm_b && !in_comm_l) {
+            if (c == '"' && !in_littera) {
+                in_chorda = !in_chorda;
+                *wp++     = c;
+                continue;
+            }
+            if (c == '\'' && !in_chorda) {
+                in_littera = !in_littera;
+                *wp++      = c;
+                continue;
+            }
+        }
+
+        if (in_chorda || in_littera) {
+            *wp++ = c;
+            continue;
+        }
+
+        /* commentarium */
+        if (
+            !in_comm_b && !in_comm_l &&
+            c == '/' && i + 1 < corp_lon
+        ) {
+            if (corpus[i + 1] == '/') {
+                in_comm_l = 1;
+            } else if (corpus[i + 1] == '*') {
+                in_comm_b = 1;
+            }
+        }
+        if (
+            in_comm_b && c == '*' &&
+            i + 1 < corp_lon && corpus[i + 1] == '/'
+        ) {
+            *wp++     = c;
+            *wp++     = corpus[++i];
+            in_comm_b = 0;
+            continue;
+        }
+        if (in_comm_b || in_comm_l) {
+            *wp++ = c;
+            continue;
+        }
+
+        /* '{': si praecedit ')' vel verbum in eadem linea, collige
+         * spatia ad unum. Aliter (e.g. '{{', ',{', '={' cum spatiis),
+         * relinque contentum intactum. */
+        if (c == '{') {
+            char *q = wp;
+            while (
+                q > wp_initium &&
+                (*(q - 1) == ' ' || *(q - 1) == '\t')
+            )
+                q--;
+            if (q > wp_initium) {
+                char prev = *(q - 1);
+                if (est_verbum_char(prev) || prev == ')') {
+                    wp    = q;
+                    *wp++ = ' ';
+                }
+            }
+            *wp++ = '{';
+            continue;
+        }
+
+        /* '}': sequens non-ws character postulat spatium nisi sit
+         * ';' ',' '.' ')' ']' '}'. Spatia plura colligantur ad unum. */
+        if (c == '}') {
+            *wp++ = '}';
+            int j = i + 1;
+            while (
+                j < corp_lon &&
+                (corpus[j] == ' ' || corpus[j] == '\t')
+            )
+                j++;
+            if (j < corp_lon) {
+                char nx    = corpus[j];
+                int benign = (
+                    nx == ';' || nx == ',' || nx == '.' ||
+                    nx == ')' || nx == ']' || nx == '}'
+                );
+                if (!benign) {
+                    *wp++ = ' ';
+                    i     = j - 1;
+                }
+            }
+            continue;
+        }
+
+        *wp++ = c;
+    }
+
+    *wp++ = '\n';
+    return wp;
+}
 
 /* ================================================================
  * corrige_bracchia_kr — iunge '{' ad finem lineae currentis
